@@ -1,5 +1,6 @@
+import 'package:begir/widgets/group_items.dart';
+import 'package:begir/widgets/groups_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:begir/widgets/order_card.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -9,10 +10,17 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  int _selectedIndex = 0; 
+    final List<Widget> _pages = [
+    const Text('صفحه خانه'),
+    const Text('صفحه گروه ها'),
+    const Text('صفحه اعلان ها'),
+  ];
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+          floatingActionButton: FloatingActionButton(onPressed: ((){}), child: Icon(Icons.add),),
           appBar: AppBar(title: Text('عنوان اپ بار'),backgroundColor: Color.fromARGB(255, 255, 255, 255),),
           endDrawer: Drawer(
             child: ListView(
@@ -43,38 +51,40 @@ class _HomeState extends State<Home> {
           ),
           body: Padding(
             padding: const EdgeInsets.all(8.0),
+
             child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Container(
-                  decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8) ,
-                  ),
-
-                  child: Row(
-                    
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(flex: 1, child: IconButton(onPressed: (){}, icon: Icon(Icons.arrow_left),),),
-                      Expanded(flex: 8, child: Text('عنوان گروه فعلی', textAlign: TextAlign.center,)),
-                      Expanded(flex: 1, child: IconButton(onPressed: (){}, icon: Icon(Icons.arrow_right),),),
-                    ],
-                  ),
-
-                ),
-                Column(
-                  children: [
-                    OrderCard(),
-                    OrderCard(),
-                    OrderCard(),
-
-                  ],
-                ),
+                GroupsBar(),
+                GroupItems(),
+                
+                
               ],
-            
-              
             ),
           ),
+          bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'خانه',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.groups),
+            label: 'گروه ها',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications),
+            label: 'اعلان ها',
+          ),
+          
+          
+        ],
+      ),
         ),
     );
   }

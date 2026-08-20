@@ -1,4 +1,4 @@
-import 'package:begir/models/user.dart';
+import 'package:begir/objects/user.dart';
 
 enum Status{pending, reserved, complete,}
 enum Priority{low, medium, high,}

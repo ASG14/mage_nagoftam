@@ -1,4 +1,4 @@
-import 'package:begir/models/user.dart';
+import 'package:begir/objects/user.dart';
 
 enum Role { creator, admin, member }
 
