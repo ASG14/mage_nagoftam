@@ -21,28 +21,32 @@ class _HomeState extends State<Home> {
     return SafeArea(
       child: Scaffold(
           floatingActionButton: FloatingActionButton(onPressed: ((){}), child: Icon(Icons.add),),
-          appBar: AppBar(title: Text('عنوان اپ بار'),backgroundColor: Color.fromARGB(255, 255, 255, 255),),
-          endDrawer: Drawer(
+          appBar: AppBar(title: Text('عنوان اپ بار'),),
+          drawer: Drawer(
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
                 DrawerHeader(
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 153, 79, 0),
-                  ),
                   child: Text('هدر کشو'),
                 ),
                 ListTile(
-                  title: Text('گزینه 1'),
+                  title: Text('تنظیمات'),
                   onTap: () {
                     // عمل مورد نظر برای گزینه 1
                     Navigator.pop(context); // بستن کشو
                   },
                 ),
                 ListTile(
-                  title: Text('گزینه 2'),
+                  title: Text('آموزش و سوالات متداول'),
                   onTap: () {
                     // عمل مورد نظر برای گزینه 2
+                    Navigator.pop(context); // بستن کشو
+                  },
+                ),
+                ListTile(
+                  title: Text('قوانین و شرایط استفاده'),
+                  onTap: () {
+                    // عمل مورد نظر برای گزینه 3
                     Navigator.pop(context); // بستن کشو
                   },
                 ),
