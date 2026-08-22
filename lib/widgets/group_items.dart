@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:begir/widgets/order_card.dart';
 
-
-
 class GroupItems extends StatefulWidget {
   const GroupItems({super.key});
 
@@ -13,13 +11,6 @@ class GroupItems extends StatefulWidget {
 class _GroupItemsState extends State<GroupItems> {
   @override
   Widget build(BuildContext context) {
-    return Column(
-                  children: [
-                    OrderCard(),
-                    OrderCard(),
-                    OrderCard(),
-
-                  ],
-                );
+    return Column(children: [OrderCard(), OrderCard(), OrderCard()]);
   }
 }
