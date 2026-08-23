@@ -64,7 +64,6 @@ class _OrderCardState extends State<OrderCard> {
               Expanded(
                 child: FilledButton(
                   onPressed: () {
-                    // TODO: من می‌گیرم
                   },
                   child: const Text('من می‌گیرم'),
                 ),
@@ -75,7 +74,6 @@ class _OrderCardState extends State<OrderCard> {
               Expanded(
                 child: OutlinedButton(
                   onPressed: () {
-                    // TODO: من گرفتم
                   },
                   child: const Text('من گرفتم'),
                 ),

@@ -11,6 +11,6 @@ class GroupItems extends StatefulWidget {
 class _GroupItemsState extends State<GroupItems> {
   @override
   Widget build(BuildContext context) {
-    return Column(children: [OrderCard(), OrderCard(), OrderCard()]);
+    return SingleChildScrollView(child: Column(children: [OrderCard(), OrderCard(), OrderCard()]));
   }
 }

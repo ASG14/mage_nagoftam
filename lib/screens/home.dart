@@ -18,15 +18,20 @@ class _HomeScreenState extends State<HomeScreen> {
     return SafeArea(
       child: Scaffold(
         floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            AddOrder();
-          },
-          child: const Icon(Icons.add),
-        ),
+  onPressed: () {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const AddOrder();
+        },
+      );
+    
+  },
+  child: const Icon(Icons.add),
+),
 
-        appBar: AppBar(
-          title: const Text('عنوان اپ بار'),
-        ),
+        appBar: AppBar(title: const Text('عنوان اپ بار')),
 
         drawer: const MyDrawer(),
 
@@ -34,10 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: const [
-              GroupsBar(),
-              GroupItems(),
-            ],
+            children: const [GroupsBar(), GroupItems()],
           ),
         ),
 
