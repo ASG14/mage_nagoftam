@@ -55,7 +55,7 @@ abstract final class AppTheme {
       foregroundColor: AppColors.gray1,
       elevation: 0,
       scrolledUnderElevation: 0,
-      centerTitle: true,
+      //centerTitle: true,
 
       titleTextStyle: AppTypography.h5.copyWith(color: AppColors.gray1),
 

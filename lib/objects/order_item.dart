@@ -6,41 +6,52 @@ enum Priority { low, medium, high }
 
 class OrderItem {
   final String itemId;
-  late String _title;
   final User _createdBy;
-  late User? _reservedBy;
   final DateTime _createdAt;
-  late DateTime _reservedAt;
+
+  late String _title;
+  late String _quantity;
+  late DateTime _deadline;
+
+  late User? _reservedBy;
+  late DateTime? _reservedAt;
 
   Status _itemStatus = Status.pending;
-  Priority? _itemPriority = Priority.medium;
+  Priority _itemPriority = Priority.medium;
 
   OrderItem({
     required this.itemId,
     required this._createdBy,
     required this._title,
+    required this._quantity,
     required this._createdAt,
-    this._itemPriority,
+    required this._deadline,
+    this._itemPriority = Priority.medium,
   });
 
-  //Setter
-  void setTitle(String newTitle) // تنظیم عنوان جدید سفارش
-  {
+  // Setter
+
+  void setTitle(String newTitle) {
     _title = newTitle;
   }
 
-  void setReservedBy(User newReservedBy) // تنظیم کاربر جدید رزرو کننده سفارش
-  {
+  void setQuantity(String newQuantity) {
+    _quantity = newQuantity;
+  }
+
+  void setDeadline(DateTime newDeadline) {
+    _deadline = newDeadline;
+  }
+
+  void setReservedBy(User newReservedBy) {
     _reservedBy = newReservedBy;
   }
 
-  void setReservedAt(DateTime newReservedAt) // تنظیم تاریخ جدید رزرو سفارش
-  {
+  void setReservedAt(DateTime newReservedAt) {
     _reservedAt = newReservedAt;
   }
 
-  void setItemStatus(Status newItemStatus) // تنظیم وضعیت جدید سفارش
-  {
+  void setItemStatus(Status newItemStatus) {
     _itemStatus = newItemStatus;
   }
 
@@ -48,53 +59,55 @@ class OrderItem {
     _itemPriority = newItemPriority;
   }
 
-  //Getter
-  String getItemId() //دریافت آیدی سفارش
-  {
+  // Getter
+
+  String getItemId() {
     return itemId;
   }
 
-  String getTitle() // دریافت عنوان سفارش
-  {
+  String getTitle() {
     return _title;
   }
 
-  User getCreatedBy() // دریافت کاربر ایجاد کننده سفارش
-  {
+  String getQuantity() {
+    return _quantity;
+  }
+
+  User getCreatedBy() {
     return _createdBy;
   }
 
-  User getReservedBy() // دریافت آخرین کاربر رزرو کننده سفارش
-  {
-    return _reservedBy!;
-  }
-
-  DateTime getCreatedAt() // دریافت تاریخ ایجاد سفارش
-  {
+  DateTime getCreatedAt() {
     return _createdAt;
   }
 
-  DateTime getReservedAt() // دریافت تاریخ آخرین رزرو سفارش
-  {
+  DateTime getDeadline() {
+    return _deadline;
+  }
+
+  User? getReservedBy() {
+    return _reservedBy;
+  }
+
+  DateTime? getReservedAt() {
     return _reservedAt;
   }
 
-  Status getItemStatus() // دریافت وضعیت فعلی سفارش
-  {
+  Status getItemStatus() {
     return _itemStatus;
   }
 
-  Priority getItemPriority() // دریافت اولویت انجام سفارش
-  {
-    return _itemPriority!;
+  Priority getItemPriority() {
+    return _itemPriority;
   }
 
-  //Other
+  // Other
+
   bool isReserved() {
-    if (_itemStatus == Status.reserved) {
-      return true;
-    } else {
-      return false;
-    }
+    return _itemStatus == Status.reserved;
+  }
+
+  bool isComplete() {
+    return _itemStatus == Status.complete;
   }
 }

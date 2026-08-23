@@ -1,3 +1,4 @@
+import 'package:begir/widgets/add_order.dart';
 import 'package:begir/widgets/bottom_navigation_bar.dart';
 import 'package:begir/widgets/drawer.dart';
 import 'package:begir/widgets/group_items.dart';
@@ -17,7 +18,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return SafeArea(
       child: Scaffold(
         floatingActionButton: FloatingActionButton(
-          onPressed: () {},
+          onPressed: () {
+            AddOrder();
+          },
           child: const Icon(Icons.add),
         ),
 

@@ -1,14 +1,19 @@
+import 'package:begir/objects/order_item.dart';
 import 'package:begir/objects/user.dart';
 
 enum Role { creator, admin, member }
 
 class Group {
-  final String id; // شناسه یکتا
-  final User creator; // سازنده گروه (با Role.creator)
-  final DateTime _createdAt; // تاریخ ایجاد
-  late String _groupTitle; // عنوان گروه (قابل تغییر)
-  late String? _groupDescription; // توضیحات گروه (اختیاری)
-  late Map<String, Role> _members; // key: userId, value: Role
+  final String id;
+  final User creator;
+  final DateTime _createdAt;
+
+  late String _groupTitle;
+  late String? _groupDescription;
+
+  late final Map<String, Role> _members;
+
+  final List<OrderItem> _orderItems = [];
 
   Group({
     required this.id,
@@ -16,18 +21,21 @@ class Group {
     required this._createdAt,
     required this._groupTitle,
     this._groupDescription,
-  });
+    Map<String, Role>? members,
+  }) : _members = members ?? {};
 
-  //Setter
+  // Setter
+
   void setGroupTitle(String newTitle) {
     _groupTitle = newTitle;
   }
 
-  void setGroupDescription(String newgroupdescription) {
-    _groupDescription = newgroupdescription;
+  void setGroupDescription(String newGroupDescription) {
+    _groupDescription = newGroupDescription;
   }
 
-  //Getter
+  // Getter
+
   String getId() {
     return id;
   }
@@ -44,11 +52,59 @@ class Group {
     return _groupTitle;
   }
 
-  String getGroupDescription() {
-    return _groupDescription!;
+  String? getGroupDescription() {
+    return _groupDescription;
   }
 
   Map<String, Role> getMembers() {
-    return _members;
+    return Map.unmodifiable(_members);
+  }
+
+  List<OrderItem> getOrderItems() {
+    return List.unmodifiable(_orderItems);
+  }
+
+  // Members
+
+  void addMember(String userId, Role role) {
+    _members[userId] = role;
+  }
+
+  void removeMember(String userId) {
+    _members.remove(userId);
+  }
+
+  void setMemberRole(String userId, Role role) {
+    if (_members.containsKey(userId)) {
+      _members[userId] = role;
+    }
+  }
+
+  // Order Items
+
+  void addOrderItem(OrderItem orderItem) {
+    _orderItems.add(orderItem);
+  }
+
+  bool removeOrderItem(String itemId) {
+    final initialLength = _orderItems.length;
+
+    _orderItems.removeWhere((item) => item.getItemId() == itemId);
+
+    return _orderItems.length < initialLength;
+  }
+
+  OrderItem? getOrderItem(String itemId) {
+    for (final orderItem in _orderItems) {
+      if (orderItem.getItemId() == itemId) {
+        return orderItem;
+      }
+    }
+
+    return null;
+  }
+
+  void clearOrderItems() {
+    _orderItems.clear();
   }
 }
