@@ -1,10 +1,10 @@
-import 'package:begir/objects/user.dart';
+import 'package:begir/models/user.dart';
 
 enum Status { pending, reserved, complete }
 
 enum Priority { low, medium, high }
 
-class OrderItem {
+class Order {
   final String itemId;
   final User _createdBy;
   final DateTime _createdAt;
@@ -19,7 +19,7 @@ class OrderItem {
   Status _itemStatus = Status.pending;
   Priority _itemPriority = Priority.medium;
 
-  OrderItem({
+  Order({
     required this.itemId,
     required this._createdBy,
     required this._title,

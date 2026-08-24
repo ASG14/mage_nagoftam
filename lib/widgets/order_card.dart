@@ -22,7 +22,6 @@ class _OrderCardState extends State<OrderCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // عنوان و فوریت
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

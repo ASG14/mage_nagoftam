@@ -1,6 +1,6 @@
-import 'package:begir/objects/order_item.dart';
-import 'package:begir/objects/user.dart';
-import 'package:begir/objects/group.dart';
+import 'package:begir/models/order.dart';
+import 'package:begir/models/user.dart';
+import 'package:begir/models/group.dart';
 import 'package:begir/style/color.dart';
 import 'package:flutter/material.dart';
 
@@ -91,8 +91,8 @@ class _AddOrderState extends State<AddOrder> {
             var testtime = DateTime(2004,02,29);
             User testuser = User(id: 'عنوان کاربر', phoneNumber: 2, registeredAt: testtime);
             Group testgroup = Group(id: '11', creator: testuser, createdAt: testtime, groupTitle: 'عنوان گروه تست');
-            OrderItem testitem = OrderItem(itemId: 'آیدی تست', createdBy: testuser, title: title, quantity: quantity, createdAt: testtime, deadline: testtime);
-            testgroup.addOrderItem(testitem);
+            Order testitem = Order(itemId: 'آیدی تست',createdBy: testuser, title: title, quantity: quantity, createdAt: testtime, deadline: testtime);
+            //testgroup.addOrder(testitem);
             Navigator.pop(context); 
           },
           child: const Text('تایید و ثبت'),

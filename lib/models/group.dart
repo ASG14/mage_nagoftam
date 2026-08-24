@@ -1,5 +1,5 @@
-import 'package:begir/objects/order_item.dart';
-import 'package:begir/objects/user.dart';
+import 'package:begir/models/order.dart';
+import 'package:begir/models/user.dart';
 
 enum Role { creator, admin, member }
 
@@ -12,8 +12,6 @@ class Group {
   late String? _groupDescription;
 
   late final Map<String, Role> _members;
-
-  final List<OrderItem> _orderItems = [];
 
   Group({
     required this.id,
@@ -59,11 +57,6 @@ class Group {
   Map<String, Role> getMembers() {
     return Map.unmodifiable(_members);
   }
-
-  List<OrderItem> getOrderItems() {
-    return List.unmodifiable(_orderItems);
-  }
-
   // Members
 
   void addMember(String userId, Role role) {
@@ -78,33 +71,5 @@ class Group {
     if (_members.containsKey(userId)) {
       _members[userId] = role;
     }
-  }
-
-  // Order Items
-
-  void addOrderItem(OrderItem orderItem) {
-    _orderItems.add(orderItem);
-  }
-
-  bool removeOrderItem(String itemId) {
-    final initialLength = _orderItems.length;
-
-    _orderItems.removeWhere((item) => item.getItemId() == itemId);
-
-    return _orderItems.length < initialLength;
-  }
-
-  OrderItem? getOrderItem(String itemId) {
-    for (final orderItem in _orderItems) {
-      if (orderItem.getItemId() == itemId) {
-        return orderItem;
-      }
-    }
-
-    return null;
-  }
-
-  void clearOrderItems() {
-    _orderItems.clear();
   }
 }
