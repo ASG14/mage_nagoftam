@@ -1,69 +1,124 @@
+import 'package:flutter/material.dart';
 import 'package:begir/models/order.dart';
 import 'package:begir/models/user.dart';
-import 'package:begir/models/group.dart';
 import 'package:begir/style/color.dart';
-import 'package:flutter/material.dart';
-
 
 class AddOrder extends StatefulWidget {
-  const AddOrder({super.key});
+  final User user;
+  final Function(Order order) onOrderCreated;
+
+  const AddOrder({
+    super.key,
+    required this.user,
+    required this.onOrderCreated,
+  });
 
   @override
   State<AddOrder> createState() => _AddOrderState();
 }
 
 class _AddOrderState extends State<AddOrder> {
-  // کنترلرها برای مدیریت مقادیر ورودی فیلدها
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _quantityController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _titleController =
+      TextEditingController();
 
+  final TextEditingController _quantityController =
+      TextEditingController();
+
+  Priority _priority = Priority.medium;
 
   @override
   void dispose() {
     _titleController.dispose();
     _quantityController.dispose();
-    _descriptionController.dispose();
+
     super.dispose();
   }
+
+  void _submit() {
+    final title = _titleController.text.trim();
+    final quantity = _quantityController.text.trim();
+
+    if (title.isEmpty || quantity.isEmpty) {
+      return;
+    }
+
+    final now = DateTime.now();
+
+    final order = Order(
+      itemId: DateTime.now().microsecondsSinceEpoch.toString(),
+      createdBy: widget.user,
+      title: title,
+      quantity: quantity,
+      createdAt: now,
+      deadline: now.add(const Duration(days: 1)),
+      itemPriority: _priority,
+    );
+
+    widget.onOrderCreated(order);
+
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('افزودن سفارش جدید'),
+
       content: SizedBox(
         width: 300,
+
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextField(
                 controller: _titleController,
                 decoration: const InputDecoration(
                   labelText: 'عنوان سفارش',
-                  hintText: 'مثلا: نان سنگک',
-                  prefixIcon: Icon(Icons.title),
+                  hintText: 'مثلاً شیر کم‌چرب',
+                  prefixIcon: Icon(Icons.shopping_cart),
                 ),
               ),
+
               const SizedBox(height: 16),
 
               TextField(
                 controller: _quantityController,
                 decoration: const InputDecoration(
                   labelText: 'تعداد / مقدار',
-                  hintText: 'مثلا: 2 عدد',
+                  hintText: 'مثلاً ۲ بطری',
                   prefixIcon: Icon(Icons.numbers),
                 ),
               ),
+
               const SizedBox(height: 16),
 
-              TextField(
-                controller: _descriptionController,
+              DropdownButtonFormField<Priority>(
+                value: _priority,
                 decoration: const InputDecoration(
-                  labelText: 'توضیحات',
-                  hintText: 'مثلا: اگر نبود بربری بگیر',
-                  prefixIcon: Icon(Icons.description),
+                  labelText: 'اولویت',
                 ),
+                items: const [
+                  DropdownMenuItem(
+                    value: Priority.low,
+                    child: Text('کم'),
+                  ),
+                  DropdownMenuItem(
+                    value: Priority.medium,
+                    child: Text('عادی'),
+                  ),
+                  DropdownMenuItem(
+                    value: Priority.high,
+                    child: Text('زیاد'),
+                  ),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      _priority = value;
+                    });
+                  }
+                },
               ),
             ],
           ),
@@ -73,29 +128,17 @@ class _AddOrderState extends State<AddOrder> {
       actions: [
         TextButton(
           onPressed: () {
-            Navigator.pop(context); // بستن دیالوگ
-          }, 
-          style: OutlinedButton.styleFrom(
-            backgroundColor: AppColors.white1,
-            foregroundColor: AppColors.red1,
-            side: const BorderSide(color: AppColors.red1, width: 1),
-            
-          ),
-          child: const Text('انصراف',style: TextStyle(color: AppColors.red1,)),
-        ),
-        const SizedBox(height: 8), 
-        TextButton(
-          onPressed: () {
-            final title = _titleController.text;
-            final quantity = _quantityController.text;
-            var testtime = DateTime(2004,02,29);
-            User testuser = User(id: 'عنوان کاربر', phoneNumber: 2, registeredAt: testtime);
-            Group testgroup = Group(id: '11', creator: testuser, createdAt: testtime, groupTitle: 'عنوان گروه تست');
-            Order testitem = Order(itemId: 'آیدی تست',createdBy: testuser, title: title, quantity: quantity, createdAt: testtime, deadline: testtime);
-            //testgroup.addOrder(testitem);
-            Navigator.pop(context); 
+            Navigator.pop(context);
           },
-          child: const Text('تایید و ثبت'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.red1,
+          ),
+          child: const Text('انصراف'),
+        ),
+
+        FilledButton(
+          onPressed: _submit,
+          child: const Text('ثبت سفارش'),
         ),
       ],
     );

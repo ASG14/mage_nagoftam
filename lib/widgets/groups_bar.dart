@@ -1,9 +1,19 @@
-// نوار بالای صفحه خانه برای تعویض گروه درحال نمایش
-
 import 'package:flutter/material.dart';
 
+import 'package:begir/models/group.dart';
+
 class GroupsBar extends StatefulWidget {
-  const GroupsBar({super.key});
+  final Group group;
+
+  final VoidCallback? onPrevious;
+  final VoidCallback? onNext;
+
+  const GroupsBar({
+    super.key,
+    required this.group,
+    this.onPrevious,
+    this.onNext,
+  });
 
   @override
   State<GroupsBar> createState() => _GroupsBarState();
@@ -13,25 +23,48 @@ class _GroupsBarState extends State<GroupsBar> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 52,
+
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(8),
       ),
 
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(
-            flex: 1,
-            child: IconButton(onPressed: () {}, icon: Icon(Icons.arrow_left)),
+          // گروه قبلی
+          SizedBox(
+            width: 48,
+            child: IconButton(
+              onPressed: widget.onPrevious,
+              icon: const Icon(
+                Icons.chevron_left,
+              ),
+            ),
           ),
+
+          // نام گروه فعلی
           Expanded(
-            flex: 8,
-            child: Text('عنوان گروه فعلی', textAlign: TextAlign.center),
+            child: Text(
+              widget.group.getGroupTitle(),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium,
+            ),
           ),
-          Expanded(
-            flex: 1,
-            child: IconButton(onPressed: () {}, icon: Icon(Icons.arrow_right)),
+
+          // گروه بعدی
+          SizedBox(
+            width: 48,
+            child: IconButton(
+              onPressed: widget.onNext,
+              icon: const Icon(
+                Icons.chevron_right,
+              ),
+            ),
           ),
         ],
       ),

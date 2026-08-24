@@ -5,7 +5,7 @@ import 'package:begir/tempDB/relator.dart';
 class Manager {
   final List<Relator> _records = [];
 
-  void add({
+  void addOrderToGroup({
     required Group group,
     required Order order,
   }) {
@@ -17,8 +17,14 @@ class Manager {
     _records.add(relation);
   }
 
-  List<Relator> getRelations() {
-    return List.unmodifiable(_records);
+  void removeOrderFromGroup({
+    required Group group,
+    required Order order,
+  }) {
+    _records.removeWhere(
+      (relation) =>
+          relation.group == group && relation.order == order,
+    );
   }
 
   List<Order> getOrdersForGroup(Group group) {
@@ -31,5 +37,13 @@ class Manager {
     }
 
     return List.unmodifiable(result);
+  }
+
+  List<Relator> getRelations() {
+    return List.unmodifiable(_records);
+  }
+
+  void clear() {
+    _records.clear();
   }
 }

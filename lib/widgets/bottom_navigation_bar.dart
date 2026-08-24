@@ -14,9 +14,9 @@ class MyBottomNavigationBar extends StatefulWidget {
 
 class _MyBottomNavigationBarState
     extends State<MyBottomNavigationBar> {
-
   int _getCurrentIndex() {
-    final routeName = ModalRoute.of(context)?.settings.name;
+    final routeName =
+        ModalRoute.of(context)?.settings.name;
 
     switch (routeName) {
       case AppRoutes.home:
@@ -34,50 +34,58 @@ class _MyBottomNavigationBarState
   }
 
   void _onItemSelected(int index) {
+    String route;
+
     switch (index) {
       case 0:
-        Navigator.pushReplacementNamed(
-          context,
-          AppRoutes.home,
-        );
+        route = AppRoutes.home;
         break;
 
       case 1:
-        Navigator.pushReplacementNamed(
-          context,
-          AppRoutes.groups,
-        );
+        route = AppRoutes.groups;
         break;
 
       case 2:
-        Navigator.pushReplacementNamed(
-          context,
-          AppRoutes.notifications,
-        );
+        route = AppRoutes.notifications;
         break;
+
+      default:
+        return;
     }
+
+    if (ModalRoute.of(context)?.settings.name == route) {
+      return;
+    }
+
+    Navigator.pushReplacementNamed(
+      context,
+      route,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: _getCurrentIndex(),
+    return NavigationBar(
+      selectedIndex: _getCurrentIndex(),
 
-      onTap: _onItemSelected,
+      onDestinationSelected: _onItemSelected,
 
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
+      destinations: const [
+        NavigationDestination(
+          icon: Icon(Icons.home_outlined),
+          selectedIcon: Icon(Icons.home),
           label: 'خانه',
         ),
 
-        BottomNavigationBarItem(
-          icon: Icon(Icons.groups),
+        NavigationDestination(
+          icon: Icon(Icons.groups_outlined),
+          selectedIcon: Icon(Icons.groups),
           label: 'گروه‌ها',
         ),
 
-        BottomNavigationBarItem(
-          icon: Icon(Icons.notifications),
+        NavigationDestination(
+          icon: Icon(Icons.notifications_outlined),
+          selectedIcon: Icon(Icons.notifications),
           label: 'اعلان‌ها',
         ),
       ],
