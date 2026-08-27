@@ -1,4 +1,3 @@
-import 'package:begir/models/order.dart';
 import 'package:begir/models/user.dart';
 
 enum Role { creator, admin, member }

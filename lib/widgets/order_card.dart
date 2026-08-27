@@ -83,9 +83,9 @@ class _OrderCardState extends State<OrderCard> {
                   borderRadius: BorderRadius.circular(5),
                 ),
                 child: Text(
-                  _priorityText(order.getItemPriority()),
+                  'اولویت: ${_priorityText(order.getItemPriority())}',
                   style: AppTypography.h9.copyWith(
-                    color: AppColors.gray2,
+                    color: AppColors.orange1,
                   ),
                 ),
               ),
@@ -97,7 +97,7 @@ class _OrderCardState extends State<OrderCard> {
           Text(
             'مقدار: ${order.getQuantity()}',
             style: AppTypography.h8.copyWith(
-              color: AppColors.gray2,
+              color: AppColors.gray1,
             ),
           ),
 
@@ -106,7 +106,7 @@ class _OrderCardState extends State<OrderCard> {
           Text(
             'وضعیت: ${_statusText(order.getItemStatus())}',
             style: AppTypography.h8.copyWith(
-              color: AppColors.gray2,
+              color: AppColors.gray1,
             ),
           ),
 
@@ -118,7 +118,7 @@ class _OrderCardState extends State<OrderCard> {
                 Expanded(
                   child: FilledButton(
                     onPressed: widget.onReserve,
-                    child: const Text('من می‌گیرم'),
+                    child: const Text('بسپرش به من'),
                   ),
                 ),
               ],
@@ -130,7 +130,7 @@ class _OrderCardState extends State<OrderCard> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: widget.onComplete,
-                    child: const Text('من گرفتم'),
+                    child: const Text('گرفتم'),
                   ),
                 ),
               ],
@@ -142,7 +142,7 @@ class _OrderCardState extends State<OrderCard> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               const Icon(
-                Icons.access_time,
+                Icons.check,
                 size: 14,
                 color: AppColors.gray2,
               ),

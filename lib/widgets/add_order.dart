@@ -62,9 +62,11 @@ class _AddOrderState extends State<AddOrder> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      alignment: Alignment.center,
       title: const Text('افزودن سفارش جدید'),
 
       content: SizedBox(
+        
         width: 300,
 
         child: SingleChildScrollView(
@@ -126,16 +128,18 @@ class _AddOrderState extends State<AddOrder> {
       ),
 
       actions: [
+        
         TextButton(
           onPressed: () {
             Navigator.pop(context);
           },
           style: OutlinedButton.styleFrom(
+            backgroundColor: AppColors.red1,
             foregroundColor: AppColors.red1,
+            
           ),
-          child: const Text('انصراف'),
-        ),
-
+          child: const Text('انصراف',style: TextStyle(color: AppColors.white1),),),
+          SizedBox(height: 5,),
         FilledButton(
           onPressed: _submit,
           child: const Text('ثبت سفارش'),

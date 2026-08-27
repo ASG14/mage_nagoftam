@@ -284,7 +284,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('سبد خرید'),
+          title: const Text('بگیر'),
         ),
 
         drawer: const MyDrawer(),
