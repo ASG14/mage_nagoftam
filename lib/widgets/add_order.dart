@@ -63,6 +63,10 @@ class _AddOrderState extends State<AddOrder> {
   Widget build(BuildContext context) {
     return AlertDialog(
       alignment: Alignment.center,
+      actionsAlignment: MainAxisAlignment.center,
+      actionsOverflowAlignment: OverflowBarAlignment.start,
+      
+
       title: const Text('افزودن سفارش جدید'),
 
       content: SizedBox(
@@ -129,20 +133,30 @@ class _AddOrderState extends State<AddOrder> {
 
       actions: [
         
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          style: OutlinedButton.styleFrom(
-            backgroundColor: AppColors.red1,
-            foregroundColor: AppColors.red1,
-            
-          ),
-          child: const Text('انصراف',style: TextStyle(color: AppColors.white1),),),
-          SizedBox(height: 5,),
-        FilledButton(
-          onPressed: _submit,
-          child: const Text('ثبت سفارش'),
+        Row(
+          children: [
+            Expanded(
+              flex: 1,
+              child: TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: AppColors.red1,
+                  foregroundColor: AppColors.red1,
+                  
+                ),
+                child: const Text('انصراف',style: TextStyle(color: AppColors.white1),),),
+            ),
+              SizedBox(width: 5,),
+            Expanded(
+              flex: 1,
+              child: FilledButton(
+                onPressed: _submit,
+                child: const Text('ثبت سفارش'),
+              ),
+            ),
+          ],
         ),
       ],
     );

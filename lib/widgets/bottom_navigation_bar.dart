@@ -66,6 +66,7 @@ class _MyBottomNavigationBarState
   @override
   Widget build(BuildContext context) {
     return NavigationBar(
+      
       selectedIndex: _getCurrentIndex(),
 
       onDestinationSelected: _onItemSelected,

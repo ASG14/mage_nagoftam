@@ -21,9 +21,12 @@ class _LoginState extends State<Login> {
         body: Center(
           child: Container(
             padding: EdgeInsets.all(8),
-            width: 300,
+            constraints: BoxConstraints(
+              maxWidth: 600,
+              minWidth: 200, 
+            ),
+
             decoration: BoxDecoration(
-              
               color: AppColors.white1,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(width: 0.5, color: AppColors.gray4),
@@ -39,6 +42,7 @@ class _LoginState extends State<Login> {
                     suffixIcon: Icon(Icons.supervised_user_circle_rounded),
                   ),
                 ),
+                SizedBox(height: 10),
                 TextField(
                   textAlign: TextAlign.center,
                   decoration: InputDecoration(
@@ -46,8 +50,8 @@ class _LoginState extends State<Login> {
                     suffixIcon: Icon(Icons.key),
                   ),
                 ),
-                SizedBox(height: 40,),
-                FilledButton(onPressed: (){}, child: Text('ثبت نام - ورود'),)
+                SizedBox(height: 40),
+                FilledButton(onPressed: () {}, child: Text('ثبت نام - ورود')),
               ],
             ),
           ),

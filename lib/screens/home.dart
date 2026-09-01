@@ -11,8 +11,8 @@ import 'package:begir/tempDB/manager.dart';
 import 'package:begir/widgets/add_order.dart';
 import 'package:begir/widgets/bottom_navigation_bar.dart';
 import 'package:begir/widgets/drawer.dart';
-import 'package:begir/widgets/group_items.dart';
-import 'package:begir/widgets/groups_bar.dart';
+import 'package:begir/widgets/orders_list.dart';
+import 'package:begir/widgets/groups_navigation_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -306,34 +306,39 @@ class _HomeScreenState extends State<HomeScreen> {
           child: const Icon(Icons.add),
         ),
 
-        body: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Column(
-            children: [
-              GroupsBar(
-                group: _currentGroup,
-
-                onPrevious:
-                    _previousGroup,
-
-                onNext:
-                    _nextGroup,
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: SizedBox(
+              width: 500,
+              child: Column(
+                children: [
+                  GroupsBar(
+                    group: _currentGroup,
+              
+                    onPrevious:
+                        _previousGroup,
+              
+                    onNext:
+                        _nextGroup,
+                  ),
+              
+                  const SizedBox(height: 12),
+              
+                  Expanded(
+                    child: OrdersList(
+                      orders: orders,
+              
+                      onReserve:
+                          _reserveOrder,
+              
+                      onComplete:
+                          _completeOrder,
+                    ),
+                  ),
+                ],
               ),
-
-              const SizedBox(height: 12),
-
-              Expanded(
-                child: GroupItems(
-                  orders: orders,
-
-                  onReserve:
-                      _reserveOrder,
-
-                  onComplete:
-                      _completeOrder,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
 

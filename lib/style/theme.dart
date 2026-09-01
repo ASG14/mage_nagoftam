@@ -110,7 +110,7 @@ abstract final class AppTheme {
         backgroundColor: AppColors.green2,
         foregroundColor: AppColors.white2,
 
-        minimumSize: const Size(0, 44),
+        minimumSize: const Size(double.infinity, 48),
 
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
 
@@ -186,10 +186,21 @@ abstract final class AppTheme {
     ),
 
     // ============================================================
+    // Navigation Bar
+    // ============================================================
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: AppColors.white2,
+      indicatorColor: AppColors.gray4,
+    ),
+
+    // ============================================================
     // Bottom Navigation Bar
     // ============================================================
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: AppColors.white2,
+
+      unselectedIconTheme: IconThemeData(color: AppColors.gray2),
+      selectedIconTheme: IconThemeData(color: AppColors.green1),
 
       selectedItemColor: AppColors.green2,
       unselectedItemColor: AppColors.gray2,
@@ -279,6 +290,7 @@ abstract final class AppTheme {
     // Dialog
     // ============================================================
     dialogTheme: DialogThemeData(
+      alignment: Alignment.center,
       backgroundColor: AppColors.white2,
       elevation: 8,
 

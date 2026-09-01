@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:begir/models/order.dart';
 import 'package:begir/widgets/order_card.dart';
 
-class GroupItems extends StatefulWidget {
+class OrdersList extends StatefulWidget {
   final List<Order> orders;
 
   final void Function(Order order)? onReserve;
   final void Function(Order order)? onComplete;
 
-  const GroupItems({
+  const OrdersList({
     super.key,
     required this.orders,
     this.onReserve,
@@ -16,10 +16,10 @@ class GroupItems extends StatefulWidget {
   });
 
   @override
-  State<GroupItems> createState() => _GroupItemsState();
+  State<OrdersList> createState() => _OrdersListState();
 }
 
-class _GroupItemsState extends State<GroupItems> {
+class _OrdersListState extends State<OrdersList> {
   @override
   Widget build(BuildContext context) {
     if (widget.orders.isEmpty) {

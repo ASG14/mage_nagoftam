@@ -1,3 +1,4 @@
+import 'package:begir/style/color.dart';
 import 'package:flutter/material.dart';
 
 class GroupsScreen extends StatefulWidget {
@@ -49,37 +50,50 @@ class _GroupsScreenState extends State<GroupsScreen> {
           ),
 
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('انصراف'),
-            ),
+            Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
 
-            FilledButton(
-              onPressed: () {
-                final title = controller.text.trim();
-
-                if (title.isEmpty) {
-                  return;
-                }
-
-                setState(() {
-                  _groups.add(
-                    _TestGroup(
-                      id: DateTime.now()
-                          .microsecondsSinceEpoch
-                          .toString(),
-                      title: title,
-                      memberCount: 1,
-                      description: 'گروه جدید',
+                    child: const Text('انصراف'),
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: AppColors.gray3,
                     ),
-                  );
-                });
+                  ),
+                ),
+                SizedBox(width: 5),
+                Expanded(
+                  flex: 1,
+                  child: FilledButton(
+                    onPressed: () {
+                      final title = controller.text.trim();
 
-                Navigator.pop(context);
-              },
-              child: const Text('ایجاد گروه'),
+                      if (title.isEmpty) {
+                        return;
+                      }
+
+                      setState(() {
+                        _groups.add(
+                          _TestGroup(
+                            id: DateTime.now().microsecondsSinceEpoch
+                                .toString(),
+                            title: title,
+                            memberCount: 1,
+                            description: 'گروه جدید',
+                          ),
+                        );
+                      });
+
+                      Navigator.pop(context);
+                    },
+                    child: const Text('ایجاد گروه'),
+                  ),
+                ),
+              ],
             ),
           ],
         );
@@ -131,8 +145,17 @@ class _GroupsScreenState extends State<GroupsScreen> {
 
                     _showDeleteConfirmation(group);
                   },
+                  style: OutlinedButton.styleFrom(
+                    //backgroundColor: AppColors.gray4,
+                    foregroundColor: AppColors.red1,
+                    iconColor: AppColors.red1,
+                    side: const BorderSide(color: AppColors.gray4, width: 1),
+                  ),
                   icon: const Icon(Icons.delete_outline),
-                  label: const Text('حذف گروه'),
+                  label: const Text(
+                    'حذف گروه',
+                    style: TextStyle(color: AppColors.red1),
+                  ),
                 ),
               ],
             ),
@@ -149,24 +172,39 @@ class _GroupsScreenState extends State<GroupsScreen> {
         return AlertDialog(
           title: const Text('حذف گروه'),
 
-          content: Text(
-            'آیا از حذف گروه «${group.title}» مطمئن هستید؟',
-          ),
+          content: Text('آیا از حذف گروه «${group.title}» مطمئن هستید؟'),
 
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('انصراف'),
-            ),
-
-            FilledButton(
-              onPressed: () {
-                _deleteGroup(group);
-                Navigator.pop(context);
-              },
-              child: const Text('حذف'),
+            Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.gray3,
+                    ),
+                    child: const Text('انصراف'),
+                  ),
+                ),
+                SizedBox(width: 5),
+                Expanded(
+                  flex: 1,
+                  child: FilledButton(
+                    onPressed: () {
+                      _deleteGroup(group);
+                      Navigator.pop(context);
+                    },
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.red1,
+                      textStyle: TextStyle(color: AppColors.white2),
+                    ),
+                    child: const Text('حذف'),
+                  ),
+                ),
+              ],
             ),
           ],
         );
@@ -178,17 +216,14 @@ class _GroupsScreenState extends State<GroupsScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('گروه‌های من'),
-        ),
+        appBar: AppBar(title: const Text('گروه‌های من')),
 
         body: _groups.isEmpty
             ? _buildEmptyState()
             : ListView.separated(
                 padding: const EdgeInsets.all(16),
                 itemCount: _groups.length,
-                separatorBuilder: (_, __) =>
-                    const SizedBox(height: 12),
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final group = _groups[index];
 
@@ -217,10 +252,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.groups_outlined,
-              size: 64,
-            ),
+            const Icon(Icons.groups_outlined, size: 64),
 
             const SizedBox(height: 16),
 
@@ -254,10 +286,7 @@ class _GroupCard extends StatelessWidget {
   final _TestGroup group;
   final VoidCallback onTap;
 
-  const _GroupCard({
-    required this.group,
-    required this.onTap,
-  });
+  const _GroupCard({required this.group, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -265,27 +294,18 @@ class _GroupCard extends StatelessWidget {
       child: ListTile(
         onTap: onTap,
 
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 8,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
 
-        leading: CircleAvatar(
-          child: const Icon(Icons.groups),
-        ),
+        leading: CircleAvatar(child: const Icon(Icons.groups)),
 
         title: Text(group.title),
 
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 6),
-          child: Text(
-            '${group.memberCount} عضو • ${group.description}',
-          ),
+          child: Text('${group.memberCount} عضو • ${group.description}'),
         ),
 
-        trailing: const Icon(
-          Icons.chevron_left,
-        ),
+        trailing: const Icon(Icons.chevron_left),
       ),
     );
   }
