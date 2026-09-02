@@ -6,18 +6,23 @@ import 'package:begir/widgets/order_card.dart';
 class OrdersList extends StatelessWidget {
   final List<Order> orders;
 
+  final int? currentUserId;
+
   final void Function(Order order)? onReserve;
   final void Function(Order order)? onComplete;
 
   const OrdersList({
     super.key,
     required this.orders,
+    this.currentUserId,
     this.onReserve,
     this.onComplete,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+    BuildContext context,
+  ) {
     if (orders.isEmpty) {
       return const Center(
         child: Text(
@@ -29,15 +34,23 @@ class OrdersList extends StatelessWidget {
     return ListView.separated(
       physics:
           const AlwaysScrollableScrollPhysics(),
+      padding:
+          const EdgeInsets.only(bottom: 80),
       itemCount: orders.length,
-      separatorBuilder: (context, index) {
-        return const SizedBox(height: 12);
+      separatorBuilder:
+          (context, index) {
+        return const SizedBox(
+          height: 12,
+        );
       },
-      itemBuilder: (context, index) {
+      itemBuilder:
+          (context, index) {
         final order = orders[index];
 
         return OrderCard(
           order: order,
+          currentUserId:
+              currentUserId,
           onReserve: () {
             onReserve?.call(order);
           },
@@ -49,3 +62,4 @@ class OrdersList extends StatelessWidget {
     );
   }
 }
+

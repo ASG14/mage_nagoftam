@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:begir/models/group.dart';
 import 'package:begir/models/order.dart';
 
+import 'package:begir/services/auth_service.dart';
 import 'package:begir/services/group_service.dart';
 import 'package:begir/services/order_service.dart';
 
@@ -34,6 +35,8 @@ class _HomeScreenState
 
   Group? _currentGroup;
 
+  int? _currentUserId;
+
   // --------------------------------------------------
   // Loading
   // --------------------------------------------------
@@ -58,7 +61,16 @@ class _HomeScreenState
   void initState() {
     super.initState();
 
-    _loadGroups();
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    _currentUserId =
+        await AuthService.getUserId();
+
+    if (!mounted) return;
+
+    await _loadGroups();
   }
 
   // --------------------------------------------------
@@ -98,7 +110,8 @@ class _HomeScreenState
 
       if (arguments is Group) {
         for (final group in groups) {
-          if (group.id == arguments.id) {
+          if (group.id ==
+              arguments.id) {
             selectedGroup = group;
             break;
           }
@@ -188,7 +201,6 @@ class _HomeScreenState
       builder: (context) {
         return AddOrder(
           groupId: group.id,
-
           onOrderCreated: (order) {
             setState(() {
               _orders.insert(
@@ -275,6 +287,15 @@ class _HomeScreenState
   Future<void> _completeOrder(
     Order order,
   ) async {
+    if (order.assignedUserId !=
+        _currentUserId) {
+      _showMessage(
+        'شما مسئول این سفارش نیستید',
+      );
+
+      return;
+    }
+
     try {
       await OrderService.completeOrder(
         orderId: order.id,
@@ -449,11 +470,9 @@ class _HomeScreenState
             Text(
               _groupsError!,
             ),
-
             const SizedBox(
               height: 12,
             ),
-
             FilledButton(
               onPressed:
                   _loadGroups,
@@ -479,27 +498,21 @@ class _HomeScreenState
       child: Padding(
         padding:
             const EdgeInsets.all(8),
-
         child: SizedBox(
           width: 500,
-
           child: Column(
             children: [
               GroupsBar(
                 group:
                     _currentGroup!,
-
                 onPrevious:
                     _previousGroup,
-
                 onNext:
                     _nextGroup,
               ),
-
               const SizedBox(
                 height: 12,
               ),
-
               Expanded(
                 child:
                     _buildOrders(),
@@ -528,16 +541,13 @@ class _HomeScreenState
         child: Column(
           mainAxisSize:
               MainAxisSize.min,
-
           children: [
             Text(
               _ordersError!,
             ),
-
             const SizedBox(
               height: 12,
             ),
-
             FilledButton(
               onPressed:
                   _loadOrders,
@@ -553,13 +563,12 @@ class _HomeScreenState
     return RefreshIndicator(
       onRefresh:
           _loadOrders,
-
       child: OrdersList(
         orders: _orders,
-
+        currentUserId:
+            _currentUserId,
         onReserve:
             _reserveOrder,
-
         onComplete:
             _completeOrder,
       ),

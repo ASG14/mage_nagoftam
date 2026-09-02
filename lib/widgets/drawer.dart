@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../core/app_routes.dart';
+import 'package:begir/core/app_routes.dart';
+import 'package:begir/services/auth_service.dart';
 
 class MyDrawer extends StatefulWidget {
   const MyDrawer({
@@ -8,54 +9,230 @@ class MyDrawer extends StatefulWidget {
   });
 
   @override
-  State<MyDrawer> createState() => _MyDrawerState();
+  State<MyDrawer> createState() =>
+      _MyDrawerState();
 }
 
-class _MyDrawerState extends State<MyDrawer> {
-  void _navigateTo(String route) {
+class _MyDrawerState
+    extends State<MyDrawer> {
+  // --------------------------------------------------
+  // Navigation
+  // --------------------------------------------------
+
+  void _navigateTo(
+    String route,
+  ) {
     Navigator.pop(context);
 
-    Navigator.pushNamed(
+    Navigator.pushReplacementNamed(
       context,
       route,
     );
   }
 
+  // --------------------------------------------------
+  // Logout
+  // --------------------------------------------------
+
+  Future<void> _logout() async {
+    await AuthService.logout();
+
+    if (!mounted) return;
+
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      AppRoutes.login,
+      (route) => false,
+    );
+  }
+
+  // --------------------------------------------------
+  // Logout Confirmation
+  // --------------------------------------------------
+
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text(
+            'خروج از حساب',
+          ),
+
+          content: const Text(
+            'آیا مطمئن هستید که می‌خواهید '
+            'از حساب خود خارج شوید؟',
+          ),
+
+          actions: [
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(
+                        dialogContext,
+                      );
+                    },
+                    child: const Text(
+                      'انصراف',
+                    ),
+                  ),
+                ),
+
+                const SizedBox(
+                  width: 5,
+                ),
+
+                Expanded(
+                  child: FilledButton(
+                    onPressed: () {
+                      Navigator.pop(
+                        dialogContext,
+                      );
+
+                      _logout();
+                    },
+                    child: const Text(
+                      'خروج',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // --------------------------------------------------
+  // Help
+  // --------------------------------------------------
+
+  void _showHelpDialog() {
+    Navigator.pop(context);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+            'آموزش استفاده',
+          ),
+
+          content: const SingleChildScrollView(
+            child: Text(
+              'برای استفاده از بگیر ابتدا یک گروه ایجاد کنید. '
+              'سپس می‌توانید سفارش‌های موردنیاز را در گروه ثبت کنید.\n\n'
+              'اعضای گروه می‌توانند سفارش‌های موجود را مشاهده کنند '
+              'و مسئولیت خرید یک سفارش را بر عهده بگیرند.\n\n'
+              'پس از انجام خرید، سفارش توسط فرد مسئول تکمیل می‌شود.',
+            ),
+          ),
+
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text(
+                'باشه',
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // --------------------------------------------------
+  // Terms
+  // --------------------------------------------------
+
+  void _showTermsDialog() {
+    Navigator.pop(context);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+            'قوانین و شرایط استفاده',
+          ),
+
+          content:
+              const SingleChildScrollView(
+            child: Text(
+              'استفاده از برنامه بگیر به معنای پذیرش قوانین '
+              'و شرایط استفاده از برنامه است.\n\n'
+              'کاربران مسئول اطلاعاتی هستند که در گروه‌ها و '
+              'سفارش‌های خود ثبت می‌کنند.\n\n'
+              'هر کاربر باید از حساب کاربری خود محافظت کند '
+              'و اطلاعات ورود خود را در اختیار دیگران قرار ندهد.',
+            ),
+          ),
+
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text(
+                'باشه',
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // --------------------------------------------------
+  // Build
+  // --------------------------------------------------
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+    BuildContext context,
+  ) {
     return Drawer(
       child: SafeArea(
         child: Column(
           children: [
             _buildHeader(),
 
-            const Divider(height: 1),
+            const Divider(
+              height: 1,
+            ),
 
             Expanded(
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.home_outlined),
-                    title: const Text('خانه'),
+                    leading: const Icon(
+                      Icons.home_outlined,
+                    ),
+                    title: const Text(
+                      'خانه',
+                    ),
                     onTap: () {
-                      Navigator.pop(context);
-
-                      Navigator.pushReplacementNamed(
-                        context,
+                      _navigateTo(
                         AppRoutes.home,
                       );
                     },
                   ),
 
                   ListTile(
-                    leading: const Icon(Icons.groups_outlined),
-                    title: const Text('گروه‌های من'),
+                    leading: const Icon(
+                      Icons.groups_outlined,
+                    ),
+                    title: const Text(
+                      'گروه‌های من',
+                    ),
                     onTap: () {
-                      Navigator.pop(context);
-
-                      Navigator.pushReplacementNamed(
-                        context,
+                      _navigateTo(
                         AppRoutes.groups,
                       );
                     },
@@ -65,12 +242,11 @@ class _MyDrawerState extends State<MyDrawer> {
                     leading: const Icon(
                       Icons.notifications_outlined,
                     ),
-                    title: const Text('اعلان‌ها'),
+                    title: const Text(
+                      'اعلان‌ها',
+                    ),
                     onTap: () {
-                      Navigator.pop(context);
-
-                      Navigator.pushReplacementNamed(
-                        context,
+                      _navigateTo(
                         AppRoutes.notifications,
                       );
                     },
@@ -82,7 +258,9 @@ class _MyDrawerState extends State<MyDrawer> {
                     leading: const Icon(
                       Icons.settings_outlined,
                     ),
-                    title: const Text('تنظیمات'),
+                    title: const Text(
+                      'تنظیمات',
+                    ),
                     onTap: () {
                       _navigateTo(
                         AppRoutes.settings,
@@ -97,15 +275,8 @@ class _MyDrawerState extends State<MyDrawer> {
                     title: const Text(
                       'آموزش و سوالات متداول',
                     ),
-                    onTap: () {
-                      Navigator.pop(context);
-
-                      _showInfoDialog(
-                        title: 'آموزش',
-                        message:
-                            'راهنمای استفاده از برنامه در این بخش قرار می‌گیرد.',
-                      );
-                    },
+                    onTap:
+                        _showHelpDialog,
                   ),
 
                   ListTile(
@@ -115,119 +286,76 @@ class _MyDrawerState extends State<MyDrawer> {
                     title: const Text(
                       'قوانین و شرایط استفاده',
                     ),
-                    onTap: () {
-                      Navigator.pop(context);
-
-                      _showInfoDialog(
-                        title: 'قوانین و شرایط',
-                        message:
-                            'قوانین و شرایط استفاده از برنامه در این بخش قرار می‌گیرد.',
-                      );
-                    },
+                    onTap:
+                        _showTermsDialog,
                   ),
                 ],
               ),
             ),
 
-            const Divider(height: 1),
+            const Divider(
+              height: 1,
+            ),
 
             ListTile(
               leading: const Icon(
                 Icons.logout,
               ),
-              title: const Text('خروج از حساب'),
-              onTap: () {
-                Navigator.pop(context);
-
-                _showLogoutDialog();
-              },
+              title: const Text(
+                'خروج از حساب',
+              ),
+              onTap:
+                  _showLogoutDialog,
             ),
           ],
         ),
       ),
     );
   }
+
+  // --------------------------------------------------
+  // Header
+  // --------------------------------------------------
 
   Widget _buildHeader() {
-    return UserAccountsDrawerHeader(
-      margin: EdgeInsets.zero,
+    return FutureBuilder<int?>(
+      future: AuthService.getUserId(),
+      builder: (
+        context,
+        snapshot,
+      ) {
+        final userId =
+            snapshot.data;
 
-      currentAccountPicture: const CircleAvatar(
-        child: Icon(
-          Icons.person,
-          size: 32,
-        ),
-      ),
+        return UserAccountsDrawerHeader(
+          margin: EdgeInsets.zero,
 
-      accountName: const Text(
-        'علی احمدی',
-      ),
-
-      accountEmail: const Text(
-        '0912 000 0000',
-      ),
-
-      onDetailsPressed: () {
-        _navigateTo(
-          AppRoutes.settings,
-        );
-      },
-    );
-  }
-
-  void _showInfoDialog({
-    required String title,
-    required String message,
-  }) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(title),
-
-          content: Text(message),
-
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('باشه'),
+          currentAccountPicture:
+              const CircleAvatar(
+            child: Icon(
+              Icons.person,
+              size: 32,
             ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showLogoutDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('خروج از حساب'),
-
-          content: const Text(
-            'آیا مطمئن هستید که می‌خواهید از حساب خود خارج شوید؟',
           ),
 
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('انصراف'),
-            ),
+          accountName: const Text(
+            'حساب کاربری',
+          ),
 
-            FilledButton(
-              onPressed: () {
-                Navigator.pop(context);
+          accountEmail: Text(
+            userId == null
+                ? 'شناسه کاربر'
+                : 'شناسه کاربر: $userId',
+          ),
 
-                // فعلاً فقط برای تست UI است.
-              },
-              child: const Text('خروج'),
-            ),
-          ],
+          onDetailsPressed: () {
+            Navigator.pop(context);
+
+            Navigator.pushReplacementNamed(
+              context,
+              AppRoutes.settings,
+            );
+          },
         );
       },
     );
