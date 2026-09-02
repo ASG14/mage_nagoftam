@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'package:begir/models/group.dart';
 import 'package:begir/models/order.dart';
-import 'package:begir/models/user.dart';
 
-import 'package:begir/tempDB/groups.dart';
-import 'package:begir/tempDB/orders.dart';
-import 'package:begir/tempDB/manager.dart';
+import 'package:begir/services/group_service.dart';
+import 'package:begir/services/order_service.dart';
 
 import 'package:begir/widgets/add_order.dart';
 import 'package:begir/widgets/bottom_navigation_bar.dart';
@@ -15,259 +13,384 @@ import 'package:begir/widgets/orders_list.dart';
 import 'package:begir/widgets/groups_navigation_bar.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({
+    super.key,
+  });
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<HomeScreen> createState() =>
+      _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  final Groups _groups = Groups();
-  final Orders _orders = Orders();
-  final Manager _manager = Manager();
+class _HomeScreenState
+    extends State<HomeScreen> {
+  // --------------------------------------------------
+  // Data
+  // --------------------------------------------------
 
-  late User _currentUser;
-  late Group _currentGroup;
+  List<Group> _groups = [];
 
-  bool _isInitialized = false;
+  List<Order> _orders = [];
+
+  Group? _currentGroup;
+
+  // --------------------------------------------------
+  // Loading
+  // --------------------------------------------------
+
+  bool _isLoadingGroups = true;
+
+  bool _isLoadingOrders = false;
+
+  // --------------------------------------------------
+  // Errors
+  // --------------------------------------------------
+
+  String? _groupsError;
+
+  String? _ordersError;
+
+  // --------------------------------------------------
+  // Init
+  // --------------------------------------------------
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void initState() {
+    super.initState();
 
-    if (_isInitialized) {
+    _loadGroups();
+  }
+
+  // --------------------------------------------------
+  // Load Groups
+  // --------------------------------------------------
+
+  Future<void> _loadGroups() async {
+    setState(() {
+      _isLoadingGroups = true;
+      _groupsError = null;
+    });
+
+    try {
+      final groups =
+          await GroupService.getGroups();
+
+      if (!mounted) return;
+
+      if (groups.isEmpty) {
+        setState(() {
+          _groups = [];
+          _currentGroup = null;
+          _orders = [];
+          _isLoadingGroups = false;
+        });
+
+        return;
+      }
+
+      Group selectedGroup =
+          groups.first;
+
+      final arguments =
+          ModalRoute.of(context)
+              ?.settings
+              .arguments;
+
+      if (arguments is Group) {
+        for (final group in groups) {
+          if (group.id == arguments.id) {
+            selectedGroup = group;
+            break;
+          }
+        }
+      }
+
+      setState(() {
+        _groups = groups;
+        _currentGroup = selectedGroup;
+        _isLoadingGroups = false;
+      });
+
+      await _loadOrders();
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoadingGroups = false;
+        _groupsError =
+            'دریافت گروه‌ها انجام نشد';
+      });
+    }
+  }
+
+  // --------------------------------------------------
+  // Load Orders
+  // --------------------------------------------------
+
+  Future<void> _loadOrders() async {
+    final group = _currentGroup;
+
+    if (group == null) {
+      setState(() {
+        _orders = [];
+        _isLoadingOrders = false;
+      });
+
       return;
     }
 
-    _initialize();
-    _isInitialized = true;
+    setState(() {
+      _isLoadingOrders = true;
+      _ordersError = null;
+    });
+
+    try {
+      final orders =
+          await OrderService.getOrders(
+        groupId: group.id,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _orders = orders;
+        _isLoadingOrders = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoadingOrders = false;
+        _ordersError =
+            'دریافت سفارش‌ها انجام نشد';
+      });
+    }
   }
 
   // --------------------------------------------------
-  // Initialization
+  // Add Order
   // --------------------------------------------------
 
-  void _initialize() {
-    final now = DateTime.now();
+  void _showAddOrderDialog() {
+    final group = _currentGroup;
 
-    _currentUser = User(
-      id: 'user_1',
-      phoneNumber: 9120000000,
-      firstName: 'علی',
-      lastName: 'احمدی',
-      registeredAt: now,
-    );
-
-    _createTestGroups(now);
-    _createTestOrders(now);
-
-    final arguments =
-        ModalRoute.of(context)?.settings.arguments;
-
-    if (arguments is Group) {
-      final selectedGroup = _groups.getById(
-        arguments.getId(),
+    if (group == null) {
+      _showMessage(
+        'ابتدا یک گروه انتخاب کنید',
       );
 
-      if (selectedGroup != null) {
-        _currentGroup = selectedGroup;
+      return;
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AddOrder(
+          groupId: group.id,
+
+          onOrderCreated: (order) {
+            setState(() {
+              _orders.insert(
+                0,
+                order,
+              );
+            });
+          },
+        );
+      },
+    );
+  }
+
+  // --------------------------------------------------
+  // Reserve Order
+  // --------------------------------------------------
+
+  Future<void> _reserveOrder(
+    Order order,
+  ) async {
+    try {
+      await OrderService.assignOrder(
+        orderId: order.id,
+      );
+
+      if (!mounted) return;
+
+      await _loadOrders();
+
+      if (!mounted) return;
+
+      _showMessage(
+        'سفارش به شما سپرده شد',
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      final error = e.toString();
+
+      if (error.contains(
+        'already_assigned',
+      )) {
+        _showMessage(
+          'این سفارش قبلاً به شخص دیگری سپرده شده است',
+        );
+
+        await _loadOrders();
+
         return;
       }
-    }
 
-    // اگر از صفحه دیگری بدون انتخاب گروه وارد Home شدیم،
-    // اولین گروه به صورت پیش‌فرض انتخاب می‌شود.
-    _currentGroup = _groups.getAll().first;
-  }
+      if (error.contains(
+        'forbidden',
+      )) {
+        _showMessage(
+          'شما عضو این گروه نیستید',
+        );
 
-  // --------------------------------------------------
-  // Test Groups
-  // --------------------------------------------------
+        return;
+      }
 
-  void _createTestGroups(DateTime now) {
-    final familyGroup = Group(
-      id: 'group_1',
-      creator: _currentUser,
-      createdAt: now,
-      groupTitle: 'خانواده احمدی',
-    );
+      if (error.contains(
+        'not_found',
+      )) {
+        _showMessage(
+          'سفارش پیدا نشد',
+        );
 
-    final homeGroup = Group(
-      id: 'group_2',
-      creator: _currentUser,
-      createdAt: now,
-      groupTitle: 'خانه',
-    );
+        await _loadOrders();
 
-    final dormGroup = Group(
-      id: 'group_3',
-      creator: _currentUser,
-      createdAt: now,
-      groupTitle: 'خوابگاه',
-    );
+        return;
+      }
 
-    _groups.add(familyGroup);
-    _groups.add(homeGroup);
-    _groups.add(dormGroup);
-  }
-
-  // --------------------------------------------------
-  // Test Orders
-  // --------------------------------------------------
-
-  void _createTestOrders(DateTime now) {
-    final groups = _groups.getAll();
-
-    final familyGroup = groups[0];
-    final homeGroup = groups[1];
-    final dormGroup = groups[2];
-
-    final order1 = Order(
-      itemId: 'order_1',
-      createdBy: _currentUser,
-      title: 'شیر کم‌چرب',
-      quantity: '۲ بطری',
-      createdAt: now,
-      deadline: now.add(
-        const Duration(days: 1),
-      ),
-      itemPriority: Priority.high,
-    );
-
-    final order2 = Order(
-      itemId: 'order_2',
-      createdBy: _currentUser,
-      title: 'نان سنگک',
-      quantity: '۳ عدد',
-      createdAt: now.subtract(
-        const Duration(minutes: 30),
-      ),
-      deadline: now.add(
-        const Duration(days: 1),
-      ),
-      itemPriority: Priority.medium,
-    );
-
-    final order3 = Order(
-      itemId: 'order_3',
-      createdBy: _currentUser,
-      title: 'مایع ظرفشویی',
-      quantity: '۱ عدد',
-      createdAt: now.subtract(
-        const Duration(hours: 1),
-      ),
-      deadline: now.add(
-        const Duration(days: 2),
-      ),
-      itemPriority: Priority.low,
-    );
-
-    final order4 = Order(
-      itemId: 'order_4',
-      createdBy: _currentUser,
-      title: 'برنج',
-      quantity: '۵ کیلو',
-      createdAt: now.subtract(
-        const Duration(hours: 2),
-      ),
-      deadline: now.add(
-        const Duration(days: 2),
-      ),
-      itemPriority: Priority.high,
-    );
-
-    _addTestOrder(
-      group: familyGroup,
-      order: order1,
-    );
-
-    _addTestOrder(
-      group: familyGroup,
-      order: order2,
-    );
-
-    _addTestOrder(
-      group: homeGroup,
-      order: order3,
-    );
-
-    _addTestOrder(
-      group: dormGroup,
-      order: order4,
-    );
-  }
-
-  void _addTestOrder({
-    required Group group,
-    required Order order,
-  }) {
-    _orders.add(order);
-
-    _manager.addOrderToGroup(
-      group: group,
-      order: order,
-    );
-  }
-
-  // --------------------------------------------------
-  // Order Actions
-  // --------------------------------------------------
-
-  void _addOrder(Order order) {
-    setState(() {
-      _orders.add(order);
-
-      _manager.addOrderToGroup(
-        group: _currentGroup,
-        order: order,
+      _showMessage(
+        'سپردن سفارش انجام نشد',
       );
-    });
-  }
-
-  void _reserveOrder(Order order) {
-    setState(() {
-      order.setItemStatus(Status.reserved);
-      order.setReservedBy(_currentUser);
-      order.setReservedAt(DateTime.now());
-    });
-  }
-
-  void _completeOrder(Order order) {
-    setState(() {
-      order.setItemStatus(Status.complete);
-    });
-  }
-
-  // --------------------------------------------------
-  // Group Navigation
-  // --------------------------------------------------
-
-  void _previousGroup() {
-    final groups = _groups.getAll();
-
-    final currentIndex =
-        groups.indexOf(_currentGroup);
-
-    if (currentIndex > 0) {
-      setState(() {
-        _currentGroup =
-            groups[currentIndex - 1];
-      });
     }
   }
 
-  void _nextGroup() {
-    final groups = _groups.getAll();
+  // --------------------------------------------------
+  // Complete Order
+  // --------------------------------------------------
+
+  Future<void> _completeOrder(
+    Order order,
+  ) async {
+    try {
+      await OrderService.completeOrder(
+        orderId: order.id,
+      );
+
+      if (!mounted) return;
+
+      await _loadOrders();
+
+      if (!mounted) return;
+
+      _showMessage(
+        'سفارش با موفقیت تکمیل شد',
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      final error = e.toString();
+
+      if (error.contains(
+        'forbidden',
+      )) {
+        _showMessage(
+          'شما مسئول این سفارش نیستید',
+        );
+
+        return;
+      }
+
+      _showMessage(
+        'تکمیل سفارش انجام نشد',
+      );
+    }
+  }
+
+  // --------------------------------------------------
+  // Previous Group
+  // --------------------------------------------------
+
+  Future<void> _previousGroup() async {
+    if (_groups.isEmpty ||
+        _currentGroup == null) {
+      return;
+    }
 
     final currentIndex =
-        groups.indexOf(_currentGroup);
+        _groups.indexWhere(
+      (group) =>
+          group.id ==
+          _currentGroup!.id,
+    );
 
-    if (currentIndex < groups.length - 1) {
-      setState(() {
-        _currentGroup =
-            groups[currentIndex + 1];
-      });
+    if (currentIndex <= 0) {
+      return;
     }
+
+    setState(() {
+      _currentGroup =
+          _groups[currentIndex - 1];
+
+      _orders = [];
+
+      _ordersError = null;
+    });
+
+    await _loadOrders();
+  }
+
+  // --------------------------------------------------
+  // Next Group
+  // --------------------------------------------------
+
+  Future<void> _nextGroup() async {
+    if (_groups.isEmpty ||
+        _currentGroup == null) {
+      return;
+    }
+
+    final currentIndex =
+        _groups.indexWhere(
+      (group) =>
+          group.id ==
+          _currentGroup!.id,
+    );
+
+    if (currentIndex == -1 ||
+        currentIndex >=
+            _groups.length - 1) {
+      return;
+    }
+
+    setState(() {
+      _currentGroup =
+          _groups[currentIndex + 1];
+
+      _orders = [];
+
+      _ordersError = null;
+    });
+
+    await _loadOrders();
+  }
+
+  // --------------------------------------------------
+  // Message
+  // --------------------------------------------------
+
+  void _showMessage(
+    String message,
+  ) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
+    );
   }
 
   // --------------------------------------------------
@@ -275,75 +398,170 @@ class _HomeScreenState extends State<HomeScreen> {
   // --------------------------------------------------
 
   @override
-  Widget build(BuildContext context) {
-    final orders =
-        _manager.getOrdersForGroup(
-      _currentGroup,
-    );
-
+  Widget build(
+    BuildContext context,
+  ) {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('بگیر'),
+          title: const Text(
+            'بگیر',
+          ),
         ),
 
         drawer: const MyDrawer(),
 
         floatingActionButton:
             FloatingActionButton(
-          onPressed: () {
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) {
-                return AddOrder(
-                  user: _currentUser,
-                  onOrderCreated: _addOrder,
-                );
-              },
-            );
-          },
-          child: const Icon(Icons.add),
-        ),
-
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: SizedBox(
-              width: 500,
-              child: Column(
-                children: [
-                  GroupsBar(
-                    group: _currentGroup,
-              
-                    onPrevious:
-                        _previousGroup,
-              
-                    onNext:
-                        _nextGroup,
-                  ),
-              
-                  const SizedBox(height: 12),
-              
-                  Expanded(
-                    child: OrdersList(
-                      orders: orders,
-              
-                      onReserve:
-                          _reserveOrder,
-              
-                      onComplete:
-                          _completeOrder,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          onPressed:
+              _showAddOrderDialog,
+          child: const Icon(
+            Icons.add,
           ),
         ),
 
+        body: _buildBody(),
+
         bottomNavigationBar:
             const MyBottomNavigationBar(),
+      ),
+    );
+  }
+
+  // --------------------------------------------------
+  // Body
+  // --------------------------------------------------
+
+  Widget _buildBody() {
+    if (_isLoadingGroups) {
+      return const Center(
+        child:
+            CircularProgressIndicator(),
+      );
+    }
+
+    if (_groupsError != null) {
+      return Center(
+        child: Column(
+          mainAxisSize:
+              MainAxisSize.min,
+          children: [
+            Text(
+              _groupsError!,
+            ),
+
+            const SizedBox(
+              height: 12,
+            ),
+
+            FilledButton(
+              onPressed:
+                  _loadGroups,
+              child: const Text(
+                'تلاش مجدد',
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_groups.isEmpty ||
+        _currentGroup == null) {
+      return const Center(
+        child: Text(
+          'هنوز گروهی ایجاد نشده است',
+        ),
+      );
+    }
+
+    return Center(
+      child: Padding(
+        padding:
+            const EdgeInsets.all(8),
+
+        child: SizedBox(
+          width: 500,
+
+          child: Column(
+            children: [
+              GroupsBar(
+                group:
+                    _currentGroup!,
+
+                onPrevious:
+                    _previousGroup,
+
+                onNext:
+                    _nextGroup,
+              ),
+
+              const SizedBox(
+                height: 12,
+              ),
+
+              Expanded(
+                child:
+                    _buildOrders(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // --------------------------------------------------
+  // Orders
+  // --------------------------------------------------
+
+  Widget _buildOrders() {
+    if (_isLoadingOrders) {
+      return const Center(
+        child:
+            CircularProgressIndicator(),
+      );
+    }
+
+    if (_ordersError != null) {
+      return Center(
+        child: Column(
+          mainAxisSize:
+              MainAxisSize.min,
+
+          children: [
+            Text(
+              _ordersError!,
+            ),
+
+            const SizedBox(
+              height: 12,
+            ),
+
+            FilledButton(
+              onPressed:
+                  _loadOrders,
+              child: const Text(
+                'تلاش مجدد',
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh:
+          _loadOrders,
+
+      child: OrdersList(
+        orders: _orders,
+
+        onReserve:
+            _reserveOrder,
+
+        onComplete:
+            _completeOrder,
       ),
     );
   }

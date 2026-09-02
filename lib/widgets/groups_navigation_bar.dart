@@ -46,7 +46,7 @@ class _GroupsBarState extends State<GroupsBar> {
           // نام گروه فعلی
           Expanded(
             child: Text(
-              widget.group.getGroupTitle(),
+              widget.group.title,
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

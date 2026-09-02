@@ -1,4 +1,4 @@
-import 'package:begir/models/order.dart';
+/*import 'package:begir/models/order.dart';
 
 class Orders {
   final List<Order> _ordersList = [];
@@ -28,4 +28,4 @@ class Orders {
   void clear() {
     _ordersList.clear();
   }
-}
+}*/

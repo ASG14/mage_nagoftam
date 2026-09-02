@@ -1,3 +1,5 @@
+import 'package:begir/models/group.dart';
+import 'package:begir/services/group_service.dart';
 import 'package:begir/style/color.dart';
 import 'package:flutter/material.dart';
 
@@ -9,26 +11,53 @@ class GroupsScreen extends StatefulWidget {
 }
 
 class _GroupsScreenState extends State<GroupsScreen> {
-  final List<_TestGroup> _groups = [
-    _TestGroup(
-      id: '1',
-      title: 'خانواده احمدی',
-      memberCount: 4,
-      description: 'سبد خرید اعضای خانواده',
-    ),
-    _TestGroup(
-      id: '2',
-      title: 'خانه',
-      memberCount: 3,
-      description: 'خریدهای مربوط به خانه',
-    ),
-    _TestGroup(
-      id: '3',
-      title: 'خوابگاه',
-      memberCount: 5,
-      description: 'خریدهای مشترک خوابگاه',
-    ),
-  ];
+  List<Group> _groups = [];
+
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadGroups();
+  }
+
+  Future<void> _loadGroups() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final groups = await GroupService.getGroups();
+
+      if (!mounted) return;
+
+      setState(() {
+        _groups = groups;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+        _errorMessage = _getErrorMessage(e);
+      });
+    }
+  }
+
+  String _getErrorMessage(Object error) {
+    if (error.toString().contains('unauthorized')) {
+      return 'نشست شما منقضی شده است. لطفاً دوباره وارد شوید.';
+    }
+
+    if (error.toString().contains('server_error')) {
+      return 'خطا در ارتباط با سرور.';
+    }
+
+    return 'دریافت گروه‌ها با خطا مواجه شد.';
+  }
 
   void _showAddGroupDialog() {
     final controller = TextEditingController();
@@ -53,21 +82,20 @@ class _GroupsScreenState extends State<GroupsScreen> {
             Row(
               children: [
                 Expanded(
-                  flex: 1,
                   child: TextButton(
                     onPressed: () {
                       Navigator.pop(context);
                     },
-
-                    child: const Text('انصراف'),
                     style: OutlinedButton.styleFrom(
                       backgroundColor: AppColors.gray3,
                     ),
+                    child: const Text('انصراف'),
                   ),
                 ),
-                SizedBox(width: 5),
+
+                const SizedBox(width: 5),
+
                 Expanded(
-                  flex: 1,
                   child: FilledButton(
                     onPressed: () {
                       final title = controller.text.trim();
@@ -76,18 +104,8 @@ class _GroupsScreenState extends State<GroupsScreen> {
                         return;
                       }
 
-                      setState(() {
-                        _groups.add(
-                          _TestGroup(
-                            id: DateTime.now().microsecondsSinceEpoch
-                                .toString(),
-                            title: title,
-                            memberCount: 1,
-                            description: 'گروه جدید',
-                          ),
-                        );
-                      });
-
+                      // فعلاً فقط بستن Dialog
+                      // اتصال Create در مرحله بعد انجام می‌شود.
                       Navigator.pop(context);
                     },
                     child: const Text('ایجاد گروه'),
@@ -103,13 +121,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
     });
   }
 
-  void _deleteGroup(_TestGroup group) {
-    setState(() {
-      _groups.remove(group);
-    });
-  }
-
-  void _showGroupDetails(_TestGroup group) {
+  void _showGroupDetails(Group group) {
     showModalBottomSheet(
       context: context,
       showDragHandle: true,
@@ -128,13 +140,14 @@ class _GroupsScreenState extends State<GroupsScreen> {
 
                 const SizedBox(height: 12),
 
-                Text(group.description),
+                Text(
+                  'شناسه گروه: ${group.id}',
+                ),
 
                 const SizedBox(height: 12),
 
                 Text(
-                  '${group.memberCount} عضو',
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  'این گروه در تاریخ ${group.createdAt} ایجاد شده است.',
                 ),
 
                 const SizedBox(height: 24),
@@ -146,15 +159,19 @@ class _GroupsScreenState extends State<GroupsScreen> {
                     _showDeleteConfirmation(group);
                   },
                   style: OutlinedButton.styleFrom(
-                    //backgroundColor: AppColors.gray4,
                     foregroundColor: AppColors.red1,
                     iconColor: AppColors.red1,
-                    side: const BorderSide(color: AppColors.gray4, width: 1),
+                    side: const BorderSide(
+                      color: AppColors.gray4,
+                      width: 1,
+                    ),
                   ),
                   icon: const Icon(Icons.delete_outline),
                   label: const Text(
                     'حذف گروه',
-                    style: TextStyle(color: AppColors.red1),
+                    style: TextStyle(
+                      color: AppColors.red1,
+                    ),
                   ),
                 ),
               ],
@@ -165,20 +182,21 @@ class _GroupsScreenState extends State<GroupsScreen> {
     );
   }
 
-  void _showDeleteConfirmation(_TestGroup group) {
+  void _showDeleteConfirmation(Group group) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: const Text('حذف گروه'),
 
-          content: Text('آیا از حذف گروه «${group.title}» مطمئن هستید؟'),
+          content: Text(
+            'آیا از حذف گروه «${group.title}» مطمئن هستید؟',
+          ),
 
           actions: [
             Row(
               children: [
                 Expanded(
-                  flex: 1,
                   child: TextButton(
                     onPressed: () {
                       Navigator.pop(context);
@@ -189,17 +207,17 @@ class _GroupsScreenState extends State<GroupsScreen> {
                     child: const Text('انصراف'),
                   ),
                 ),
-                SizedBox(width: 5),
+
+                const SizedBox(width: 5),
+
                 Expanded(
-                  flex: 1,
                   child: FilledButton(
                     onPressed: () {
-                      _deleteGroup(group);
+                      // اتصال Delete در مرحله بعد انجام می‌شود.
                       Navigator.pop(context);
                     },
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.red1,
-                      textStyle: TextStyle(color: AppColors.white2),
                     ),
                     child: const Text('حذف'),
                   ),
@@ -216,30 +234,83 @@ class _GroupsScreenState extends State<GroupsScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(title: const Text('گروه‌های من')),
+        appBar: AppBar(
+          title: const Text('گروه‌های من'),
+        ),
 
-        body: _groups.isEmpty
-            ? _buildEmptyState()
-            : ListView.separated(
-                padding: const EdgeInsets.all(16),
-                itemCount: _groups.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  final group = _groups[index];
-
-                  return _GroupCard(
-                    group: group,
-                    onTap: () {
-                      _showGroupDetails(group);
-                    },
-                  );
-                },
-              ),
+        body: _buildBody(),
 
         floatingActionButton: FloatingActionButton.extended(
           onPressed: _showAddGroupDialog,
           icon: const Icon(Icons.add),
           label: const Text('گروه جدید'),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    if (_errorMessage != null) {
+      return _buildErrorState();
+    }
+
+    if (_groups.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return RefreshIndicator(
+      onRefresh: _loadGroups,
+      child: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: _groups.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        itemBuilder: (context, index) {
+          final group = _groups[index];
+
+          return _GroupCard(
+            group: group,
+            onTap: () {
+              _showGroupDetails(group);
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 64,
+            ),
+
+            const SizedBox(height: 16),
+
+            Text(
+              _errorMessage!,
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 24),
+
+            FilledButton.icon(
+              onPressed: _loadGroups,
+              icon: const Icon(Icons.refresh),
+              label: const Text('تلاش مجدد'),
+            ),
+          ],
         ),
       ),
     );
@@ -252,7 +323,10 @@ class _GroupsScreenState extends State<GroupsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.groups_outlined, size: 64),
+            const Icon(
+              Icons.groups_outlined,
+              size: 64,
+            ),
 
             const SizedBox(height: 16),
 
@@ -283,10 +357,13 @@ class _GroupsScreenState extends State<GroupsScreen> {
 }
 
 class _GroupCard extends StatelessWidget {
-  final _TestGroup group;
+  final Group group;
   final VoidCallback onTap;
 
-  const _GroupCard({required this.group, required this.onTap});
+  const _GroupCard({
+    required this.group,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -294,33 +371,26 @@ class _GroupCard extends StatelessWidget {
       child: ListTile(
         onTap: onTap,
 
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 8,
+        ),
 
-        leading: CircleAvatar(child: const Icon(Icons.groups)),
+        leading: const CircleAvatar(
+          child: Icon(Icons.groups),
+        ),
 
         title: Text(group.title),
 
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 6),
-          child: Text('${group.memberCount} عضو • ${group.description}'),
+        subtitle: const Padding(
+          padding: EdgeInsets.only(top: 6),
+          child: Text('گروه خرید'),
         ),
 
-        trailing: const Icon(Icons.chevron_left),
+        trailing: const Icon(
+          Icons.chevron_left,
+        ),
       ),
     );
   }
-}
-
-class _TestGroup {
-  final String id;
-  final String title;
-  final int memberCount;
-  final String description;
-
-  const _TestGroup({
-    required this.id,
-    required this.title,
-    required this.memberCount,
-    required this.description,
-  });
 }

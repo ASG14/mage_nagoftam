@@ -1,113 +1,115 @@
-import 'package:begir/models/user.dart';
+enum Status {
+  pending,
+  reserved,
+  completed,
+  cancelled,
+}
 
-enum Status { pending, reserved, complete }
-
-enum Priority { low, medium, high }
+enum Priority {
+  low,
+  medium,
+  high,
+}
 
 class Order {
-  final String itemId;
-  final User _createdBy;
-  final DateTime _createdAt;
+  final int id;
+  final int groupId;
+  final int createdBy;
 
-  late String _title;
-  late String _quantity;
-  late DateTime _deadline;
+  String title;
+  String? quantity;
 
-  late User? _reservedBy;
-  late DateTime? _reservedAt;
+  Priority priority;
+  Status status;
 
-  Status _itemStatus = Status.pending;
-  Priority _itemPriority = Priority.medium;
+  DateTime? deadline;
+  final DateTime createdAt;
+  DateTime? updatedAt;
+
+  int? assignedUserId;
 
   Order({
-    required this.itemId,
-    required this._createdBy,
-    required this._title,
-    required this._quantity,
-    required this._createdAt,
-    required this._deadline,
-    this._itemPriority = Priority.medium,
+    required this.id,
+    required this.groupId,
+    required this.createdBy,
+    required this.title,
+    this.quantity,
+    required this.priority,
+    required this.status,
+    this.deadline,
+    required this.createdAt,
+    this.updatedAt,
+    this.assignedUserId,
   });
 
-  // Setter
-
-  void setTitle(String newTitle) {
-    _title = newTitle;
+  factory Order.fromJson(Map<String, dynamic> json) {
+    return Order(
+      id: int.parse(json['id'].toString()),
+      groupId: int.parse(json['group_id'].toString()),
+      createdBy: int.parse(json['created_by'].toString()),
+      title: json['title'].toString(),
+      quantity: json['quantity']?.toString(),
+      priority: _priorityFromString(
+        json['priority'].toString(),
+      ),
+      status: _statusFromString(
+        json['status'].toString(),
+      ),
+      deadline: _parseDate(json['deadline']),
+      createdAt: DateTime.parse(
+        json['created_at'].toString(),
+      ),
+      updatedAt: _parseDate(json['updated_at']),
+      assignedUserId: json['assigned_user_id'] != null
+          ? int.parse(
+              json['assigned_user_id'].toString(),
+            )
+          : null,
+    );
   }
 
-  void setQuantity(String newQuantity) {
-    _quantity = newQuantity;
+  static DateTime? _parseDate(dynamic value) {
+    if (value == null || value.toString().isEmpty) {
+      return null;
+    }
+
+    return DateTime.parse(value.toString());
   }
 
-  void setDeadline(DateTime newDeadline) {
-    _deadline = newDeadline;
+  static Priority _priorityFromString(String value) {
+    switch (value) {
+      case 'low':
+        return Priority.low;
+
+      case 'high':
+        return Priority.high;
+
+      default:
+        return Priority.medium;
+    }
   }
 
-  void setReservedBy(User newReservedBy) {
-    _reservedBy = newReservedBy;
+  static Status _statusFromString(String value) {
+    switch (value) {
+      case 'reserved':
+        return Status.reserved;
+
+      case 'completed':
+        return Status.completed;
+
+      case 'cancelled':
+        return Status.cancelled;
+
+      default:
+        return Status.pending;
+    }
   }
 
-  void setReservedAt(DateTime newReservedAt) {
-    _reservedAt = newReservedAt;
-  }
+  bool get isPending => status == Status.pending;
 
-  void setItemStatus(Status newItemStatus) {
-    _itemStatus = newItemStatus;
-  }
+  bool get isReserved => status == Status.reserved;
 
-  void setItemPriority(Priority newItemPriority) {
-    _itemPriority = newItemPriority;
-  }
+  bool get isCompleted => status == Status.completed;
 
-  // Getter
-
-  String getItemId() {
-    return itemId;
-  }
-
-  String getTitle() {
-    return _title;
-  }
-
-  String getQuantity() {
-    return _quantity;
-  }
-
-  User getCreatedBy() {
-    return _createdBy;
-  }
-
-  DateTime getCreatedAt() {
-    return _createdAt;
-  }
-
-  DateTime getDeadline() {
-    return _deadline;
-  }
-
-  User? getReservedBy() {
-    return _reservedBy;
-  }
-
-  DateTime? getReservedAt() {
-    return _reservedAt;
-  }
-
-  Status getItemStatus() {
-    return _itemStatus;
-  }
-
-  Priority getItemPriority() {
-    return _itemPriority;
-  }
-
-  // Other
-
-  bool isReserved() {
-    return _itemStatus == Status.reserved;
-  }
-
-  bool isComplete() {
-    return _itemStatus == Status.complete;
-  }
+  bool get isCancelled => status == Status.cancelled;
 }

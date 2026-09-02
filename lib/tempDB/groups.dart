@@ -1,4 +1,4 @@
-import 'package:begir/models/group.dart';
+/*import 'package:begir/models/group.dart';
 
 class Groups {
   final List<Group> _groupsList = [];
@@ -32,4 +32,4 @@ class Groups {
   void clear() {
     _groupsList.clear();
   }
-}
+}*/

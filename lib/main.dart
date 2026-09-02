@@ -4,13 +4,16 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:begir/style/theme.dart';
 import 'package:begir/core/app_routes.dart';
+
 import 'package:begir/screens/groups.dart';
 import 'package:begir/screens/home.dart';
+import 'package:begir/screens/login.dart';
 import 'package:begir/screens/notifications.dart';
 import 'package:begir/screens/settings.dart';
+import 'package:begir/screens/splash.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -19,25 +22,32 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      locale: Locale('fa', 'IR'),
+      locale: const Locale('fa', 'IR'),
+
       theme: AppTheme.lightTheme,
+
       title: 'بگیر',
 
-      supportedLocales: [
-        Locale('fa', 'IR'), // فارسی
-        Locale('en', 'US'), // انگلیسی
+      supportedLocales: const [
+        Locale('fa', 'IR'),
+        Locale('en', 'US'),
       ],
 
-      localizationsDelegates: [
+      localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      initialRoute: AppRoutes.home,
+
+      initialRoute: AppRoutes.splash,
+
       routes: {
+        AppRoutes.splash: (context) => const SplashScreen(),
+        AppRoutes.login: (context) => const Login(),
         AppRoutes.home: (context) => const HomeScreen(),
         AppRoutes.groups: (context) => const GroupsScreen(),
-        AppRoutes.notifications: (context) => const NotificationsScreen(),
+        AppRoutes.notifications: (context) =>
+            const NotificationsScreen(),
         AppRoutes.settings: (context) => const SettingsScreen(),
       },
 

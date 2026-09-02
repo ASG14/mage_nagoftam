@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+
 import 'package:begir/models/order.dart';
-import 'package:begir/models/user.dart';
+import 'package:begir/services/order_service.dart';
 import 'package:begir/style/color.dart';
+import 'package:begir/style/typography.dart';
 
 class AddOrder extends StatefulWidget {
-  final User user;
-  final Function(Order order) onOrderCreated;
+  final int groupId;
+  final void Function(Order order) onOrderCreated;
 
   const AddOrder({
     super.key,
-    required this.user,
+    required this.groupId,
     required this.onOrderCreated,
   });
 
@@ -26,137 +28,158 @@ class _AddOrderState extends State<AddOrder> {
 
   Priority _priority = Priority.medium;
 
+  bool _isLoading = false;
+
   @override
   void dispose() {
     _titleController.dispose();
     _quantityController.dispose();
-
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     final title = _titleController.text.trim();
     final quantity = _quantityController.text.trim();
 
-    if (title.isEmpty || quantity.isEmpty) {
+    if (title.isEmpty) {
+      _showMessage('نام سفارش را وارد کنید');
       return;
     }
 
-    final now = DateTime.now();
+    if (quantity.isEmpty) {
+      _showMessage('مقدار سفارش را وارد کنید');
+      return;
+    }
 
-    final order = Order(
-      itemId: DateTime.now().microsecondsSinceEpoch.toString(),
-      createdBy: widget.user,
-      title: title,
-      quantity: quantity,
-      createdAt: now,
-      deadline: now.add(const Duration(days: 1)),
-      itemPriority: _priority,
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final order = await OrderService.createOrder(
+        groupId: widget.groupId,
+        title: title,
+        quantity: quantity,
+        priority: _priority,
+      );
+
+      if (!mounted) return;
+
+      widget.onOrderCreated(order);
+
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+
+      _showMessage(
+        'ثبت سفارش انجام نشد',
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
     );
-
-    widget.onOrderCreated(order);
-
-    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      alignment: Alignment.center,
-      actionsAlignment: MainAxisAlignment.center,
-      actionsOverflowAlignment: OverflowBarAlignment.start,
-      
-
-      title: const Text('افزودن سفارش جدید'),
-
-      content: SizedBox(
-        
-        width: 300,
-
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'عنوان سفارش',
-                  hintText: 'مثلاً شیر کم‌چرب',
-                  prefixIcon: Icon(Icons.shopping_cart),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              TextField(
-                controller: _quantityController,
-                decoration: const InputDecoration(
-                  labelText: 'تعداد / مقدار',
-                  hintText: 'مثلاً ۲ بطری',
-                  prefixIcon: Icon(Icons.numbers),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              DropdownButtonFormField<Priority>(
-                value: _priority,
-                decoration: const InputDecoration(
-                  labelText: 'اولویت',
-                ),
-                items: const [
-                  DropdownMenuItem(
-                    value: Priority.low,
-                    child: Text('کم'),
-                  ),
-                  DropdownMenuItem(
-                    value: Priority.medium,
-                    child: Text('عادی'),
-                  ),
-                  DropdownMenuItem(
-                    value: Priority.high,
-                    child: Text('زیاد'),
-                  ),
-                ],
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      _priority = value;
-                    });
-                  }
-                },
-              ),
-            ],
-          ),
+      title: Text(
+        'افزودن سفارش',
+        style: AppTypography.h5.copyWith(
+          color: AppColors.gray1,
         ),
       ),
-
-      actions: [
-        
-        Row(
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Expanded(
-              flex: 1,
-              child: TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: AppColors.red1,
-                  foregroundColor: AppColors.red1,
-                  
-                ),
-                child: const Text('انصراف',style: TextStyle(color: AppColors.white1),),),
-            ),
-              SizedBox(width: 5,),
-            Expanded(
-              flex: 1,
-              child: FilledButton(
-                onPressed: _submit,
-                child: const Text('ثبت سفارش'),
+            TextField(
+              controller: _titleController,
+              enabled: !_isLoading,
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(
+                labelText: 'نام کالا',
+                hintText: 'مثلاً شیر',
               ),
             ),
+
+            const SizedBox(height: 16),
+
+            TextField(
+              controller: _quantityController,
+              enabled: !_isLoading,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => _submit(),
+              decoration: const InputDecoration(
+                labelText: 'مقدار',
+                hintText: 'مثلاً ۲ عدد',
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            DropdownButtonFormField<Priority>(
+              value: _priority,
+              decoration: const InputDecoration(
+                labelText: 'اولویت',
+              ),
+              items: const [
+                DropdownMenuItem(
+                  value: Priority.low,
+                  child: Text('کم'),
+                ),
+                DropdownMenuItem(
+                  value: Priority.medium,
+                  child: Text('عادی'),
+                ),
+                DropdownMenuItem(
+                  value: Priority.high,
+                  child: Text('زیاد'),
+                ),
+              ],
+              onChanged: _isLoading
+                  ? null
+                  : (value) {
+                      if (value == null) return;
+
+                      setState(() {
+                        _priority = value;
+                      });
+                    },
+            ),
           ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isLoading
+              ? null
+              : () => Navigator.pop(context),
+          child: const Text('انصراف'),
+        ),
+
+        FilledButton(
+          onPressed: _isLoading ? null : _submit,
+          child: _isLoading
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                  ),
+                )
+              : const Text('ثبت سفارش'),
         ),
       ],
     );
