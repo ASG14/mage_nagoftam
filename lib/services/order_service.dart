@@ -175,6 +175,45 @@ class OrderService {
   }
 
   // --------------------------------------------------
+  // Delete Order
+  // --------------------------------------------------
+
+  static Future<void> deleteOrder({
+    required int orderId,
+  }) async {
+    final response = await ApiClient.postForm(
+      'orders/delete.php',
+      body: {
+        'order_id': orderId.toString(),
+      },
+    );
+
+    if (response.statusCode == 401) {
+      throw Exception('unauthorized');
+    }
+
+    if (response.statusCode == 403) {
+      throw Exception('forbidden');
+    }
+
+    if (response.statusCode == 404) {
+      throw Exception('not_found');
+    }
+
+    if (response.statusCode != 200) {
+      throw Exception('server_error');
+    }
+
+    final result = jsonDecode(response.body);
+
+    if (result['success'] != true) {
+      throw Exception(
+        result['message'] ?? 'خطا در حذف سفارش',
+      );
+    }
+  }
+
+  // --------------------------------------------------
   // Helpers
   // --------------------------------------------------
 

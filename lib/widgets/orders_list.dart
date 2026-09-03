@@ -10,6 +10,7 @@ class OrdersList extends StatelessWidget {
 
   final void Function(Order order)? onReserve;
   final void Function(Order order)? onComplete;
+  final void Function(Order order)? onDelete;
 
   const OrdersList({
     super.key,
@@ -17,6 +18,7 @@ class OrdersList extends StatelessWidget {
     this.currentUserId,
     this.onReserve,
     this.onComplete,
+    this.onDelete,
   });
 
   @override
@@ -57,9 +59,11 @@ class OrdersList extends StatelessWidget {
           onComplete: () {
             onComplete?.call(order);
           },
+          onDelete: () {
+            onDelete?.call(order);
+          },
         );
       },
     );
   }
 }
-

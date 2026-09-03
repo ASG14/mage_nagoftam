@@ -228,13 +228,28 @@ class _HomeScreenState
 
       if (!mounted) return;
 
-      await _loadOrders();
-
-      if (!mounted) return;
+      // Update the current order immediately.
+      //
+      // This prevents the UI from waiting for another
+      // request to orders/list.php before changing the
+      // button from "بسپرش به من".
+      setState(() {
+        order.status = Status.reserved;
+        order.assignedUserId =
+            _currentUserId;
+        order.assignedUserName =
+            'شما';
+      });
 
       _showMessage(
         'سفارش به شما سپرده شد',
       );
+
+      // Refresh from server after updating the UI.
+      //
+      // If the server returns the correct state,
+      // the local state will be synchronized with it.
+      await _loadOrders();
     } catch (e) {
       if (!mounted) return;
 
@@ -303,13 +318,16 @@ class _HomeScreenState
 
       if (!mounted) return;
 
-      await _loadOrders();
-
-      if (!mounted) return;
+      setState(() {
+        order.status =
+            Status.completed;
+      });
 
       _showMessage(
         'سفارش با موفقیت تکمیل شد',
       );
+
+      await _loadOrders();
     } catch (e) {
       if (!mounted) return;
 
@@ -327,6 +345,72 @@ class _HomeScreenState
 
       _showMessage(
         'تکمیل سفارش انجام نشد',
+      );
+    }
+  }
+
+  // --------------------------------------------------
+  // Delete Order
+  // --------------------------------------------------
+
+  Future<void> _deleteOrder(
+    Order order,
+  ) async {
+    if (order.createdBy !=
+        _currentUserId) {
+      _showMessage(
+        'شما اجازه حذف این سفارش را ندارید',
+      );
+
+      return;
+    }
+
+    try {
+      await OrderService.deleteOrder(
+        orderId: order.id,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _orders.removeWhere(
+          (item) =>
+              item.id == order.id,
+        );
+      });
+
+      _showMessage(
+        'سفارش با موفقیت حذف شد',
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      final error = e.toString();
+
+      if (error.contains(
+        'forbidden',
+      )) {
+        _showMessage(
+          'شما اجازه حذف این سفارش را ندارید',
+        );
+
+        return;
+      }
+
+      if (error.contains(
+        'not_found',
+      )) {
+        _showMessage(
+          'سفارش پیدا نشد',
+        );
+
+        await _loadOrders();
+
+        return;
+      }
+
+      _showMessage(
+        'حذف سفارش انجام نشد',
       );
     }
   }
@@ -429,9 +513,7 @@ class _HomeScreenState
             'بگیر',
           ),
         ),
-
         drawer: const MyDrawer(),
-
         floatingActionButton:
             FloatingActionButton(
           onPressed:
@@ -440,9 +522,7 @@ class _HomeScreenState
             Icons.add,
           ),
         ),
-
         body: _buildBody(),
-
         bottomNavigationBar:
             const MyBottomNavigationBar(),
       ),
@@ -571,6 +651,8 @@ class _HomeScreenState
             _reserveOrder,
         onComplete:
             _completeOrder,
+        onDelete:
+            _deleteOrder,
       ),
     );
   }

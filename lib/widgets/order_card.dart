@@ -11,6 +11,7 @@ class OrderCard extends StatelessWidget {
 
   final VoidCallback? onReserve;
   final VoidCallback? onComplete;
+  final VoidCallback? onDelete;
 
   const OrderCard({
     super.key,
@@ -18,6 +19,7 @@ class OrderCard extends StatelessWidget {
     this.currentUserId,
     this.onReserve,
     this.onComplete,
+    this.onDelete,
   });
 
   String _priorityText(
@@ -71,15 +73,17 @@ class OrderCard extends StatelessWidget {
   bool get _isCurrentUserAssigned {
     return currentUserId != null &&
         order.assignedUserId != null &&
-        currentUserId ==
-            order.assignedUserId;
+        currentUserId == order.assignedUserId;
+  }
+
+  bool get _isCurrentUserCreator {
+    return currentUserId != null &&
+        currentUserId == order.createdBy;
   }
 
   String _assignedUserText() {
     if (order.assignedUserName != null &&
-        order.assignedUserName!
-            .trim()
-            .isNotEmpty) {
+        order.assignedUserName!.trim().isNotEmpty) {
       return order.assignedUserName!;
     }
 
@@ -88,6 +92,50 @@ class OrderCard extends StatelessWidget {
     }
 
     return 'هنوز کسی مسئول نشده';
+  }
+
+  Future<void> _confirmDelete(
+    BuildContext context,
+  ) async {
+    if (onDelete == null) {
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text(
+            'حذف سفارش',
+          ),
+          content: const Text(
+            'آیا از حذف این سفارش مطمئن هستید؟',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(false);
+              },
+              child: const Text(
+                'انصراف',
+              ),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(true);
+              },
+              child: const Text(
+                'حذف',
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      onDelete!();
+    }
   }
 
   @override
@@ -114,7 +162,7 @@ class OrderCard extends StatelessWidget {
             crossAxisAlignment:
                 CrossAxisAlignment.stretch,
             children: [
-              // Title + Priority
+              // Title + Priority + Delete
               Row(
                 crossAxisAlignment:
                     CrossAxisAlignment.start,
@@ -130,7 +178,7 @@ class OrderCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(
-                    width: 12,
+                    width: 8,
                   ),
                   Container(
                     padding:
@@ -163,6 +211,21 @@ class OrderCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                  if (_isCurrentUserCreator &&
+                      !isCompleted) ...[
+                    const SizedBox(
+                      width: 4,
+                    ),
+                    IconButton(
+                      onPressed: () =>
+                          _confirmDelete(context),
+                      icon: const Icon(
+                        Icons.delete_outline,
+                      ),
+                      tooltip: 'حذف سفارش',
+                      color: AppColors.red1,
+                    ),
+                  ],
                 ],
               ),
 
@@ -289,8 +352,7 @@ class OrderCard extends StatelessWidget {
                 borderRadius:
                     BorderRadius.circular(10),
                 child: Container(
-                  color: Colors.black
-                      .withValues(
+                  color: Colors.black.withValues(
                     alpha: 0.55,
                   ),
                   alignment:
@@ -303,8 +365,8 @@ class OrderCard extends StatelessWidget {
                     ),
                     decoration:
                         BoxDecoration(
-                      color: Colors.black
-                          .withValues(
+                      color:
+                          Colors.black.withValues(
                         alpha: 0.45,
                       ),
                       borderRadius:
