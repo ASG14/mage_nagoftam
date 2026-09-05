@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:begir/models/notification.dart';
-import 'package:begir/style/color.dart';
+import 'package:mage_nagoftam/models/notification.dart';
+import 'package:mage_nagoftam/style/color.dart';
 
 class NotificationCard extends StatelessWidget {
   final AppNotification notification;

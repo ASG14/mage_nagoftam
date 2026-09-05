@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:begir/core/app_routes.dart';
-import 'package:begir/services/notification_service.dart';
+import 'package:mage_nagoftam/core/app_routes.dart';
+import 'package:mage_nagoftam/services/notification_service.dart';
 
 class MyBottomNavigationBar
     extends StatefulWidget {

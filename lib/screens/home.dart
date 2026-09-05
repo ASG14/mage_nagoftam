@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
-import 'package:begir/models/group.dart';
-import 'package:begir/models/order.dart';
+import 'package:mage_nagoftam/models/group.dart';
+import 'package:mage_nagoftam/models/order.dart';
 
-import 'package:begir/services/auth_service.dart';
-import 'package:begir/services/group_service.dart';
-import 'package:begir/services/order_service.dart';
+import 'package:mage_nagoftam/services/auth_service.dart';
+import 'package:mage_nagoftam/services/group_service.dart';
+import 'package:mage_nagoftam/services/order_service.dart';
 
-import 'package:begir/widgets/add_order.dart';
-import 'package:begir/widgets/bottom_navigation_bar.dart';
-import 'package:begir/widgets/drawer.dart';
-import 'package:begir/widgets/orders_list.dart';
-import 'package:begir/widgets/groups_navigation_bar.dart';
+import 'package:mage_nagoftam/widgets/add_order.dart';
+import 'package:mage_nagoftam/widgets/bottom_navigation_bar.dart';
+import 'package:mage_nagoftam/widgets/drawer.dart';
+import 'package:mage_nagoftam/widgets/orders_list.dart';
+import 'package:mage_nagoftam/widgets/groups_navigation_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({

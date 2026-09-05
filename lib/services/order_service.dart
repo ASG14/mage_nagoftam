@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:begir/models/order.dart';
-import 'package:begir/services/api_client.dart';
+import 'package:mage_nagoftam/models/order.dart';
+import 'package:mage_nagoftam/services/api_client.dart';
 
 class OrderService {
   // --------------------------------------------------

@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-import 'package:begir/models/group.dart';
+import 'package:mage_nagoftam/models/group.dart';
 
-import 'package:begir/services/auth_service.dart';
-import 'package:begir/services/group_service.dart';
+import 'package:mage_nagoftam/services/auth_service.dart';
+import 'package:mage_nagoftam/services/group_service.dart';
 
-import 'package:begir/core/app_routes.dart';
+import 'package:mage_nagoftam/core/app_routes.dart';
 
-import 'package:begir/style/color.dart';
+import 'package:mage_nagoftam/style/color.dart';
 
-import 'package:begir/widgets/bottom_navigation_bar.dart';
+import 'package:mage_nagoftam/widgets/bottom_navigation_bar.dart';
 
 import 'members.dart';
 

@@ -6,7 +6,7 @@ import 'auth_service.dart';
 
 class ApiClient {
   static const String baseUrl =
-      'http://localhost/begir_api/api';
+      'http://mage_nagoftam.ir/api';
 
   // --------------------------------------------------
   // GET

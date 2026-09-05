@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'package:begir/models/order.dart';
-import 'package:begir/services/order_service.dart';
-import 'package:begir/style/color.dart';
-import 'package:begir/style/typography.dart';
+import 'package:mage_nagoftam/models/order.dart';
+import 'package:mage_nagoftam/services/order_service.dart';
+import 'package:mage_nagoftam/style/color.dart';
+import 'package:mage_nagoftam/style/typography.dart';
 
 class AddOrder extends StatefulWidget {
   final int groupId;

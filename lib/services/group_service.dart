@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:begir/models/group.dart';
-import 'package:begir/models/group_member.dart';
+import 'package:mage_nagoftam/models/group.dart';
+import 'package:mage_nagoftam/models/group_member.dart';
 
 import 'api_client.dart';
 

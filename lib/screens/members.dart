@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:begir/models/group.dart';
-import 'package:begir/models/group_member.dart';
+import 'package:mage_nagoftam/models/group.dart';
+import 'package:mage_nagoftam/models/group_member.dart';
 
-import 'package:begir/services/auth_service.dart';
-import 'package:begir/services/group_service.dart';
+import 'package:mage_nagoftam/services/auth_service.dart';
+import 'package:mage_nagoftam/services/group_service.dart';
 
-import 'package:begir/style/color.dart';
+import 'package:mage_nagoftam/style/color.dart';
 
 class MembersScreen extends StatefulWidget {
   final Group group;

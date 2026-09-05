@@ -1,13 +1,13 @@
 // lib/core/routes/app_routes.dart
 
 import 'package:flutter/material.dart';
-import 'package:begir/screens/home.dart';
-import 'package:begir/screens/notifications.dart';
-import 'package:begir/screens/groups.dart';
-import 'package:begir/screens/settings.dart';
-import 'package:begir/screens/login.dart';
-import 'package:begir/screens/splash.dart';
-import 'package:begir/screens/register.dart';
+import 'package:mage_nagoftam/screens/notifications.dart';
+import 'package:mage_nagoftam/screens/home.dart';
+import 'package:mage_nagoftam/screens/groups.dart';
+import 'package:mage_nagoftam/screens/settings.dart';
+import 'package:mage_nagoftam/screens/login.dart';
+import 'package:mage_nagoftam/screens/splash.dart';
+import 'package:mage_nagoftam/screens/register.dart';
 
 
 class AppRoutes {

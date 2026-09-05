@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:begir/models/order.dart';
-import 'package:begir/widgets/order_card.dart';
+import 'package:mage_nagoftam/models/order.dart';
+import 'package:mage_nagoftam/widgets/order_card.dart';
 
 class OrdersList extends StatelessWidget {
   final List<Order> orders;

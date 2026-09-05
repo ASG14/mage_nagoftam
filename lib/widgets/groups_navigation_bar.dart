@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:begir/models/group.dart';
+import 'package:mage_nagoftam/models/group.dart';
 
 class GroupsBar extends StatefulWidget {
   final Group group;

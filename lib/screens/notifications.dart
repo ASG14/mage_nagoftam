@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'package:begir/models/notification.dart';
-import 'package:begir/services/notification_service.dart';
-import 'package:begir/widgets/bottom_navigation_bar.dart';
-import 'package:begir/widgets/drawer.dart';
-import 'package:begir/widgets/notification_card.dart';
+import 'package:mage_nagoftam/models/notification.dart';
+import 'package:mage_nagoftam/services/notification_service.dart';
+import 'package:mage_nagoftam/widgets/bottom_navigation_bar.dart';
+import 'package:mage_nagoftam/widgets/drawer.dart';
+import 'package:mage_nagoftam/widgets/notification_card.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({

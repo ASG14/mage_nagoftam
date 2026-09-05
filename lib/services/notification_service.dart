@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:begir/models/notification.dart';
+import 'package:mage_nagoftam/models/notification.dart';
 
 import 'api_client.dart';
 

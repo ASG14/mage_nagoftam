@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:begir/models/order.dart';
-import 'package:begir/style/color.dart';
-import 'package:begir/style/typography.dart';
+import 'package:mage_nagoftam/models/order.dart';
+import 'package:mage_nagoftam/style/color.dart';
+import 'package:mage_nagoftam/style/typography.dart';
 
 class OrderCard extends StatelessWidget {
   final Order order;

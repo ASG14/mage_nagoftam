@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:begir/core/app_routes.dart';
-import 'package:begir/services/auth_service.dart';
+import 'package:mage_nagoftam/core/app_routes.dart';
+import 'package:mage_nagoftam/services/auth_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
