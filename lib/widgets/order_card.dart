@@ -211,8 +211,10 @@ class OrderCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (_isCurrentUserCreator &&
-                      !isCompleted) ...[
+
+                  // Creator can delete
+                  // both pending and completed orders.
+                  if (_isCurrentUserCreator) ...[
                     const SizedBox(
                       width: 4,
                     ),

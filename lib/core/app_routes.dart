@@ -1,6 +1,5 @@
-// lib/core/routes/app_routes.dart
-
 import 'package:flutter/material.dart';
+
 import 'package:mage_nagoftam/screens/notifications.dart';
 import 'package:mage_nagoftam/screens/home.dart';
 import 'package:mage_nagoftam/screens/groups.dart';
@@ -8,7 +7,6 @@ import 'package:mage_nagoftam/screens/settings.dart';
 import 'package:mage_nagoftam/screens/login.dart';
 import 'package:mage_nagoftam/screens/splash.dart';
 import 'package:mage_nagoftam/screens/register.dart';
-
 
 class AppRoutes {
   static const String home = '/';
@@ -24,28 +22,50 @@ class RouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case AppRoutes.home:
-        return MaterialPageRoute(builder: (_) => const HomeScreen());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const HomeScreen(),
+        );
 
       case AppRoutes.notifications:
-        return MaterialPageRoute(builder: (_) => const NotificationsScreen());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const NotificationsScreen(),
+        );
 
       case AppRoutes.groups:
-        return MaterialPageRoute(builder: (_) => const GroupsScreen());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const GroupsScreen(),
+        );
 
       case AppRoutes.settings:
-        return MaterialPageRoute(builder: (_) => const SettingsScreen());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const SettingsScreen(),
+        );
 
       case AppRoutes.login:
-        return MaterialPageRoute(builder: (_) => const Login());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const Login(),
+        );
 
       case AppRoutes.splash:
-        return MaterialPageRoute(builder: (_) => const SplashScreen());
-      
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const SplashScreen(),
+        );
+
       case AppRoutes.register:
-        return MaterialPageRoute(builder: (_) => const Register());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const Register(),
+        );
 
       default:
         return MaterialPageRoute(
+          settings: settings,
           builder: (_) =>
               const Scaffold(body: Center(child: Text('صفحه پیدا نشد'))),
         );

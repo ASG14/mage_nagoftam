@@ -15,9 +15,7 @@ class GroupService {
       'groups/list.php',
     );
 
-    _handleUnauthorized(
-      response.statusCode,
-    );
+    _handleUnauthorized(response.statusCode);
 
     if (response.statusCode != 200) {
       throw Exception(
@@ -37,13 +35,10 @@ class GroupService {
       );
     }
 
-    final groupsData =
-        result['data']?['groups'];
+    final groupsData = result['data']?['groups'];
 
     if (groupsData is! List) {
-      throw Exception(
-        'invalid_response',
-      );
+      throw Exception('invalid_response');
     }
 
     return groupsData
@@ -71,9 +66,7 @@ class GroupService {
       },
     );
 
-    _handleUnauthorized(
-      response.statusCode,
-    );
+    _handleUnauthorized(response.statusCode);
 
     if (response.statusCode != 200) {
       throw Exception(
@@ -93,31 +86,21 @@ class GroupService {
       );
     }
 
-    /*
-     * create.php اطلاعات created_at را
-     * برنمی‌گرداند؛ بنابراین پاسخ را مستقیماً
-     * به Group تبدیل نمی‌کنیم.
-     *
-     * بعد از ساخت گروه، لیست گروه‌ها را
-     * دوباره از سرور می‌گیریم تا Group کامل
-     * همراه با createdAt ساخته شود.
-     */
+    final groupId = result['data']?['group']?['id'];
+
+    if (groupId == null) {
+      throw Exception('invalid_response');
+    }
 
     final groups = await getGroups();
-
-    final createdGroupId = int.parse(
-      result['data']['group']['id'].toString(),
-    );
 
     try {
       return groups.firstWhere(
         (group) =>
-            group.id == createdGroupId,
+            group.id == int.parse(groupId.toString()),
       );
     } catch (_) {
-      throw Exception(
-        'invalid_response',
-      );
+      throw Exception('invalid_response');
     }
   }
 
@@ -137,9 +120,7 @@ class GroupService {
       },
     );
 
-    _handleUnauthorized(
-      response.statusCode,
-    );
+    _handleUnauthorized(response.statusCode);
 
     if (response.statusCode != 200) {
       throw Exception(
@@ -171,9 +152,7 @@ class GroupService {
       'groups/delete.php?group_id=$groupId',
     );
 
-    _handleUnauthorized(
-      response.statusCode,
-    );
+    _handleUnauthorized(response.statusCode);
 
     if (response.statusCode != 200) {
       throw Exception(
@@ -198,17 +177,14 @@ class GroupService {
   // Get Members
   // ==================================================
 
-  static Future<List<GroupMember>>
-      getMembers({
+  static Future<List<GroupMember>> getMembers({
     required int groupId,
   }) async {
     final response = await ApiClient.get(
       'groups/members.php?group_id=$groupId',
     );
 
-    _handleUnauthorized(
-      response.statusCode,
-    );
+    _handleUnauthorized(response.statusCode);
 
     if (response.statusCode != 200) {
       throw Exception(
@@ -228,13 +204,10 @@ class GroupService {
       );
     }
 
-    final membersData =
-        result['data']?['members'];
+    final membersData = result['data']?['members'];
 
     if (membersData is! List) {
-      throw Exception(
-        'invalid_response',
-      );
+      throw Exception('invalid_response');
     }
 
     return membersData
@@ -264,9 +237,7 @@ class GroupService {
       },
     );
 
-    _handleUnauthorized(
-      response.statusCode,
-    );
+    _handleUnauthorized(response.statusCode);
 
     if (response.statusCode != 200) {
       throw Exception(
@@ -288,22 +259,20 @@ class GroupService {
   }
 
   // ==================================================
-  // Create / Get Stable Invite
+  // Create Invite
   // ==================================================
 
   static Future<String> createInvite({
     required int groupId,
   }) async {
     final response = await ApiClient.post(
-      'groups/create_invite.php',
+      'groups/invite.php',
       body: {
         'group_id': groupId,
       },
     );
 
-    _handleUnauthorized(
-      response.statusCode,
-    );
+    _handleUnauthorized(response.statusCode);
 
     if (response.statusCode != 200) {
       throw Exception(
@@ -323,14 +292,10 @@ class GroupService {
       );
     }
 
-    final token =
-        result['data']?['token'];
+    final token = result['data']?['token'];
 
-    if (token == null ||
-        token.toString().isEmpty) {
-      throw Exception(
-        'invalid_response',
-      );
+    if (token == null || token.toString().isEmpty) {
+      throw Exception('invalid_response');
     }
 
     return token.toString();
@@ -350,9 +315,7 @@ class GroupService {
       },
     );
 
-    _handleUnauthorized(
-      response.statusCode,
-    );
+    _handleUnauthorized(response.statusCode);
 
     if (response.statusCode != 200) {
       throw Exception(
@@ -372,31 +335,21 @@ class GroupService {
       );
     }
 
-    /*
-     * join.php فقط group_id و group_title
-     * برمی‌گرداند و created_at / creator_id
-     * ندارد.
-     *
-     * بنابراین بعد از Join، لیست نهایی
-     * گروه‌های کاربر را از سرور می‌گیریم
-     * و Group کامل را برمی‌گردانیم.
-     */
+    final groupId = result['data']?['group_id'];
 
-    final groupId = int.parse(
-      result['data']['group_id'].toString(),
-    );
+    if (groupId == null) {
+      throw Exception('invalid_response');
+    }
 
     final groups = await getGroups();
 
     try {
       return groups.firstWhere(
         (group) =>
-            group.id == groupId,
+            group.id == int.parse(groupId.toString()),
       );
     } catch (_) {
-      throw Exception(
-        'invalid_response',
-      );
+      throw Exception('invalid_response');
     }
   }
 
@@ -408,9 +361,7 @@ class GroupService {
     int statusCode,
   ) {
     if (statusCode == 401) {
-      throw Exception(
-        'unauthorized',
-      );
+      throw Exception('unauthorized');
     }
   }
 
@@ -423,13 +374,11 @@ class GroupService {
     required String fallback,
   }) {
     try {
-      final result =
-          jsonDecode(response.body);
+      final result = jsonDecode(response.body);
 
       if (result is Map &&
           result['message'] != null) {
-        return result['message']
-            .toString();
+        return result['message'].toString();
       }
     } catch (_) {
       // Ignore invalid JSON.
