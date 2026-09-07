@@ -266,7 +266,7 @@ class GroupService {
     required int groupId,
   }) async {
     final response = await ApiClient.post(
-      'groups/invite.php',
+      'groups/create_invite.php',
       body: {
         'group_id': groupId,
       },
@@ -294,11 +294,18 @@ class GroupService {
 
     final token = result['data']?['token'];
 
-    if (token == null || token.toString().isEmpty) {
+    if (token == null ||
+        token.toString().isEmpty) {
       throw Exception('invalid_response');
     }
 
-    return token.toString();
+    final tokenString = token.toString().trim();
+
+    if (!_isValidInviteToken(tokenString)) {
+      throw Exception('invalid_invite_token');
+    }
+
+    return tokenString;
   }
 
   // ==================================================
@@ -308,10 +315,16 @@ class GroupService {
   static Future<Group> joinGroup({
     required String token,
   }) async {
+    final cleanToken = token.trim();
+
+    if (!_isValidInviteToken(cleanToken)) {
+      throw Exception('invalid_invite_token');
+    }
+
     final response = await ApiClient.postForm(
       'groups/join.php',
       body: {
-        'token': token,
+        'token': cleanToken,
       },
     );
 
@@ -346,11 +359,25 @@ class GroupService {
     try {
       return groups.firstWhere(
         (group) =>
-            group.id == int.parse(groupId.toString()),
+            group.id == int.parse(
+              groupId.toString(),
+            ),
       );
     } catch (_) {
       throw Exception('invalid_response');
     }
+  }
+
+  // ==================================================
+  // Invite Token Validation
+  // ==================================================
+
+  static bool _isValidInviteToken(
+    String token,
+  ) {
+    return RegExp(
+      r'^[A-HJ-NP-Za-hj-km-z2-9]{8}$',
+    ).hasMatch(token);
   }
 
   // ==================================================
@@ -374,7 +401,9 @@ class GroupService {
     required String fallback,
   }) {
     try {
-      final result = jsonDecode(response.body);
+      final result = jsonDecode(
+        response.body,
+      );
 
       if (result is Map &&
           result['message'] != null) {

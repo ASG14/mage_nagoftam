@@ -5,8 +5,7 @@ import 'package:mage_nagoftam/models/notification.dart';
 import 'api_client.dart';
 
 class NotificationService {
-  static Future<NotificationResult>
-      getNotifications() async {
+  static Future<NotificationResult> getNotifications() async {
     final response = await ApiClient.get(
       'notifications/list.php',
     );
@@ -42,17 +41,15 @@ class NotificationService {
       );
     }
 
-    final notifications =
-        notificationsData
-            .map(
-              (item) =>
-                  AppNotification.fromJson(
-                Map<String, dynamic>.from(
-                  item as Map,
-                ),
-              ),
-            )
-            .toList();
+    final notifications = notificationsData
+        .map(
+          (item) => AppNotification.fromJson(
+            Map<String, dynamic>.from(
+              item as Map,
+            ),
+          ),
+        )
+        .toList();
 
     final unreadCount = int.parse(
       result['data']?['unread_count']
@@ -72,8 +69,7 @@ class NotificationService {
     final response = await ApiClient.post(
       'notifications/read.php',
       body: {
-        'notification_id':
-            notificationId,
+        'notification_id': notificationId,
       },
     );
 
@@ -100,10 +96,9 @@ class NotificationService {
     }
   }
 
-  static Future<void>
-      markAllAsRead() async {
+  static Future<void> markAllAsRead() async {
     final response = await ApiClient.post(
-      'notifications/read_all.php',
+      'notifications/mark_all_read.php',
     );
 
     _handleUnauthorized(
@@ -144,13 +139,11 @@ class NotificationService {
     required String fallback,
   }) {
     try {
-      final result =
-          jsonDecode(response.body);
+      final result = jsonDecode(response.body);
 
       if (result is Map &&
           result['message'] != null) {
-        return result['message']
-            .toString();
+        return result['message'].toString();
       }
     } catch (_) {}
 
@@ -159,8 +152,7 @@ class NotificationService {
 }
 
 class NotificationResult {
-  final List<AppNotification>
-      notifications;
+  final List<AppNotification> notifications;
 
   final int unreadCount;
 

@@ -7,6 +7,7 @@ import 'package:mage_nagoftam/screens/settings.dart';
 import 'package:mage_nagoftam/screens/login.dart';
 import 'package:mage_nagoftam/screens/splash.dart';
 import 'package:mage_nagoftam/screens/register.dart';
+import 'package:mage_nagoftam/screens/join_group.dart';
 
 class AppRoutes {
   static const String home = '/';
@@ -16,11 +17,37 @@ class AppRoutes {
   static const String notifications = '/notifications';
   static const String settings = '/settings';
   static const String register = '/register';
+  static const String join = '/join';
+
+  static String joinGroup(
+    String token,
+  ) {
+    return '$join/$token';
+  }
 }
 
 class RouteGenerator {
-  static Route<dynamic> generateRoute(RouteSettings settings) {
-    switch (settings.name) {
+  static Route<dynamic> generateRoute(
+    RouteSettings settings,
+  ) {
+    final routeName = settings.name ?? '';
+
+    if (routeName.startsWith('${AppRoutes.join}/')) {
+      final token = routeName
+          .substring('${AppRoutes.join}/'.length)
+          .trim();
+
+      if (token.isNotEmpty) {
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => JoinGroupScreen(
+            token: token,
+          ),
+        );
+      }
+    }
+
+    switch (routeName) {
       case AppRoutes.home:
         return MaterialPageRoute(
           settings: settings,
@@ -66,8 +93,13 @@ class RouteGenerator {
       default:
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) =>
-              const Scaffold(body: Center(child: Text('صفحه پیدا نشد'))),
+          builder: (_) => const Scaffold(
+            body: Center(
+              child: Text(
+                'صفحه پیدا نشد',
+              ),
+            ),
+          ),
         );
     }
   }

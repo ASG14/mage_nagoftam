@@ -3,13 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:mage_nagoftam/core/app_routes.dart';
-import 'package:mage_nagoftam/screens/groups.dart';
-import 'package:mage_nagoftam/screens/home.dart';
-import 'package:mage_nagoftam/screens/login.dart';
-import 'package:mage_nagoftam/screens/notifications.dart';
-import 'package:mage_nagoftam/screens/register.dart';
-import 'package:mage_nagoftam/screens/settings.dart';
-import 'package:mage_nagoftam/screens/splash.dart';
 
 import 'package:mage_nagoftam/style/theme.dart';
 
@@ -36,7 +29,7 @@ class MyApp extends StatelessWidget {
 
       theme: AppTheme.lightTheme,
 
-      title: 'بگیر',
+      title: 'مگه نگفتم',
 
       supportedLocales: const [
         Locale(
@@ -55,41 +48,44 @@ class MyApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
 
-      initialRoute:
-          AppRoutes.splash,
+      onGenerateInitialRoutes: (
+        String initialRoute,
+      ) {
+        final uri = Uri.base;
 
-      routes: {
-        AppRoutes.splash:
-            (context) =>
-                const SplashScreen(),
+        final path = uri.path;
 
-        AppRoutes.login:
-            (context) =>
-                const Login(),
+        if (path.startsWith('/join/')) {
+          final token = path
+              .substring('/join/'.length)
+              .trim();
 
-        AppRoutes.register:
-            (context) =>
-                const Register(),
+          if (token.isNotEmpty) {
+            return [
+              RouteGenerator.generateRoute(
+                RouteSettings(
+                  name: AppRoutes.joinGroup(
+                    token,
+                  ),
+                ),
+              ),
+            ];
+          }
+        }
 
-        AppRoutes.home:
-            (context) =>
-                const HomeScreen(),
-
-        AppRoutes.groups:
-            (context) =>
-                const GroupsScreen(),
-
-        AppRoutes.notifications:
-            (context) =>
-                const NotificationsScreen(),
-
-        AppRoutes.settings:
-            (context) =>
-                const SettingsScreen(),
+        return [
+          RouteGenerator.generateRoute(
+            const RouteSettings(
+              name: AppRoutes.splash,
+            ),
+          ),
+        ];
       },
 
-      debugShowCheckedModeBanner:
-          false,
+      onGenerateRoute:
+          RouteGenerator.generateRoute,
+
+      debugShowCheckedModeBanner: false,
     );
   }
 }

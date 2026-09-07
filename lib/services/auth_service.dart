@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   static const String baseUrl =
-      'http://localhost/begir_api/api';
+      'https://magenagoftam.ir/api';
 
   static Future<bool> login({
     required String username,
