@@ -4,7 +4,7 @@ import 'package:mage_nagoftam/models/order.dart';
 import 'package:mage_nagoftam/style/color.dart';
 import 'package:mage_nagoftam/style/typography.dart';
 
-class OrderCard extends StatelessWidget {
+class OrderCard extends StatefulWidget {
   final Order order;
 
   final int? currentUserId;
@@ -12,6 +12,7 @@ class OrderCard extends StatelessWidget {
   final VoidCallback? onReserve;
   final VoidCallback? onComplete;
   final VoidCallback? onDelete;
+  final VoidCallback? onCancelReserve;
 
   const OrderCard({
     super.key,
@@ -20,381 +21,353 @@ class OrderCard extends StatelessWidget {
     this.onReserve,
     this.onComplete,
     this.onDelete,
+    this.onCancelReserve,
   });
 
-  String _priorityText(
-    Priority priority,
-  ) {
+  @override
+  State<OrderCard> createState() => _OrderCardState();
+}
+
+class _OrderCardState extends State<OrderCard> {
+  bool get _isCurrentUserAssigned {
+    return widget.currentUserId != null &&
+        widget.order.assignedUserId != null &&
+        widget.currentUserId == widget.order.assignedUserId;
+  }
+
+  bool get _isCurrentUserCreator {
+    return widget.currentUserId != null &&
+        widget.currentUserId == widget.order.createdBy;
+  }
+
+  bool get _hasAssignedUser {
+    return widget.order.assignedUserId != null;
+  }
+
+  String _priorityText(Priority priority) {
     switch (priority) {
       case Priority.low:
         return 'کم';
 
       case Priority.medium:
-        return 'متوسط';
+        return 'عادی';
 
       case Priority.high:
         return 'فوری';
     }
   }
 
-  Color _priorityColor(
-    Priority priority,
-  ) {
+  Color _priorityColor(Priority priority) {
     switch (priority) {
       case Priority.low:
-        return Colors.green;
+        return AppColors.green2;
 
       case Priority.medium:
-        return Colors.orange;
+        return AppColors.orange1;
 
       case Priority.high:
-        return Colors.red;
+        return AppColors.red1;
     }
   }
 
-  String _statusText(
-    Status status,
-  ) {
-    switch (status) {
-      case Status.pending:
-        return 'در انتظار خرید';
-
-      case Status.reserved:
-        return 'در حال خرید';
-
-      case Status.completed:
-        return 'خریداری شده';
-
-      case Status.cancelled:
-        return 'لغو شده';
-    }
-  }
-
-  bool get _isCurrentUserAssigned {
-    return currentUserId != null &&
-        order.assignedUserId != null &&
-        currentUserId == order.assignedUserId;
-  }
-
-  bool get _isCurrentUserCreator {
-    return currentUserId != null &&
-        currentUserId == order.createdBy;
-  }
-
-  String _assignedUserText() {
-    if (order.assignedUserName != null &&
-        order.assignedUserName!.trim().isNotEmpty) {
-      return order.assignedUserName!;
+  String _assignedText() {
+    if (widget.order.assignedUserName != null &&
+        widget.order.assignedUserName!.trim().isNotEmpty) {
+      return '${widget.order.assignedUserName} مسئولیت سفارش را به عهده گرفته است.';
     }
 
-    if (order.assignedUserId != null) {
-      return 'کاربر ${order.assignedUserId}';
+    if (widget.order.assignedUserId != null) {
+      return 'کاربر ${widget.order.assignedUserId} مسئولیت سفارش را به عهده گرفته است.';
     }
 
-    return 'هنوز کسی مسئول نشده';
+    return 'هنوز کسی مسئولیت سفارش را به عهده نگرفته است.';
   }
 
-  Future<void> _confirmDelete(
-    BuildContext context,
-  ) async {
-    if (onDelete == null) {
-      return;
-    }
+  Future<void> _confirmDelete() async {
+    if (widget.onDelete == null) return;
 
-    final confirmed = await showDialog<bool>(
+    final result = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) {
+      builder: (context) {
         return AlertDialog(
-          title: const Text(
-            'حذف سفارش',
-          ),
+          title: const Text('حذف سفارش'),
           content: const Text(
             'آیا از حذف این سفارش مطمئن هستید؟',
           ),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(dialogContext).pop(false);
+                Navigator.pop(context, false);
               },
-              child: const Text(
-                'انصراف',
-              ),
+              child: const Text('انصراف'),
             ),
             FilledButton(
               onPressed: () {
-                Navigator.of(dialogContext).pop(true);
+                Navigator.pop(context, true);
               },
-              child: const Text(
-                'حذف',
-              ),
+              child: const Text('حذف'),
             ),
           ],
         );
       },
     );
 
-    if (confirmed == true) {
-      onDelete!();
+    if (result == true) {
+      widget.onDelete!();
     }
   }
 
+  Widget _buildPriority() {
+    final color = _priorityColor(widget.order.priority);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 4,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: Text(
+        _priorityText(widget.order.priority),
+        style: AppTypography.h9.copyWith(
+          color: color,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    final order = widget.order;
+
+    // --------------------------------
+    // سفارش هنوز مسئول ندارد
+    // --------------------------------
+
+    if (order.status == Status.pending && !_hasAssignedUser) {
+      return Row(
+        children: [
+          Expanded(
+            child: OutlinedButton(
+              onPressed: widget.onReserve,
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(42),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+              ),
+              child: const Text(
+                'قبول مسئولیت',
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    // --------------------------------
+    // سفارش در اختیار کاربر فعلی است
+    // --------------------------------
+
+    if (order.status == Status.reserved &&
+        _isCurrentUserAssigned) {
+      return Row(
+        children: [
+          Expanded(
+            child: OutlinedButton(
+              onPressed: widget.onCancelReserve,
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(42),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+              ),
+              child: const Text(
+                'لغو مسئولیت',
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 8),
+
+          Expanded(
+            child: FilledButton(
+              onPressed: widget.onComplete,
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(42),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+              ),
+              child: const Text(
+                'تکمیل سفارش',
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    // --------------------------------
+    // شخص دیگری مسئول سفارش است
+    // --------------------------------
+
+    return const SizedBox.shrink();
+  }
+
   @override
-  Widget build(
-    BuildContext context,
-  ) {
-    final isCompleted =
-        order.status == Status.completed;
+  Widget build(BuildContext context) {
+    final order = widget.order;
+
+    final bool isCompleted = order.status == Status.completed;
 
     return Stack(
       children: [
         Container(
-          padding:
-              const EdgeInsets.all(16),
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(
+            14,
+            12,
+            14,
+            12,
+          ),
           decoration: BoxDecoration(
             color: AppColors.white2,
-            borderRadius:
-                BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: AppColors.gray4,
             ),
           ),
           child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Title + Priority + Delete
+              // --------------------------------
+              // عنوان سفارش + حذف
+              // --------------------------------
+
               Row(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: Text(
                       order.title,
-                      style:
-                          AppTypography.h5.copyWith(
-                        color:
-                            AppColors.gray1,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 8,
-                  ),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 5,
-                    ),
-                    decoration:
-                        BoxDecoration(
-                      color: _priorityColor(
-                        order.priority,
-                      ).withValues(
-                        alpha: 0.12,
-                      ),
-                      borderRadius:
-                          BorderRadius.circular(5),
-                    ),
-                    child: Text(
-                      _priorityText(
-                        order.priority,
-                      ),
-                      style:
-                          AppTypography.h9.copyWith(
-                        color:
-                            _priorityColor(
-                          order.priority,
-                        ),
-                        fontWeight:
-                            FontWeight.bold,
+                      textAlign: TextAlign.right,
+                      style: AppTypography.h5.copyWith(
+                        color: AppColors.gray1,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
 
-                  // Creator can delete
-                  // both pending and completed orders.
-                  if (_isCurrentUserCreator) ...[
-                    const SizedBox(
-                      width: 4,
-                    ),
+                  if (_isCurrentUserCreator)
                     IconButton(
-                      onPressed: () =>
-                          _confirmDelete(context),
+                      onPressed: _confirmDelete,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 32,
+                        minHeight: 32,
+                      ),
                       icon: const Icon(
                         Icons.delete_outline,
+                        size: 22,
                       ),
-                      tooltip: 'حذف سفارش',
                       color: AppColors.red1,
+                      tooltip: 'حذف سفارش',
                     ),
-                  ],
                 ],
               ),
 
-              const SizedBox(
-                height: 10,
-              ),
+              const SizedBox(height: 6),
 
-              // Quantity
-              Text(
-                'مقدار: '
-                '${order.quantity ?? 'مشخص نشده'}',
-                style:
-                    AppTypography.h8.copyWith(
-                  color: AppColors.gray1,
-                ),
-              ),
+              // --------------------------------
+              // مقدار + اولویت
+              // --------------------------------
 
-              const SizedBox(
-                height: 5,
-              ),
-
-              // Status
-              Text(
-                'وضعیت: '
-                '${_statusText(order.status)}',
-                style:
-                    AppTypography.h8.copyWith(
-                  color: AppColors.gray1,
-                ),
-              ),
-
-              const SizedBox(
-                height: 5,
-              ),
-
-              // Assigned User
               Row(
                 children: [
-                  const Icon(
-                    Icons.person_outline,
-                    size: 18,
-                    color: AppColors.gray2,
-                  ),
-                  const SizedBox(
-                    width: 5,
-                  ),
                   Expanded(
                     child: Text(
-                      'مسئول خرید: '
-                      '${_assignedUserText()}',
-                      style:
-                          AppTypography.h8.copyWith(
-                        color:
-                            AppColors.gray1,
+                      'مقدار: ${order.quantity ?? 'مشخص نشده'}',
+                      textAlign: TextAlign.right,
+                      style: AppTypography.h8.copyWith(
+                        color: AppColors.gray1,
                       ),
                     ),
                   ),
+
+                  _buildPriority(),
                 ],
               ),
 
-              const SizedBox(
-                height: 16,
-              ),
+              const SizedBox(height: 6),
 
-              // Pending
-              if (order.status ==
-                  Status.pending)
-                FilledButton(
-                  onPressed: onReserve,
-                  child: const Text(
-                    'بسپرش به من',
-                  ),
-                ),
+              // --------------------------------
+              // زمان ایجاد
+              // --------------------------------
 
-              // Reserved + Current User
-              if (order.status ==
-                      Status.reserved &&
-                  _isCurrentUserAssigned)
-                OutlinedButton(
-                  onPressed: onComplete,
-                  child: const Text(
-                    'گرفتم',
-                  ),
-                ),
-
-              const SizedBox(
-                height: 12,
-              ),
-
-              // Created Time
-              Row(
-                mainAxisAlignment:
-                    MainAxisAlignment.end,
-                children: [
-                  const Icon(
-                    Icons.access_time,
-                    size: 14,
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'ساعت ${_formatTime(order.createdAt)}',
+                  style: AppTypography.h10.copyWith(
                     color: AppColors.gray2,
                   ),
-                  const SizedBox(
-                    width: 4,
-                  ),
-                  Text(
-                    _formatTime(
-                      order.createdAt,
-                    ),
-                    style:
-                        AppTypography.h10.copyWith(
-                      color:
-                          AppColors.gray2,
-                    ),
-                  ),
-                ],
+                ),
               ),
+
+              const SizedBox(height: 8),
+
+              Divider(
+                height: 1,
+                color: AppColors.gray4,
+              ),
+
+              const SizedBox(height: 8),
+
+              // --------------------------------
+              // وضعیت مسئولیت
+              // --------------------------------
+
+              Text(
+                _assignedText(),
+                textAlign: TextAlign.right,
+                style: AppTypography.h8.copyWith(
+                  color: AppColors.gray1,
+                ),
+              ),
+
+              // --------------------------------
+              // دکمه‌های عملیات
+              // --------------------------------
+
+              if (!isCompleted) ...[
+                const SizedBox(height: 10),
+                _buildActionButtons(),
+              ],
             ],
           ),
         ),
 
-        // Completed Overlay
+        // --------------------------------
+        // Overlay سفارش تکمیل‌شده
+        // --------------------------------
+
         if (isCompleted)
           Positioned.fill(
             child: IgnorePointer(
               child: ClipRRect(
-                borderRadius:
-                    BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(10),
                 child: Container(
-                  color: Colors.black.withValues(
-                    alpha: 0.55,
+                  color: AppColors.gray1.withValues(
+                    alpha: 0.72,
                   ),
-                  alignment:
-                      Alignment.center,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                    decoration:
-                        BoxDecoration(
-                      color:
-                          Colors.black.withValues(
-                        alpha: 0.45,
-                      ),
-                      borderRadius:
-                          BorderRadius.circular(8),
-                    ),
-                    child: const Row(
-                      mainAxisSize:
-                          MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.check_circle,
-                          color: Colors.white,
-                        ),
-                        SizedBox(
-                          width: 8,
-                        ),
-                        Text(
-                          'خریداری شده',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight:
-                                FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    Icons.check_circle,
+                    size: 64,
+                    color: AppColors.green3,
                   ),
                 ),
               ),
@@ -404,16 +377,9 @@ class OrderCard extends StatelessWidget {
     );
   }
 
-  String _formatTime(
-    DateTime dateTime,
-  ) {
-    final hour = dateTime.hour
-        .toString()
-        .padLeft(2, '0');
-
-    final minute = dateTime.minute
-        .toString()
-        .padLeft(2, '0');
+  String _formatTime(DateTime dateTime) {
+    final hour = dateTime.hour.toString().padLeft(2, '0');
+    final minute = dateTime.minute.toString().padLeft(2, '0');
 
     return '$hour:$minute';
   }

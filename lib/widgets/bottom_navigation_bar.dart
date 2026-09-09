@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mage_nagoftam/core/app_routes.dart';
 import 'package:mage_nagoftam/services/notification_service.dart';
 
-class MyBottomNavigationBar
-    extends StatefulWidget {
+class MyBottomNavigationBar extends StatefulWidget {
   const MyBottomNavigationBar({
     super.key,
   });
@@ -27,12 +26,15 @@ class _MyBottomNavigationBarState
     _loadUnreadCount();
   }
 
+  // ==================================================
+  // Unread Notifications
+  // ==================================================
+
   Future<void> _loadUnreadCount() async {
     final routeName =
         ModalRoute.of(context)?.settings.name;
 
-    if (routeName ==
-        AppRoutes.notifications) {
+    if (routeName == AppRoutes.notifications) {
       if (mounted) {
         setState(() {
           _unreadCount = 0;
@@ -67,6 +69,10 @@ class _MyBottomNavigationBarState
     }
   }
 
+  // ==================================================
+  // Current Navigation Index
+  // ==================================================
+
   int _getCurrentIndex() {
     final routeName =
         ModalRoute.of(context)?.settings.name;
@@ -85,6 +91,10 @@ class _MyBottomNavigationBarState
         return 0;
     }
   }
+
+  // ==================================================
+  // Navigation
+  // ==================================================
 
   void _onItemSelected(int index) {
     String route;
@@ -106,8 +116,10 @@ class _MyBottomNavigationBarState
         return;
     }
 
-    if (ModalRoute.of(context)?.settings.name ==
-        route) {
+    final currentRoute =
+        ModalRoute.of(context)?.settings.name;
+
+    if (currentRoute == route) {
       return;
     }
 
@@ -116,6 +128,10 @@ class _MyBottomNavigationBarState
       route,
     );
   }
+
+  // ==================================================
+  // Notification Icon
+  // ==================================================
 
   Widget _notificationIcon({
     required bool selected,
@@ -140,20 +156,17 @@ class _MyBottomNavigationBarState
           right: -10,
           top: -8,
           child: Container(
-            constraints:
-                const BoxConstraints(
+            constraints: const BoxConstraints(
               minWidth: 18,
               minHeight: 18,
             ),
-            padding:
-                const EdgeInsets.symmetric(
+            padding: const EdgeInsets.symmetric(
               horizontal: 4,
             ),
             decoration: BoxDecoration(
               color: Theme.of(context)
                   .colorScheme
                   .error,
-              shape: BoxShape.rectangle,
               borderRadius:
                   BorderRadius.circular(9),
               border: Border.all(
@@ -181,23 +194,25 @@ class _MyBottomNavigationBarState
     );
   }
 
+  // ==================================================
+  // Build
+  // ==================================================
+
   @override
   Widget build(BuildContext context) {
     return NavigationBar(
       selectedIndex: _getCurrentIndex(),
-
       onDestinationSelected:
           _onItemSelected,
-
       destinations: [
         const NavigationDestination(
           icon: Icon(
-            Icons.home_outlined,
+            Icons.person_outline,
           ),
           selectedIcon: Icon(
-            Icons.home,
+            Icons.person,
           ),
-          label: 'خانه',
+          label: 'من',
         ),
 
         const NavigationDestination(

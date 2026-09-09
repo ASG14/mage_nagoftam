@@ -5,11 +5,11 @@ import 'package:mage_nagoftam/models/group.dart';
 import 'package:mage_nagoftam/services/auth_service.dart';
 import 'package:mage_nagoftam/services/group_service.dart';
 
-import 'package:mage_nagoftam/core/app_routes.dart';
-
 import 'package:mage_nagoftam/style/color.dart';
 
 import 'package:mage_nagoftam/widgets/bottom_navigation_bar.dart';
+
+import 'package:mage_nagoftam/screens/group_orders.dart';
 
 import 'members.dart';
 
@@ -47,6 +47,8 @@ class _GroupsScreenState
   Future<void> _initialize() async {
     _currentUserId =
         await AuthService.getUserId();
+
+    if (!mounted) return;
 
     await _loadGroups();
   }
@@ -235,9 +237,11 @@ class _GroupsScreenState
 
       if (!mounted) return;
 
-      await _loadGroups();
-
-      if (!mounted) return;
+      setState(() {
+        _groups.removeWhere(
+          (item) => item.id == group.id,
+        );
+      });
 
       _showMessage(
         'گروه با موفقیت حذف شد.',
@@ -269,16 +273,19 @@ class _GroupsScreenState
   }
 
   // ==================================================
-  // Open Home
+  // Open Group
   // ==================================================
 
   void _openGroup(
     Group group,
   ) {
-    Navigator.pushReplacementNamed(
+    Navigator.push(
       context,
-      AppRoutes.home,
-      arguments: group,
+      MaterialPageRoute(
+        builder: (_) => GroupOrdersScreen(
+          group: group,
+        ),
+      ),
     );
   }
 
@@ -431,18 +438,52 @@ class _GroupsScreenState
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: const Text(
-            'گروه‌ها',
+          titleSpacing: 16,
+
+          title: Row(
+            mainAxisSize:
+                MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.groups_outlined,
+                color: Theme.of(context)
+                    .colorScheme
+                    .primary,
+              ),
+              const SizedBox(
+                width: 8,
+              ),
+              const Text(
+                'گروه‌ها',
+              ),
+            ],
           ),
+
+          actions: [
+            IconButton(
+              tooltip: 'جستجو',
+              onPressed:
+                  _showSearchMessage,
+              icon: const Icon(
+                Icons.search,
+              ),
+            ),
+            const SizedBox(
+              width: 4,
+            ),
+          ],
         ),
 
         body: _buildBody(),
 
         floatingActionButton:
-            FloatingActionButton(
+            FloatingActionButton.extended(
           onPressed: _createGroup,
-          child: const Icon(
+          icon: const Icon(
             Icons.add,
+          ),
+          label: const Text(
+            'افزودن گروه',
           ),
         ),
 
@@ -480,7 +521,7 @@ class _GroupsScreenState
         padding:
             const EdgeInsets.fromLTRB(
           16,
-          16,
+          12,
           16,
           100,
         ),
@@ -493,10 +534,11 @@ class _GroupsScreenState
           return Padding(
             padding:
                 const EdgeInsets.only(
-              bottom: 12,
+              bottom: 10,
             ),
             child: _GroupCard(
               group: group,
+              index: index,
               isOwner:
                   group.creatorId ==
                       _currentUserId,
@@ -548,18 +590,23 @@ class _GroupsScreenState
                   mainAxisSize:
                       MainAxisSize.min,
                   children: [
-                    const Icon(
-                      Icons.group_outlined,
-                      size: 72,
+                    Icon(
+                      Icons.groups_outlined,
+                      size: 64,
+                      color:
+                          Theme.of(context)
+                              .colorScheme
+                              .primary,
                     ),
                     const SizedBox(
                       height: 20,
                     ),
                     const Text(
-                      'هنوز گروهی ایجاد نشده است.',
+                      'هنوز گروهی نداری',
                       textAlign:
                           TextAlign.center,
-                      style: TextStyle(
+                      style:
+                          TextStyle(
                         fontSize: 18,
                         fontWeight:
                             FontWeight.bold,
@@ -569,7 +616,7 @@ class _GroupsScreenState
                       height: 10,
                     ),
                     const Text(
-                      'برای شروع یک گروه جدید ایجاد کنید.',
+                      'یک گروه بساز و خریدهای مشترک را با دیگران مدیریت کن.',
                       textAlign:
                           TextAlign.center,
                     ),
@@ -579,11 +626,13 @@ class _GroupsScreenState
                     FilledButton.icon(
                       onPressed:
                           _createGroup,
-                      icon: const Icon(
+                      icon:
+                          const Icon(
                         Icons.add,
                       ),
-                      label: const Text(
-                        'ایجاد گروه',
+                      label:
+                          const Text(
+                        'افزودن گروه',
                       ),
                     ),
                   ],
@@ -611,7 +660,7 @@ class _GroupsScreenState
           children: [
             const Icon(
               Icons.error_outline,
-              size: 64,
+              size: 56,
             ),
             const SizedBox(
               height: 16,
@@ -639,6 +688,16 @@ class _GroupsScreenState
       ),
     );
   }
+
+  // ==================================================
+  // Search
+  // ==================================================
+
+  void _showSearchMessage() {
+    _showMessage(
+      'جستجو را در مرحله بعد اضافه می‌کنیم.',
+    );
+  }
 }
 
 // ==================================================
@@ -649,6 +708,8 @@ class _GroupCard
     extends StatelessWidget {
   final Group group;
 
+  final int index;
+
   final bool isOwner;
 
   final VoidCallback onTap;
@@ -658,6 +719,7 @@ class _GroupCard
 
   const _GroupCard({
     required this.group,
+    required this.index,
     required this.isOwner,
     required this.onTap,
     required this.onMembers,
@@ -669,7 +731,19 @@ class _GroupCard
   Widget build(
     BuildContext context,
   ) {
+    final colors = [
+      AppColors.green1,
+      AppColors.green2,
+      AppColors.yellow1,
+      AppColors.blue1,
+      AppColors.purple1,
+    ];
+
+    final avatarColor =
+        colors[index % colors.length];
+
     return Card(
+      margin: EdgeInsets.zero,
       clipBehavior:
           Clip.antiAlias,
       child: InkWell(
@@ -677,14 +751,23 @@ class _GroupCard
         child: Padding(
           padding:
               const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 8,
+            horizontal: 14,
+            vertical: 12,
           ),
           child: Row(
             children: [
-              const CircleAvatar(
+              // ----------------------------------------
+              // Group Avatar
+              // ----------------------------------------
+
+              CircleAvatar(
+                radius: 25,
+                backgroundColor:
+                    avatarColor,
                 child: Icon(
-                  Icons.group_outlined,
+                  _groupIcon,
+                  size: 24,
+                  color: Colors.white,
                 ),
               ),
 
@@ -692,131 +775,146 @@ class _GroupCard
                 width: 14,
               ),
 
+              // ----------------------------------------
+              // Group Name
+              // ----------------------------------------
+
               Expanded(
-                child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      group.title,
-                      maxLines: 1,
-                      overflow:
-                          TextOverflow.ellipsis,
-                      style:
-                          const TextStyle(
-                        fontWeight:
-                            FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 4,
-                    ),
-                    Text(
-                      isOwner
-                          ? 'مالک گروه'
-                          : 'عضو گروه',
-                      style: Theme.of(
-                        context,
-                      )
-                          .textTheme
-                          .bodySmall,
-                    ),
-                  ],
+                child: Text(
+                  group.title,
+                  maxLines: 1,
+                  overflow:
+                      TextOverflow.ellipsis,
+                  style:
+                      const TextStyle(
+                    fontSize: 16,
+                    fontWeight:
+                        FontWeight.w600,
+                  ),
                 ),
               ),
 
+              const SizedBox(
+                width: 12,
+              ),
+
+              // ----------------------------------------
+              // Unfinished Orders
+              // ----------------------------------------
+
+              Container(
+                width: 30,
+                height: 30,
+                decoration:
+                    BoxDecoration(
+                  shape:
+                      BoxShape.circle,
+                  color: Theme.of(
+                    context,
+                  )
+                      .colorScheme
+                      .surfaceContainerHighest,
+                ),
+                alignment:
+                    Alignment.center,
+                child: const Text(
+                  '—',
+                  style:
+                      TextStyle(
+                    fontSize: 13,
+                    fontWeight:
+                        FontWeight.w600,
+                  ),
+                ),
+              ),
+
+              const SizedBox(
+                width: 6,
+              ),
+
+              // ----------------------------------------
+              // Menu
+              // ----------------------------------------
+
               PopupMenuButton<String>(
-                onSelected: (value) {
+                tooltip: 'گزینه‌های گروه',
+                icon: const Icon(
+                  Icons.more_vert,
+                ),
+                onSelected:
+                    (value) {
                   switch (value) {
                     case 'members':
                       onMembers();
                       break;
 
                     case 'edit':
-                      onEdit();
+                      if (isOwner) {
+                        onEdit();
+                      }
                       break;
 
                     case 'delete':
-                      onDelete();
+                      if (isOwner) {
+                        onDelete();
+                      }
                       break;
                   }
                 },
                 itemBuilder:
                     (context) {
-                  final items =
-                      <PopupMenuEntry<
-                          String>>[
-                    const PopupMenuItem<
-                        String>(
+                  return [
+                    const PopupMenuItem(
                       value: 'members',
-                      child: ListTile(
-                        leading: Icon(
-                          Icons
-                              .group_outlined,
-                        ),
-                        title: Text(
-                          'اعضای گروه',
-                        ),
-                        contentPadding:
-                            EdgeInsets.zero,
+                      child: Text(
+                        'اعضای گروه',
                       ),
                     ),
-                  ];
-
-                  if (isOwner) {
-                    items.add(
-                      const PopupMenuDivider(),
-                    );
-
-                    items.add(
-                      const PopupMenuItem<
-                          String>(
+                    if (isOwner)
+                      const PopupMenuItem(
                         value: 'edit',
-                        child: ListTile(
-                          leading: Icon(
-                            Icons
-                                .edit_outlined,
-                          ),
-                          title: Text(
-                            'ویرایش گروه',
-                          ),
-                          contentPadding:
-                              EdgeInsets.zero,
+                        child: Text(
+                          'ویرایش گروه',
                         ),
                       ),
-                    );
-
-                    items.add(
-                      const PopupMenuItem<
-                          String>(
+                    if (isOwner)
+                      PopupMenuItem(
                         value: 'delete',
-                        child: ListTile(
-                          leading: Icon(
-                            Icons
-                                .delete_outline,
+                        child: Text(
+                          'حذف گروه',
+                          style:
+                              TextStyle(
+                            color:
+                                AppColors.red1,
                           ),
-                          title: Text(
-                            'حذف گروه',
-                          ),
-                          contentPadding:
-                              EdgeInsets.zero,
                         ),
                       ),
-                    );
-                  }
-
-                  return items;
+                  ];
                 },
-              ),
-
-              const Icon(
-                Icons.chevron_left,
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  IconData get _groupIcon {
+    switch (index % 5) {
+      case 0:
+        return Icons.home_outlined;
+
+      case 1:
+        return Icons.people_outline;
+
+      case 2:
+        return Icons.family_restroom;
+
+      case 3:
+        return Icons.shopping_basket_outlined;
+
+      default:
+        return Icons.groups_outlined;
+    }
   }
 }

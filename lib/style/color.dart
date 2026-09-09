@@ -28,4 +28,16 @@ abstract final class AppColors {
   // Orange
 
   static const Color orange1 = Color(0xFFF39C12);
+
+  // Blue
+
+  static const Color blue1 = Color(0xFF1B3078);
+
+  //yellow
+
+  static const yellow1 = Color(0xFFF8EE82);
+
+  //purple
+
+  static const purple1 = Color(0xFF564169);
 }

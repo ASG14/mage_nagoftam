@@ -4,6 +4,7 @@ import 'package:mage_nagoftam/models/group.dart';
 import 'package:mage_nagoftam/models/order.dart';
 
 import 'package:mage_nagoftam/services/auth_service.dart';
+import 'package:mage_nagoftam/services/group_service.dart';
 import 'package:mage_nagoftam/services/order_service.dart';
 
 import 'package:mage_nagoftam/widgets/bottom_navigation_bar.dart';
@@ -26,10 +27,11 @@ class GroupOrdersScreen extends StatefulWidget {
 
 class _GroupOrdersScreenState
     extends State<GroupOrdersScreen> {
-
   List<Order> _orders = [];
 
   int? _currentUserId;
+
+  int _memberCount = 0;
 
   bool _isLoading = true;
 
@@ -38,23 +40,61 @@ class _GroupOrdersScreenState
   @override
   void initState() {
     super.initState();
+
     _initialize();
   }
+
+  // ==================================================
+  // Initialize
+  // ==================================================
 
   Future<void> _initialize() async {
     _currentUserId =
         await AuthService.getUserId();
+
+    await _loadMemberCount();
 
     if (!mounted) return;
 
     await _loadOrders();
   }
 
+  // ==================================================
+  // Load Member Count
+  // ==================================================
+
+  Future<void> _loadMemberCount() async {
+    try {
+      final members =
+          await GroupService.getMembers(
+        groupId: widget.group.id,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _memberCount = members.length;
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      setState(() {
+        _memberCount = 0;
+      });
+    }
+  }
+
+  // ==================================================
+  // Load Orders
+  // ==================================================
+
   Future<void> _loadOrders() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+    }
 
     try {
       final orders =
@@ -68,17 +108,24 @@ class _GroupOrdersScreenState
         _orders = orders;
         _isLoading = false;
       });
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
 
       setState(() {
         _isLoading = false;
-        _error = 'دریافت سفارش‌ها انجام نشد';
+        _error =
+            'دریافت سفارش‌ها انجام نشد.';
       });
     }
   }
 
-  Future<void> _reserveOrder(Order order) async {
+  // ==================================================
+  // Reserve Order
+  // ==================================================
+
+  Future<void> _reserveOrder(
+    Order order,
+  ) async {
     try {
       await OrderService.assignOrder(
         orderId: order.id,
@@ -87,19 +134,26 @@ class _GroupOrdersScreenState
       if (!mounted) return;
 
       await _loadOrders();
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
 
       _showMessage(
-        'سپردن سفارش انجام نشد',
+        'قبول مسئولیت سفارش انجام نشد.',
       );
     }
   }
 
-  Future<void> _completeOrder(Order order) async {
-    if (order.assignedUserId != _currentUserId) {
+  // ==================================================
+  // Complete Order
+  // ==================================================
+
+  Future<void> _completeOrder(
+    Order order,
+  ) async {
+    if (order.assignedUserId !=
+        _currentUserId) {
       _showMessage(
-        'شما مسئول این سفارش نیستید',
+        'شما مسئول این سفارش نیستید.',
       );
 
       return;
@@ -113,19 +167,26 @@ class _GroupOrdersScreenState
       if (!mounted) return;
 
       await _loadOrders();
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
 
       _showMessage(
-        'تکمیل سفارش انجام نشد',
+        'تکمیل سفارش انجام نشد.',
       );
     }
   }
 
-  Future<void> _deleteOrder(Order order) async {
-    if (order.createdBy != _currentUserId) {
+  // ==================================================
+  // Delete Order
+  // ==================================================
+
+  Future<void> _deleteOrder(
+    Order order,
+  ) async {
+    if (order.createdBy !=
+        _currentUserId) {
       _showMessage(
-        'شما اجازه حذف این سفارش را ندارید',
+        'شما اجازه حذف این سفارش را ندارید.',
       );
 
       return;
@@ -143,36 +204,74 @@ class _GroupOrdersScreenState
           (item) => item.id == order.id,
         );
       });
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
 
       _showMessage(
-        'حذف سفارش انجام نشد',
+        'حذف سفارش انجام نشد.',
       );
     }
   }
 
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-      ),
-    );
+  // ==================================================
+  // Add Order
+  // ==================================================
+
+  void _onOrderCreated(
+    Order order,
+  ) {
+    setState(() {
+      _orders.insert(
+        0,
+        order,
+      );
+    });
   }
 
+  // ==================================================
+  // Message
+  // ==================================================
+
+  void _showMessage(
+    String message,
+  ) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+        ),
+      );
+  }
+
+  // ==================================================
+  // Build
+  // ==================================================
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+    BuildContext context,
+  ) {
     return SafeArea(
       child: Scaffold(
+        backgroundColor:
+            const Color(0xFFF8FAF9),
 
         appBar: GroupOrdersAppBar(
           group: widget.group,
+          memberCount: _memberCount,
         ),
 
         body: _buildBody(),
 
         floatingActionButton:
-            const AddOrderButton(),
+            AddOrderButton(
+          groupId: widget.group.id,
+          onOrderCreated:
+              _onOrderCreated,
+        ),
 
         bottomNavigationBar:
             const MyBottomNavigationBar(),
@@ -180,37 +279,89 @@ class _GroupOrdersScreenState
     );
   }
 
+  // ==================================================
+  // Body
+  // ==================================================
+
   Widget _buildBody() {
     if (_isLoading) {
       return const Center(
-        child: CircularProgressIndicator(),
+        child:
+            CircularProgressIndicator(),
       );
     }
 
     if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(_error!),
-            const SizedBox(height: 12),
-            FilledButton(
-              onPressed: _loadOrders,
-              child: const Text('تلاش مجدد'),
-            ),
-          ],
-        ),
-      );
+      return _buildError();
     }
 
     return RefreshIndicator(
       onRefresh: _loadOrders,
+
       child: OrdersList(
         orders: _orders,
-        currentUserId: _currentUserId,
-        onReserve: _reserveOrder,
-        onComplete: _completeOrder,
-        onDelete: _deleteOrder,
+        currentUserId:
+            _currentUserId,
+        onReserve:
+            _reserveOrder,
+        onComplete:
+            _completeOrder,
+        onDelete:
+            _deleteOrder,
+        onCancelReserve:
+            null,
+      ),
+    );
+  }
+
+  // ==================================================
+  // Error
+  // ==================================================
+
+  Widget _buildError() {
+    return Center(
+      child: Padding(
+        padding:
+            const EdgeInsets.all(24),
+
+        child: Column(
+          mainAxisSize:
+              MainAxisSize.min,
+
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 52,
+            ),
+
+            const SizedBox(
+              height: 16,
+            ),
+
+            Text(
+              _error!,
+              textAlign:
+                  TextAlign.center,
+            ),
+
+            const SizedBox(
+              height: 20,
+            ),
+
+            FilledButton.icon(
+              onPressed:
+                  _loadOrders,
+
+              icon: const Icon(
+                Icons.refresh,
+              ),
+
+              label: const Text(
+                'تلاش مجدد',
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

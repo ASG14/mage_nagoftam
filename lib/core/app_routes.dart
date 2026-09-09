@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:mage_nagoftam/screens/notifications.dart';
-import 'package:mage_nagoftam/screens/home.dart';
+import 'package:mage_nagoftam/screens/account.dart';
 import 'package:mage_nagoftam/screens/groups.dart';
 import 'package:mage_nagoftam/screens/settings.dart';
 import 'package:mage_nagoftam/screens/login.dart';
@@ -51,7 +51,7 @@ class RouteGenerator {
       case AppRoutes.home:
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => const HomeScreen(),
+          builder: (_) => const AccountScreen(),
         );
 
       case AppRoutes.notifications:

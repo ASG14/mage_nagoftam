@@ -357,7 +357,7 @@ class _AccountScreenState
         borderRadius:
             BorderRadius.circular(12),
         onTap: () {
-          // TODO:
+          // 
           // Navigate to group orders.
         },
         child: Container(
