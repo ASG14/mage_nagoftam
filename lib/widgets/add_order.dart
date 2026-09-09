@@ -130,7 +130,7 @@ class _AddOrderState extends State<AddOrder> {
             const SizedBox(height: 16),
 
             DropdownButtonFormField<Priority>(
-              value: _priority,
+              initialValue: _priority,
               decoration: const InputDecoration(
                 labelText: 'اولویت',
               ),
