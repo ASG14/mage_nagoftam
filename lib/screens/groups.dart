@@ -8,23 +8,20 @@ import 'package:mage_nagoftam/services/group_service.dart';
 import 'package:mage_nagoftam/style/color.dart';
 
 import 'package:mage_nagoftam/widgets/bottom_navigation_bar.dart';
+import 'package:mage_nagoftam/widgets/groups/group_card.dart';
 
 import 'package:mage_nagoftam/screens/group_orders.dart';
 
 import 'members.dart';
 
 class GroupsScreen extends StatefulWidget {
-  const GroupsScreen({
-    super.key,
-  });
+  const GroupsScreen({super.key});
 
   @override
-  State<GroupsScreen> createState() =>
-      _GroupsScreenState();
+  State<GroupsScreen> createState() => _GroupsScreenState();
 }
 
-class _GroupsScreenState
-    extends State<GroupsScreen> {
+class _GroupsScreenState extends State<GroupsScreen> {
   List<Group> _groups = [];
 
   int? _currentUserId;
@@ -45,8 +42,7 @@ class _GroupsScreenState
   // ==================================================
 
   Future<void> _initialize() async {
-    _currentUserId =
-        await AuthService.getUserId();
+    _currentUserId = await AuthService.getUserId();
 
     if (!mounted) return;
 
@@ -66,8 +62,7 @@ class _GroupsScreenState
     }
 
     try {
-      final groups =
-          await GroupService.getGroups();
+      final groups = await GroupService.getGroups();
 
       if (!mounted) return;
 
@@ -80,8 +75,7 @@ class _GroupsScreenState
 
       setState(() {
         _isLoading = false;
-        _errorMessage =
-            _getErrorMessage(e);
+        _errorMessage = _getErrorMessage(e);
       });
     }
   }
@@ -91,21 +85,17 @@ class _GroupsScreenState
   // ==================================================
 
   Future<void> _createGroup() async {
-    final title =
-        await _showGroupTitleDialog(
+    final title = await _showGroupTitleDialog(
       title: 'ایجاد گروه',
       confirmText: 'ایجاد',
     );
 
-    if (title == null ||
-        title.trim().isEmpty) {
+    if (title == null || title.trim().isEmpty) {
       return;
     }
 
     try {
-      await GroupService.createGroup(
-        title: title.trim(),
-      );
+      await GroupService.createGroup(title: title.trim());
 
       if (!mounted) return;
 
@@ -113,15 +103,11 @@ class _GroupsScreenState
 
       if (!mounted) return;
 
-      _showMessage(
-        'گروه با موفقیت ایجاد شد.',
-      );
+      _showMessage('گروه با موفقیت ایجاد شد.');
     } catch (e) {
       if (!mounted) return;
 
-      _showMessage(
-        _getErrorMessage(e),
-      );
+      _showMessage(_getErrorMessage(e));
     }
   }
 
@@ -129,26 +115,19 @@ class _GroupsScreenState
   // Edit Group
   // ==================================================
 
-  Future<void> _editGroup(
-    Group group,
-  ) async {
-    final title =
-        await _showGroupTitleDialog(
+  Future<void> _editGroup(Group group) async {
+    final title = await _showGroupTitleDialog(
       title: 'ویرایش گروه',
       initialValue: group.title,
       confirmText: 'ذخیره',
     );
 
-    if (title == null ||
-        title.trim().isEmpty) {
+    if (title == null || title.trim().isEmpty) {
       return;
     }
 
     try {
-      await GroupService.updateGroup(
-        groupId: group.id,
-        title: title.trim(),
-      );
+      await GroupService.updateGroup(groupId: group.id, title: title.trim());
 
       if (!mounted) return;
 
@@ -156,15 +135,11 @@ class _GroupsScreenState
 
       if (!mounted) return;
 
-      _showMessage(
-        'گروه با موفقیت ویرایش شد.',
-      );
+      _showMessage('گروه با موفقیت ویرایش شد.');
     } catch (e) {
       if (!mounted) return;
 
-      _showMessage(
-        _getErrorMessage(e),
-      );
+      _showMessage(_getErrorMessage(e));
     }
   }
 
@@ -172,17 +147,12 @@ class _GroupsScreenState
   // Delete Group
   // ==================================================
 
-  Future<void> _confirmDeleteGroup(
-    Group group,
-  ) async {
-    final confirmed =
-        await showDialog<bool>(
+  Future<void> _confirmDeleteGroup(Group group) async {
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text(
-            'حذف گروه',
-          ),
+          title: const Text('حذف گروه'),
           content: Text(
             'آیا از حذف گروه «${group.title}» '
             'مطمئن هستید؟\n\n'
@@ -191,29 +161,16 @@ class _GroupsScreenState
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(
-                  context,
-                  false,
-                );
+                Navigator.pop(context, false);
               },
-              child: const Text(
-                'انصراف',
-              ),
+              child: const Text('انصراف'),
             ),
             FilledButton(
               onPressed: () {
-                Navigator.pop(
-                  context,
-                  true,
-                );
+                Navigator.pop(context, true);
               },
-              style: FilledButton.styleFrom(
-                backgroundColor:
-                    AppColors.red1,
-              ),
-              child: const Text(
-                'حذف',
-              ),
+              style: FilledButton.styleFrom(backgroundColor: AppColors.red1),
+              child: const Text('حذف'),
             ),
           ],
         );
@@ -227,31 +184,21 @@ class _GroupsScreenState
     await _deleteGroup(group);
   }
 
-  Future<void> _deleteGroup(
-    Group group,
-  ) async {
+  Future<void> _deleteGroup(Group group) async {
     try {
-      await GroupService.deleteGroup(
-        groupId: group.id,
-      );
+      await GroupService.deleteGroup(groupId: group.id);
 
       if (!mounted) return;
 
       setState(() {
-        _groups.removeWhere(
-          (item) => item.id == group.id,
-        );
+        _groups.removeWhere((item) => item.id == group.id);
       });
 
-      _showMessage(
-        'گروه با موفقیت حذف شد.',
-      );
+      _showMessage('گروه با موفقیت حذف شد.');
     } catch (e) {
       if (!mounted) return;
 
-      _showMessage(
-        _getErrorMessage(e),
-      );
+      _showMessage(_getErrorMessage(e));
     }
   }
 
@@ -259,16 +206,10 @@ class _GroupsScreenState
   // Open Members
   // ==================================================
 
-  void _openMembers(
-    Group group,
-  ) {
+  void _openMembers(Group group) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => MembersScreen(
-          group: group,
-        ),
-      ),
+      MaterialPageRoute(builder: (_) => MembersScreen(group: group)),
     );
   }
 
@@ -276,16 +217,10 @@ class _GroupsScreenState
   // Open Group
   // ==================================================
 
-  void _openGroup(
-    Group group,
-  ) {
+  void _openGroup(Group group) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => GroupOrdersScreen(
-          group: group,
-        ),
-      ),
+      MaterialPageRoute(builder: (_) => GroupOrdersScreen(group: group)),
     );
   }
 
@@ -298,13 +233,9 @@ class _GroupsScreenState
     required String confirmText,
     String initialValue = '',
   }) async {
-    final controller =
-        TextEditingController(
-      text: initialValue,
-    );
+    final controller = TextEditingController(text: initialValue);
 
-    final result =
-        await showDialog<String>(
+    final result = await showDialog<String>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -313,54 +244,37 @@ class _GroupsScreenState
             controller: controller,
             autofocus: true,
             maxLength: 150,
-            textInputAction:
-                TextInputAction.done,
-            decoration:
-                const InputDecoration(
+            textInputAction: TextInputAction.done,
+            decoration: const InputDecoration(
               labelText: 'نام گروه',
-              hintText:
-                  'مثلاً خانواده',
+              hintText: 'مثلاً خانواده',
             ),
             onSubmitted: (_) {
-              final value =
-                  controller.text.trim();
+              final value = controller.text.trim();
 
               if (value.isNotEmpty) {
-                Navigator.pop(
-                  context,
-                  value,
-                );
+                Navigator.pop(context, value);
               }
             },
           ),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(
-                  context,
-                );
+                Navigator.pop(context);
               },
-              child: const Text(
-                'انصراف',
-              ),
+              child: const Text('انصراف'),
             ),
             FilledButton(
               onPressed: () {
-                final value =
-                    controller.text.trim();
+                final value = controller.text.trim();
 
                 if (value.isEmpty) {
                   return;
                 }
 
-                Navigator.pop(
-                  context,
-                  value,
-                );
+                Navigator.pop(context, value);
               },
-              child: Text(
-                confirmText,
-              ),
+              child: Text(confirmText),
             ),
           ],
         );
@@ -376,33 +290,22 @@ class _GroupsScreenState
   // Error
   // ==================================================
 
-  String _getErrorMessage(
-    Object error,
-  ) {
-    final message =
-        error.toString();
+  String _getErrorMessage(Object error) {
+    final message = error.toString();
 
-    if (message.contains(
-      'unauthorized',
-    )) {
+    if (message.contains('unauthorized')) {
       return 'نشست شما منقضی شده است.';
     }
 
-    if (message.contains(
-      'server_error',
-    )) {
+    if (message.contains('server_error')) {
       return 'خطا در ارتباط با سرور.';
     }
 
-    if (message.contains(
-      'not allowed',
-    )) {
+    if (message.contains('not allowed')) {
       return 'شما اجازه انجام این عملیات را ندارید.';
     }
 
-    if (message.contains(
-      'not found',
-    )) {
+    if (message.contains('not found')) {
       return 'گروه موردنظر پیدا نشد.';
     }
 
@@ -413,18 +316,12 @@ class _GroupsScreenState
   // Message
   // ==================================================
 
-  void _showMessage(
-    String message,
-  ) {
+  void _showMessage(String message) {
     if (!mounted) return;
 
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-        ),
-      );
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   // ==================================================
@@ -432,63 +329,43 @@ class _GroupsScreenState
   // ==================================================
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
           titleSpacing: 16,
 
           title: Row(
-            mainAxisSize:
-                MainAxisSize.min,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 Icons.groups_outlined,
-                color: Theme.of(context)
-                    .colorScheme
-                    .primary,
+                color: Theme.of(context).colorScheme.primary,
               ),
-              const SizedBox(
-                width: 8,
-              ),
-              const Text(
-                'گروه‌ها',
-              ),
+              const SizedBox(width: 8),
+              const Text('گروه‌ها'),
             ],
           ),
 
           actions: [
             IconButton(
               tooltip: 'جستجو',
-              onPressed:
-                  _showSearchMessage,
-              icon: const Icon(
-                Icons.search,
-              ),
+              onPressed: _showSearchMessage,
+              icon: const Icon(Icons.search),
             ),
-            const SizedBox(
-              width: 4,
-            ),
+            const SizedBox(width: 4),
           ],
         ),
 
         body: _buildBody(),
 
-        floatingActionButton:
-            FloatingActionButton.extended(
+        floatingActionButton: FloatingActionButton.extended(
           onPressed: _createGroup,
-          icon: const Icon(
-            Icons.add,
-          ),
-          label: const Text(
-            'افزودن گروه',
-          ),
+          icon: const Icon(Icons.add),
+          label: const Text('افزودن گروه'),
         ),
 
-        bottomNavigationBar:
-            const MyBottomNavigationBar(),
+        bottomNavigationBar: const MyBottomNavigationBar(),
       ),
     );
   }
@@ -499,10 +376,7 @@ class _GroupsScreenState
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(
-        child:
-            CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_errorMessage != null) {
@@ -516,32 +390,18 @@ class _GroupsScreenState
     return RefreshIndicator(
       onRefresh: _loadGroups,
       child: ListView.builder(
-        physics:
-            const AlwaysScrollableScrollPhysics(),
-        padding:
-            const EdgeInsets.fromLTRB(
-          16,
-          12,
-          16,
-          100,
-        ),
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
         itemCount: _groups.length,
-        itemBuilder:
-            (context, index) {
-          final group =
-              _groups[index];
+        itemBuilder: (context, index) {
+          final group = _groups[index];
 
           return Padding(
-            padding:
-                const EdgeInsets.only(
-              bottom: 10,
-            ),
-            child: _GroupCard(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: GroupCard(
               group: group,
               index: index,
-              isOwner:
-                  group.creatorId ==
-                      _currentUserId,
+              isOwner: group.creatorId == _currentUserId,
               onTap: () {
                 _openGroup(group);
               },
@@ -552,9 +412,7 @@ class _GroupsScreenState
                 _editGroup(group);
               },
               onDelete: () {
-                _confirmDeleteGroup(
-                  group,
-                );
+                _confirmDeleteGroup(group);
               },
             ),
           );
@@ -571,69 +429,40 @@ class _GroupsScreenState
     return RefreshIndicator(
       onRefresh: _loadGroups,
       child: ListView(
-        physics:
-            const AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
         children: [
           SizedBox(
-            height:
-                MediaQuery.of(context)
-                        .size
-                        .height *
-                    0.65,
+            height: MediaQuery.of(context).size.height * 0.65,
             child: Center(
               child: Padding(
-                padding:
-                    const EdgeInsets.all(
-                  32,
-                ),
+                padding: const EdgeInsets.all(32),
                 child: Column(
-                  mainAxisSize:
-                      MainAxisSize.min,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       Icons.groups_outlined,
                       size: 64,
-                      color:
-                          Theme.of(context)
-                              .colorScheme
-                              .primary,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
-                    const SizedBox(
-                      height: 20,
-                    ),
+                    const SizedBox(height: 20),
                     const Text(
                       'هنوز گروهی نداری',
-                      textAlign:
-                          TextAlign.center,
-                      style:
-                          TextStyle(
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
                         fontSize: 18,
-                        fontWeight:
-                            FontWeight.bold,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(
-                      height: 10,
-                    ),
+                    const SizedBox(height: 10),
                     const Text(
                       'یک گروه بساز و خریدهای مشترک را با دیگران مدیریت کن.',
-                      textAlign:
-                          TextAlign.center,
+                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(
-                      height: 24,
-                    ),
+                    const SizedBox(height: 24),
                     FilledButton.icon(
-                      onPressed:
-                          _createGroup,
-                      icon:
-                          const Icon(
-                        Icons.add,
-                      ),
-                      label:
-                          const Text(
-                        'افزودن گروه',
-                      ),
+                      onPressed: _createGroup,
+                      icon: const Icon(Icons.add),
+                      label: const Text('افزودن گروه'),
                     ),
                   ],
                 ),
@@ -652,36 +481,18 @@ class _GroupsScreenState
   Widget _buildErrorState() {
     return Center(
       child: Padding(
-        padding:
-            const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(32),
         child: Column(
-          mainAxisSize:
-              MainAxisSize.min,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 56,
-            ),
-            const SizedBox(
-              height: 16,
-            ),
-            Text(
-              _errorMessage!,
-              textAlign:
-                  TextAlign.center,
-            ),
-            const SizedBox(
-              height: 24,
-            ),
+            const Icon(Icons.error_outline, size: 56),
+            const SizedBox(height: 16),
+            Text(_errorMessage!, textAlign: TextAlign.center),
+            const SizedBox(height: 24),
             FilledButton.icon(
-              onPressed:
-                  _loadGroups,
-              icon: const Icon(
-                Icons.refresh,
-              ),
-              label: const Text(
-                'تلاش مجدد',
-              ),
+              onPressed: _loadGroups,
+              icon: const Icon(Icons.refresh),
+              label: const Text('تلاش مجدد'),
             ),
           ],
         ),
@@ -694,227 +505,6 @@ class _GroupsScreenState
   // ==================================================
 
   void _showSearchMessage() {
-    _showMessage(
-      'جستجو را در مرحله بعد اضافه می‌کنیم.',
-    );
-  }
-}
-
-// ==================================================
-// Group Card
-// ==================================================
-
-class _GroupCard
-    extends StatelessWidget {
-  final Group group;
-
-  final int index;
-
-  final bool isOwner;
-
-  final VoidCallback onTap;
-  final VoidCallback onMembers;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-
-  const _GroupCard({
-    required this.group,
-    required this.index,
-    required this.isOwner,
-    required this.onTap,
-    required this.onMembers,
-    required this.onEdit,
-    required this.onDelete,
-  });
-
-  @override
-  Widget build(
-    BuildContext context,
-  ) {
-    final colors = [
-      AppColors.green1,
-      AppColors.green2,
-      AppColors.yellow1,
-      AppColors.blue1,
-      AppColors.purple1,
-    ];
-
-    final avatarColor =
-        colors[index % colors.length];
-
-    return Card(
-      margin: EdgeInsets.zero,
-      clipBehavior:
-          Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding:
-              const EdgeInsets.symmetric(
-            horizontal: 14,
-            vertical: 12,
-          ),
-          child: Row(
-            children: [
-              // ----------------------------------------
-              // Group Avatar
-              // ----------------------------------------
-
-              CircleAvatar(
-                radius: 25,
-                backgroundColor:
-                    avatarColor,
-                child: Icon(
-                  _groupIcon,
-                  size: 24,
-                  color: Colors.white,
-                ),
-              ),
-
-              const SizedBox(
-                width: 14,
-              ),
-
-              // ----------------------------------------
-              // Group Name
-              // ----------------------------------------
-
-              Expanded(
-                child: Text(
-                  group.title,
-                  maxLines: 1,
-                  overflow:
-                      TextOverflow.ellipsis,
-                  style:
-                      const TextStyle(
-                    fontSize: 16,
-                    fontWeight:
-                        FontWeight.w600,
-                  ),
-                ),
-              ),
-
-              const SizedBox(
-                width: 12,
-              ),
-
-              // ----------------------------------------
-              // Unfinished Orders
-              // ----------------------------------------
-
-              Container(
-                width: 30,
-                height: 30,
-                decoration:
-                    BoxDecoration(
-                  shape:
-                      BoxShape.circle,
-                  color: Theme.of(
-                    context,
-                  )
-                      .colorScheme
-                      .surfaceContainerHighest,
-                ),
-                alignment:
-                    Alignment.center,
-                child: const Text(
-                  '—',
-                  style:
-                      TextStyle(
-                    fontSize: 13,
-                    fontWeight:
-                        FontWeight.w600,
-                  ),
-                ),
-              ),
-
-              const SizedBox(
-                width: 6,
-              ),
-
-              // ----------------------------------------
-              // Menu
-              // ----------------------------------------
-
-              PopupMenuButton<String>(
-                tooltip: 'گزینه‌های گروه',
-                icon: const Icon(
-                  Icons.more_vert,
-                ),
-                onSelected:
-                    (value) {
-                  switch (value) {
-                    case 'members':
-                      onMembers();
-                      break;
-
-                    case 'edit':
-                      if (isOwner) {
-                        onEdit();
-                      }
-                      break;
-
-                    case 'delete':
-                      if (isOwner) {
-                        onDelete();
-                      }
-                      break;
-                  }
-                },
-                itemBuilder:
-                    (context) {
-                  return [
-                    const PopupMenuItem(
-                      value: 'members',
-                      child: Text(
-                        'اعضای گروه',
-                      ),
-                    ),
-                    if (isOwner)
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: Text(
-                          'ویرایش گروه',
-                        ),
-                      ),
-                    if (isOwner)
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: Text(
-                          'حذف گروه',
-                          style:
-                              TextStyle(
-                            color:
-                                AppColors.red1,
-                          ),
-                        ),
-                      ),
-                  ];
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  IconData get _groupIcon {
-    switch (index % 5) {
-      case 0:
-        return Icons.home_outlined;
-
-      case 1:
-        return Icons.people_outline;
-
-      case 2:
-        return Icons.family_restroom;
-
-      case 3:
-        return Icons.shopping_basket_outlined;
-
-      default:
-        return Icons.groups_outlined;
-    }
+    _showMessage('جستجو را در مرحله بعد اضافه می‌کنیم.');
   }
 }

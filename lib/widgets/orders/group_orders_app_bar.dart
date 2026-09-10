@@ -5,9 +5,7 @@ import 'package:mage_nagoftam/screens/group_details.dart';
 import 'package:mage_nagoftam/style/color.dart';
 import 'package:mage_nagoftam/style/typography.dart';
 
-class GroupOrdersAppBar
-    extends StatelessWidget
-    implements PreferredSizeWidget {
+class GroupOrdersAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Group group;
   final int memberCount;
 
@@ -18,48 +16,32 @@ class GroupOrdersAppBar
   });
 
   @override
-  Size get preferredSize =>
-      const Size.fromHeight(
-        kToolbarHeight,
-      );
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
-  void _openDetails(
-    BuildContext context,
-  ) {
+  void _openDetails(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) =>
-            GroupDetailsScreen(
-          group: group,
-        ),
-      ),
+      MaterialPageRoute(builder: (_) => GroupDetailsScreen(group: group)),
     );
   }
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     return AppBar(
       elevation: 0,
 
       scrolledUnderElevation: 0,
 
-      backgroundColor:
-          AppColors.white2,
+      backgroundColor: AppColors.white2,
 
-      surfaceTintColor:
-          Colors.transparent,
+      surfaceTintColor: Colors.transparent,
 
       leading: IconButton(
         onPressed: () {
           Navigator.of(context).pop();
         },
 
-        icon: const Icon(
-          Icons.arrow_back,
-        ),
+        icon: const Icon(Icons.arrow_back),
       ),
 
       titleSpacing: 0,
@@ -69,28 +51,18 @@ class GroupOrdersAppBar
           CircleAvatar(
             radius: 20,
 
-            backgroundColor:
-                _avatarColor(group.id),
+            backgroundColor: _avatarColor(group.id),
 
-            child: const Icon(
-              Icons.groups,
-              size: 21,
-              color:
-                  AppColors.white2,
-            ),
+            child: const Icon(Icons.groups, size: 21, color: AppColors.white2),
           ),
 
-          const SizedBox(
-            width: 10,
-          ),
+          const SizedBox(width: 10),
 
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
 
-              mainAxisAlignment:
-                  MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
 
               children: [
                 Text(
@@ -98,33 +70,21 @@ class GroupOrdersAppBar
 
                   maxLines: 1,
 
-                  overflow:
-                      TextOverflow.ellipsis,
+                  overflow: TextOverflow.ellipsis,
 
-                  style:
-                      AppTypography.h6
-                          .copyWith(
-                    color:
-                        AppColors.gray1,
+                  style: AppTypography.h6.copyWith(
+                    color: AppColors.gray1,
 
-                    fontWeight:
-                        FontWeight.w700,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
 
-                const SizedBox(
-                  height: 1,
-                ),
+                const SizedBox(height: 1),
 
                 Text(
                   '$memberCount عضو',
 
-                  style:
-                      AppTypography.h10
-                          .copyWith(
-                    color:
-                        AppColors.gray2,
-                  ),
+                  style: AppTypography.h10.copyWith(color: AppColors.gray2),
                 ),
               ],
             ),
@@ -140,13 +100,9 @@ class GroupOrdersAppBar
             }
 
             if (value == 'leave') {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(
+              ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text(
-                    'قابلیت ترک گروه در مرحله بعد اضافه می‌شود.',
-                  ),
+                  content: Text('قابلیت ترک گروه در مرحله بعد اضافه می‌شود.'),
                 ),
               );
             }
@@ -157,18 +113,10 @@ class GroupOrdersAppBar
               PopupMenuItem<String>(
                 value: 'details',
 
-                child: Text(
-                  'مشخصات گروه',
-                ),
+                child: Text('مشخصات گروه'),
               ),
 
-              PopupMenuItem<String>(
-                value: 'leave',
-
-                child: Text(
-                  'ترک گروه',
-                ),
-              ),
+              PopupMenuItem<String>(value: 'leave', child: Text('ترک گروه')),
             ];
           },
         ),
@@ -176,9 +124,7 @@ class GroupOrdersAppBar
     );
   }
 
-  Color _avatarColor(
-    int groupId,
-  ) {
+  Color _avatarColor(int groupId) {
     const colors = [
       AppColors.green2,
       Color(0xFF2980B9),
@@ -188,7 +134,6 @@ class GroupOrdersAppBar
       Color(0xFFD35400),
     ];
 
-    return colors[
-        groupId % colors.length];
+    return colors[groupId % colors.length];
   }
 }

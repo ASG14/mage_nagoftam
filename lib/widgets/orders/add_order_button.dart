@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 
 import 'package:mage_nagoftam/models/order.dart';
-import 'package:mage_nagoftam/widgets/add_order.dart';
+import 'package:mage_nagoftam/widgets/orders/add_order.dart';
 
-class AddOrderButton
-    extends StatelessWidget {
+class AddOrderButton extends StatelessWidget {
   final int groupId;
 
-  final void Function(Order order)
-      onOrderCreated;
+  final void Function(Order order) onOrderCreated;
 
   const AddOrderButton({
     super.key,
@@ -16,39 +14,26 @@ class AddOrderButton
     required this.onOrderCreated,
   });
 
-  Future<void> _openDialog(
-    BuildContext context,
-  ) async {
+  Future<void> _openDialog(BuildContext context) async {
     await showDialog(
       context: context,
 
       builder: (context) {
-        return AddOrder(
-          groupId: groupId,
-
-          onOrderCreated:
-              onOrderCreated,
-        );
+        return AddOrder(groupId: groupId, onOrderCreated: onOrderCreated);
       },
     );
   }
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     return FloatingActionButton.extended(
       onPressed: () {
         _openDialog(context);
       },
 
-      icon: const Icon(
-        Icons.add,
-      ),
+      icon: const Icon(Icons.add),
 
-      label: const Text(
-        'افزودن سفارش',
-      ),
+      label: const Text('افزودن سفارش'),
     );
   }
 }

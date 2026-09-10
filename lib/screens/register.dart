@@ -54,24 +54,17 @@ class _RegisterState extends State<Register> {
       if (!mounted) return;
 
       if (success) {
-        Navigator.pushReplacementNamed(
-          context,
-          AppRoutes.account,
-        );
+        Navigator.pushReplacementNamed(context, AppRoutes.account);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('ثبت نام انجام نشد'),
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('ثبت نام انجام نشد')));
       }
     } catch (e) {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('ارتباط با سرور برقرار نشد'),
-        ),
+        const SnackBar(content: Text('ارتباط با سرور برقرار نشد')),
       );
     } finally {
       if (mounted) {
@@ -94,40 +87,27 @@ class _RegisterState extends State<Register> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('ثبت نام'),
-          centerTitle: true,
-        ),
+        appBar: AppBar(title: const Text('ثبت نام'), centerTitle: true),
         body: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Container(
               padding: const EdgeInsets.all(16),
-              constraints: const BoxConstraints(
-                maxWidth: 600,
-                minWidth: 200,
-              ),
+              constraints: const BoxConstraints(maxWidth: 600, minWidth: 200),
               decoration: BoxDecoration(
                 color: AppColors.white1,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  width: 0.5,
-                  color: AppColors.gray4,
-                ),
+                border: Border.all(width: 0.5, color: AppColors.gray4),
               ),
               child: Form(
                 key: _formKey,
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.stretch,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-
                     TextFormField(
                       controller: _firstNameController,
                       textAlign: TextAlign.center,
-                      decoration: const InputDecoration(
-                        hintText: 'نام',
-                      ),
+                      decoration: const InputDecoration(hintText: 'نام'),
                       validator: (value) =>
                           _required(value, 'نام را وارد کنید'),
                     ),
@@ -141,10 +121,7 @@ class _RegisterState extends State<Register> {
                         hintText: 'نام خانوادگی',
                       ),
                       validator: (value) =>
-                          _required(
-                            value,
-                            'نام خانوادگی را وارد کنید',
-                          ),
+                          _required(value, 'نام خانوادگی را وارد کنید'),
                     ),
 
                     const SizedBox(height: 12),
@@ -158,9 +135,7 @@ class _RegisterState extends State<Register> {
                       ),
                       validator: (value) {
                         if (value == null ||
-                            !RegExp(
-                              r'^09\d{9}$',
-                            ).hasMatch(value.trim())) {
+                            !RegExp(r'^09\d{9}$').hasMatch(value.trim())) {
                           return 'شماره موبایل معتبر وارد کنید';
                         }
 
@@ -173,9 +148,7 @@ class _RegisterState extends State<Register> {
                     TextFormField(
                       controller: _usernameController,
                       textAlign: TextAlign.center,
-                      decoration: const InputDecoration(
-                        hintText: 'نام کاربری',
-                      ),
+                      decoration: const InputDecoration(hintText: 'نام کاربری'),
                       validator: (value) {
                         if (value == null ||
                             !RegExp(
@@ -199,8 +172,7 @@ class _RegisterState extends State<Register> {
                         suffixIcon: IconButton(
                           onPressed: () {
                             setState(() {
-                              _obscurePassword =
-                                  !_obscurePassword;
+                              _obscurePassword = !_obscurePassword;
                             });
                           },
                           icon: Icon(
@@ -211,8 +183,7 @@ class _RegisterState extends State<Register> {
                         ),
                       ),
                       validator: (value) {
-                        if (value == null ||
-                            value.length < 6) {
+                        if (value == null || value.length < 6) {
                           return 'کلمه عبور حداقل ۶ کاراکتر باشد';
                         }
 
@@ -223,16 +194,12 @@ class _RegisterState extends State<Register> {
                     const SizedBox(height: 32),
 
                     FilledButton(
-                      onPressed:
-                          _isLoading ? null : _register,
+                      onPressed: _isLoading ? null : _register,
                       child: _isLoading
                           ? const SizedBox(
                               width: 22,
                               height: 22,
-                              child:
-                                  CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Text('ثبت نام'),
                     ),
@@ -245,9 +212,7 @@ class _RegisterState extends State<Register> {
                           : () {
                               Navigator.pop(context);
                             },
-                      child: const Text(
-                        'قبلاً حساب دارید؟ ورود',
-                      ),
+                      child: const Text('قبلاً حساب دارید؟ ورود'),
                     ),
                   ],
                 ),

@@ -11,28 +11,18 @@ class GroupService {
   // ==================================================
 
   static Future<List<Group>> getGroups() async {
-    final response = await ApiClient.get(
-      'groups/list.php',
-    );
+    final response = await ApiClient.get('groups/list.php');
 
     _handleUnauthorized(response.statusCode);
 
     if (response.statusCode != 200) {
-      throw Exception(
-        _errorFromResponse(
-          response,
-          fallback: 'server_error',
-        ),
-      );
+      throw Exception(_errorFromResponse(response, fallback: 'server_error'));
     }
 
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
-      throw Exception(
-        result['message']?.toString() ??
-            'خطا در دریافت گروه‌ها',
-      );
+      throw Exception(result['message']?.toString() ?? 'خطا در دریافت گروه‌ها');
     }
 
     final groupsData = result['data']?['groups'];
@@ -42,13 +32,7 @@ class GroupService {
     }
 
     return groupsData
-        .map(
-          (item) => Group.fromJson(
-            Map<String, dynamic>.from(
-              item as Map,
-            ),
-          ),
-        )
+        .map((item) => Group.fromJson(Map<String, dynamic>.from(item as Map)))
         .toList();
   }
 
@@ -56,34 +40,22 @@ class GroupService {
   // Create Group
   // ==================================================
 
-  static Future<Group> createGroup({
-    required String title,
-  }) async {
+  static Future<Group> createGroup({required String title}) async {
     final response = await ApiClient.post(
       'groups/create.php',
-      body: {
-        'title': title,
-      },
+      body: {'title': title},
     );
 
     _handleUnauthorized(response.statusCode);
 
     if (response.statusCode != 200) {
-      throw Exception(
-        _errorFromResponse(
-          response,
-          fallback: 'server_error',
-        ),
-      );
+      throw Exception(_errorFromResponse(response, fallback: 'server_error'));
     }
 
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
-      throw Exception(
-        result['message']?.toString() ??
-            'خطا در ایجاد گروه',
-      );
+      throw Exception(result['message']?.toString() ?? 'خطا در ایجاد گروه');
     }
 
     final groupId = result['data']?['group']?['id'];
@@ -96,8 +68,7 @@ class GroupService {
 
     try {
       return groups.firstWhere(
-        (group) =>
-            group.id == int.parse(groupId.toString()),
+        (group) => group.id == int.parse(groupId.toString()),
       );
     } catch (_) {
       throw Exception('invalid_response');
@@ -114,30 +85,19 @@ class GroupService {
   }) async {
     final response = await ApiClient.post(
       'groups/update.php',
-      body: {
-        'group_id': groupId,
-        'title': title,
-      },
+      body: {'group_id': groupId, 'title': title},
     );
 
     _handleUnauthorized(response.statusCode);
 
     if (response.statusCode != 200) {
-      throw Exception(
-        _errorFromResponse(
-          response,
-          fallback: 'server_error',
-        ),
-      );
+      throw Exception(_errorFromResponse(response, fallback: 'server_error'));
     }
 
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
-      throw Exception(
-        result['message']?.toString() ??
-            'خطا در ویرایش گروه',
-      );
+      throw Exception(result['message']?.toString() ?? 'خطا در ویرایش گروه');
     }
   }
 
@@ -145,9 +105,7 @@ class GroupService {
   // Delete Group
   // ==================================================
 
-  static Future<void> deleteGroup({
-    required int groupId,
-  }) async {
+  static Future<void> deleteGroup({required int groupId}) async {
     final response = await ApiClient.delete(
       'groups/delete.php?group_id=$groupId',
     );
@@ -155,21 +113,13 @@ class GroupService {
     _handleUnauthorized(response.statusCode);
 
     if (response.statusCode != 200) {
-      throw Exception(
-        _errorFromResponse(
-          response,
-          fallback: 'server_error',
-        ),
-      );
+      throw Exception(_errorFromResponse(response, fallback: 'server_error'));
     }
 
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
-      throw Exception(
-        result['message']?.toString() ??
-            'خطا در حذف گروه',
-      );
+      throw Exception(result['message']?.toString() ?? 'خطا در حذف گروه');
     }
   }
 
@@ -177,9 +127,7 @@ class GroupService {
   // Get Members
   // ==================================================
 
-  static Future<List<GroupMember>> getMembers({
-    required int groupId,
-  }) async {
+  static Future<List<GroupMember>> getMembers({required int groupId}) async {
     final response = await ApiClient.get(
       'groups/members.php?group_id=$groupId',
     );
@@ -187,20 +135,14 @@ class GroupService {
     _handleUnauthorized(response.statusCode);
 
     if (response.statusCode != 200) {
-      throw Exception(
-        _errorFromResponse(
-          response,
-          fallback: 'server_error',
-        ),
-      );
+      throw Exception(_errorFromResponse(response, fallback: 'server_error'));
     }
 
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
       throw Exception(
-        result['message']?.toString() ??
-            'خطا در دریافت اعضای گروه',
+        result['message']?.toString() ?? 'خطا در دریافت اعضای گروه',
       );
     }
 
@@ -212,11 +154,8 @@ class GroupService {
 
     return membersData
         .map(
-          (item) => GroupMember.fromJson(
-            Map<String, dynamic>.from(
-              item as Map,
-            ),
-          ),
+          (item) =>
+              GroupMember.fromJson(Map<String, dynamic>.from(item as Map)),
         )
         .toList();
   }
@@ -231,30 +170,19 @@ class GroupService {
   }) async {
     final response = await ApiClient.post(
       'groups/remove_member.php',
-      body: {
-        'group_id': groupId,
-        'member_id': memberId,
-      },
+      body: {'group_id': groupId, 'member_id': memberId},
     );
 
     _handleUnauthorized(response.statusCode);
 
     if (response.statusCode != 200) {
-      throw Exception(
-        _errorFromResponse(
-          response,
-          fallback: 'server_error',
-        ),
-      );
+      throw Exception(_errorFromResponse(response, fallback: 'server_error'));
     }
 
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
-      throw Exception(
-        result['message']?.toString() ??
-            'خطا در حذف عضو',
-      );
+      throw Exception(result['message']?.toString() ?? 'خطا در حذف عضو');
     }
   }
 
@@ -262,40 +190,29 @@ class GroupService {
   // Create Invite
   // ==================================================
 
-  static Future<String> createInvite({
-    required int groupId,
-  }) async {
+  static Future<String> createInvite({required int groupId}) async {
     final response = await ApiClient.post(
       'groups/create_invite.php',
-      body: {
-        'group_id': groupId,
-      },
+      body: {'group_id': groupId},
     );
 
     _handleUnauthorized(response.statusCode);
 
     if (response.statusCode != 200) {
-      throw Exception(
-        _errorFromResponse(
-          response,
-          fallback: 'server_error',
-        ),
-      );
+      throw Exception(_errorFromResponse(response, fallback: 'server_error'));
     }
 
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
       throw Exception(
-        result['message']?.toString() ??
-            'خطا در ایجاد لینک دعوت',
+        result['message']?.toString() ?? 'خطا در ایجاد لینک دعوت',
       );
     }
 
     final token = result['data']?['token'];
 
-    if (token == null ||
-        token.toString().isEmpty) {
+    if (token == null || token.toString().isEmpty) {
       throw Exception('invalid_response');
     }
 
@@ -312,9 +229,7 @@ class GroupService {
   // Join Group
   // ==================================================
 
-  static Future<Group> joinGroup({
-    required String token,
-  }) async {
+  static Future<Group> joinGroup({required String token}) async {
     final cleanToken = token.trim();
 
     if (!_isValidInviteToken(cleanToken)) {
@@ -323,29 +238,19 @@ class GroupService {
 
     final response = await ApiClient.postForm(
       'groups/join.php',
-      body: {
-        'token': cleanToken,
-      },
+      body: {'token': cleanToken},
     );
 
     _handleUnauthorized(response.statusCode);
 
     if (response.statusCode != 200) {
-      throw Exception(
-        _errorFromResponse(
-          response,
-          fallback: 'server_error',
-        ),
-      );
+      throw Exception(_errorFromResponse(response, fallback: 'server_error'));
     }
 
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
-      throw Exception(
-        result['message']?.toString() ??
-            'خطا در عضویت در گروه',
-      );
+      throw Exception(result['message']?.toString() ?? 'خطا در عضویت در گروه');
     }
 
     final groupId = result['data']?['group_id'];
@@ -358,10 +263,7 @@ class GroupService {
 
     try {
       return groups.firstWhere(
-        (group) =>
-            group.id == int.parse(
-              groupId.toString(),
-            ),
+        (group) => group.id == int.parse(groupId.toString()),
       );
     } catch (_) {
       throw Exception('invalid_response');
@@ -372,21 +274,15 @@ class GroupService {
   // Invite Token Validation
   // ==================================================
 
-  static bool _isValidInviteToken(
-    String token,
-  ) {
-    return RegExp(
-      r'^[A-HJ-NP-Za-hj-km-z2-9]{8}$',
-    ).hasMatch(token);
+  static bool _isValidInviteToken(String token) {
+    return RegExp(r'^[A-HJ-NP-Za-hj-km-z2-9]{8}$').hasMatch(token);
   }
 
   // ==================================================
   // Unauthorized
   // ==================================================
 
-  static void _handleUnauthorized(
-    int statusCode,
-  ) {
+  static void _handleUnauthorized(int statusCode) {
     if (statusCode == 401) {
       throw Exception('unauthorized');
     }
@@ -401,12 +297,9 @@ class GroupService {
     required String fallback,
   }) {
     try {
-      final result = jsonDecode(
-        response.body,
-      );
+      final result = jsonDecode(response.body);
 
-      if (result is Map &&
-          result['message'] != null) {
+      if (result is Map && result['message'] != null) {
         return result['message'].toString();
       }
     } catch (_) {

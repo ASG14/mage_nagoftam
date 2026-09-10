@@ -7,18 +7,13 @@ import 'package:mage_nagoftam/services/group_service.dart';
 class JoinGroupScreen extends StatefulWidget {
   final String token;
 
-  const JoinGroupScreen({
-    super.key,
-    required this.token,
-  });
+  const JoinGroupScreen({super.key, required this.token});
 
   @override
-  State<JoinGroupScreen> createState() =>
-      _JoinGroupScreenState();
+  State<JoinGroupScreen> createState() => _JoinGroupScreenState();
 }
 
-class _JoinGroupScreenState
-    extends State<JoinGroupScreen> {
+class _JoinGroupScreenState extends State<JoinGroupScreen> {
   bool _isJoining = false;
 
   String? _error;
@@ -34,26 +29,19 @@ class _JoinGroupScreenState
     });
 
     try {
-      final loggedIn =
-          await AuthService.isLoggedIn();
+      final loggedIn = await AuthService.isLoggedIn();
 
       if (!mounted) {
         return;
       }
 
       if (!loggedIn) {
-        Navigator.pushNamed(
-          context,
-          AppRoutes.login,
-        );
+        Navigator.pushNamed(context, AppRoutes.login);
 
         return;
       }
 
-      final group =
-          await GroupService.joinGroup(
-        token: widget.token,
-      );
+      final group = await GroupService.joinGroup(token: widget.token);
 
       if (!mounted) {
         return;
@@ -75,20 +63,15 @@ class _JoinGroupScreenState
       String message;
 
       if (error.contains('invalid_invite_token')) {
-        message =
-            'لینک دعوت معتبر نیست';
+        message = 'لینک دعوت معتبر نیست';
       } else if (error.contains('Invite not found')) {
-        message =
-            'لینک دعوت پیدا نشد یا دیگر معتبر نیست';
+        message = 'لینک دعوت پیدا نشد یا دیگر معتبر نیست';
       } else if (error.contains('unauthorized')) {
-        message =
-            'نشست شما منقضی شده است. دوباره وارد حساب شوید';
+        message = 'نشست شما منقضی شده است. دوباره وارد حساب شوید';
       } else if (error.contains('server_error')) {
-        message =
-            'خطایی در سرور رخ داده است';
+        message = 'خطایی در سرور رخ داده است';
       } else {
-        message =
-            'پیوستن به گروه انجام نشد';
+        message = 'پیوستن به گروه انجام نشد';
       }
 
       setState(() {
@@ -107,128 +90,80 @@ class _JoinGroupScreenState
   }
 
   void _goToLogin() {
-    Navigator.pushNamed(
-      context,
-      AppRoutes.login,
-    );
+    Navigator.pushNamed(context, AppRoutes.login);
   }
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'پیوستن به گروه',
-        ),
-      ),
+      appBar: AppBar(title: const Text('پیوستن به گروه')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 420,
-            ),
+            constraints: const BoxConstraints(maxWidth: 420),
             child: Card(
               child: Padding(
-                padding:
-                    const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(24),
                 child: Column(
-                  mainAxisSize:
-                      MainAxisSize.min,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
-                      Icons.group_add_outlined,
-                      size: 64,
-                    ),
+                    const Icon(Icons.group_add_outlined, size: 64),
 
-                    const SizedBox(
-                      height: 20,
-                    ),
+                    const SizedBox(height: 20),
 
                     const Text(
                       'دعوت به عضویت در گروه',
-                      textAlign:
-                          TextAlign.center,
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 22,
-                        fontWeight:
-                            FontWeight.bold,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
 
-                    const SizedBox(
-                      height: 12,
-                    ),
+                    const SizedBox(height: 12),
 
                     const Text(
                       'شما با استفاده از این لینک به یک گروه دعوت شده‌اید.',
-                      textAlign:
-                          TextAlign.center,
+                      textAlign: TextAlign.center,
                     ),
 
-                    const SizedBox(
-                      height: 24,
-                    ),
+                    const SizedBox(height: 24),
 
                     if (_error != null) ...[
                       Container(
                         width: double.infinity,
-                        padding:
-                            const EdgeInsets.all(12),
-                        decoration:
-                            BoxDecoration(
-                          borderRadius:
-                              BorderRadius.circular(
-                            5,
-                          ),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
                         ),
-                        child: Text(
-                          _error!,
-                          textAlign:
-                              TextAlign.center,
-                        ),
+                        child: Text(_error!, textAlign: TextAlign.center),
                       ),
 
-                      const SizedBox(
-                        height: 16,
-                      ),
+                      const SizedBox(height: 16),
                     ],
 
                     SizedBox(
                       width: double.infinity,
                       child: FilledButton(
-                        onPressed:
-                            _isJoining
-                                ? null
-                                : _joinGroup,
+                        onPressed: _isJoining ? null : _joinGroup,
                         child: _isJoining
                             ? const SizedBox(
                                 width: 20,
                                 height: 20,
-                                child:
-                                    CircularProgressIndicator(
+                                child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Text(
-                                'پیوستن به گروه',
-                              ),
+                            : const Text('پیوستن به گروه'),
                       ),
                     ),
 
-                    const SizedBox(
-                      height: 12,
-                    ),
+                    const SizedBox(height: 12),
 
                     TextButton(
-                      onPressed: _isJoining
-                          ? null
-                          : _goToLogin,
-                      child: const Text(
-                        'ورود به حساب کاربری',
-                      ),
+                      onPressed: _isJoining ? null : _goToLogin,
+                      child: const Text('ورود به حساب کاربری'),
                     ),
                   ],
                 ),

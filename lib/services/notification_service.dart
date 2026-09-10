@@ -6,55 +6,37 @@ import 'api_client.dart';
 
 class NotificationService {
   static Future<NotificationResult> getNotifications() async {
-    final response = await ApiClient.get(
-      'notifications/list.php',
-    );
+    final response = await ApiClient.get('notifications/list.php');
 
-    _handleUnauthorized(
-      response.statusCode,
-    );
+    _handleUnauthorized(response.statusCode);
 
     if (response.statusCode != 200) {
-      throw Exception(
-        _errorFromResponse(
-          response,
-          fallback: 'server_error',
-        ),
-      );
+      throw Exception(_errorFromResponse(response, fallback: 'server_error'));
     }
 
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
       throw Exception(
-        result['message']?.toString() ??
-            'خطا در دریافت اعلان‌ها',
+        result['message']?.toString() ?? 'خطا در دریافت اعلان‌ها',
       );
     }
 
-    final notificationsData =
-        result['data']?['notifications'];
+    final notificationsData = result['data']?['notifications'];
 
     if (notificationsData is! List) {
-      throw Exception(
-        'invalid_response',
-      );
+      throw Exception('invalid_response');
     }
 
     final notifications = notificationsData
         .map(
-          (item) => AppNotification.fromJson(
-            Map<String, dynamic>.from(
-              item as Map,
-            ),
-          ),
+          (item) =>
+              AppNotification.fromJson(Map<String, dynamic>.from(item as Map)),
         )
         .toList();
 
     final unreadCount = int.parse(
-      result['data']?['unread_count']
-              ?.toString() ??
-          '0',
+      result['data']?['unread_count']?.toString() ?? '0',
     );
 
     return NotificationResult(
@@ -63,74 +45,46 @@ class NotificationService {
     );
   }
 
-  static Future<void> markAsRead({
-    required int notificationId,
-  }) async {
+  static Future<void> markAsRead({required int notificationId}) async {
     final response = await ApiClient.post(
       'notifications/read.php',
-      body: {
-        'notification_id': notificationId,
-      },
+      body: {'notification_id': notificationId},
     );
 
-    _handleUnauthorized(
-      response.statusCode,
-    );
+    _handleUnauthorized(response.statusCode);
 
     if (response.statusCode != 200) {
-      throw Exception(
-        _errorFromResponse(
-          response,
-          fallback: 'server_error',
-        ),
-      );
+      throw Exception(_errorFromResponse(response, fallback: 'server_error'));
     }
 
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
-      throw Exception(
-        result['message']?.toString() ??
-            'خطا در خواندن اعلان',
-      );
+      throw Exception(result['message']?.toString() ?? 'خطا در خواندن اعلان');
     }
   }
 
   static Future<void> markAllAsRead() async {
-    final response = await ApiClient.post(
-      'notifications/mark_all_read.php',
-    );
+    final response = await ApiClient.post('notifications/mark_all_read.php');
 
-    _handleUnauthorized(
-      response.statusCode,
-    );
+    _handleUnauthorized(response.statusCode);
 
     if (response.statusCode != 200) {
-      throw Exception(
-        _errorFromResponse(
-          response,
-          fallback: 'server_error',
-        ),
-      );
+      throw Exception(_errorFromResponse(response, fallback: 'server_error'));
     }
 
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
       throw Exception(
-        result['message']?.toString() ??
-            'خطا در خواندن اعلان‌ها',
+        result['message']?.toString() ?? 'خطا در خواندن اعلان‌ها',
       );
     }
   }
 
-  static void _handleUnauthorized(
-    int statusCode,
-  ) {
+  static void _handleUnauthorized(int statusCode) {
     if (statusCode == 401) {
-      throw Exception(
-        'unauthorized',
-      );
+      throw Exception('unauthorized');
     }
   }
 
@@ -141,8 +95,7 @@ class NotificationService {
     try {
       final result = jsonDecode(response.body);
 
-      if (result is Map &&
-          result['message'] != null) {
+      if (result is Map && result['message'] != null) {
         return result['message'].toString();
       }
     } catch (_) {}

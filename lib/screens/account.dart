@@ -4,17 +4,13 @@ import 'package:mage_nagoftam/style/color.dart';
 import 'package:mage_nagoftam/widgets/bottom_navigation_bar.dart';
 
 class AccountScreen extends StatefulWidget {
-  const AccountScreen({
-    super.key,
-  });
+  const AccountScreen({super.key});
 
   @override
-  State<AccountScreen> createState() =>
-      _AccountScreenState();
+  State<AccountScreen> createState() => _AccountScreenState();
 }
 
-class _AccountScreenState
-    extends State<AccountScreen> {
+class _AccountScreenState extends State<AccountScreen> {
   // ==================================================
   // Mock Data
   // ==================================================
@@ -47,15 +43,12 @@ class _AccountScreenState
   // ==================================================
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
         appBar: _buildAppBar(),
         body: _buildBody(),
-        bottomNavigationBar:
-            const MyBottomNavigationBar(),
+        bottomNavigationBar: const MyBottomNavigationBar(),
       ),
     );
   }
@@ -70,28 +63,18 @@ class _AccountScreenState
       title: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.person,
-            size: 24,
-          ),
+          const Icon(Icons.person, size: 24),
           const SizedBox(width: 8),
-          const Text(
-            'حساب من',
-          ),
+          const Text('حساب من'),
         ],
       ),
       actions: [
         IconButton(
           tooltip: 'تنظیمات',
           onPressed: () {
-            Navigator.pushNamed(
-              context,
-              '/settings',
-            );
+            Navigator.pushNamed(context, '/settings');
           },
-          icon: const Icon(
-            Icons.settings_outlined,
-          ),
+          icon: const Icon(Icons.settings_outlined),
         ),
       ],
     );
@@ -104,16 +87,9 @@ class _AccountScreenState
   Widget _buildBody() {
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxWidth: 600,
-        ),
+        constraints: const BoxConstraints(maxWidth: 600),
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            16,
-            12,
-            16,
-            32,
-          ),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
           children: [
             _buildHeroSection(),
 
@@ -123,9 +99,7 @@ class _AccountScreenState
 
             const SizedBox(height: 24),
 
-            _buildSectionTitle(
-              'وضعیت گروه‌ها',
-            ),
+            _buildSectionTitle('وضعیت گروه‌ها'),
 
             const SizedBox(height: 8),
 
@@ -133,9 +107,7 @@ class _AccountScreenState
 
             const SizedBox(height: 24),
 
-            _buildSectionTitle(
-              'آمار کلی',
-            ),
+            _buildSectionTitle('آمار کلی'),
 
             const SizedBox(height: 8),
 
@@ -153,22 +125,14 @@ class _AccountScreenState
   Widget _buildHeroSection() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 18,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       decoration: BoxDecoration(
         color: AppColors.white2,
-        borderRadius:
-            BorderRadius.circular(18),
-        border: Border.all(
-          color: AppColors.gray4,
-        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.gray4),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(
-              alpha: 0.04,
-            ),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -182,13 +146,9 @@ class _AccountScreenState
 
           Text(
             _userName,
-            style: Theme.of(context)
-                .textTheme
-                .headlineSmall
-                ?.copyWith(
-                  fontWeight:
-                      FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
 
@@ -196,28 +156,20 @@ class _AccountScreenState
 
           Text(
             _username,
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(
-                  color: AppColors.gray2,
-                ),
-            textDirection:
-                TextDirection.ltr,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: AppColors.gray2),
+            textDirection: TextDirection.ltr,
           ),
 
           const SizedBox(height: 10),
 
           Text(
             '👏 این هفته ۱۲ خرید رو انجام دادی',
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(
-                  color: AppColors.gray1,
-                  fontWeight:
-                      FontWeight.w600,
-                ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.gray1,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
@@ -234,21 +186,12 @@ class _AccountScreenState
       height: 82,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: AppColors.green3
-            .withValues(alpha: 0.35),
-        border: Border.all(
-          color: AppColors.green3,
-          width: 3,
-        ),
+        color: AppColors.green3.withValues(alpha: 0.35),
+        border: Border.all(color: AppColors.green3, width: 3),
       ),
       child: const CircleAvatar(
-        backgroundColor:
-            AppColors.white2,
-        child: Icon(
-          Icons.person,
-          size: 46,
-          color: AppColors.gray2,
-        ),
+        backgroundColor: AppColors.white2,
+        child: Icon(Icons.person, size: 46, color: AppColors.gray2),
       ),
     );
   }
@@ -260,18 +203,11 @@ class _AccountScreenState
   Widget _buildAnnouncementSection() {
     return Container(
       width: double.infinity,
-      padding:
-          const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 10,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: AppColors.white2,
-        borderRadius:
-            BorderRadius.circular(10),
-        border: Border.all(
-          color: AppColors.gray4,
-        ),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.gray4),
       ),
       child: Row(
         children: [
@@ -284,12 +220,9 @@ class _AccountScreenState
           Expanded(
             child: Text(
               'قابلیت جدید: حالا می‌تونی اعضای خانواده رو راحت‌تر دعوت کنی.',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(
-                    color: AppColors.gray1,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.gray1),
             ),
           ),
         ],
@@ -301,24 +234,15 @@ class _AccountScreenState
   // Section Title
   // ==================================================
 
-  Widget _buildSectionTitle(
-    String title,
-  ) {
+  Widget _buildSectionTitle(String title) {
     return Padding(
-      padding:
-          const EdgeInsets.symmetric(
-        horizontal: 4,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Text(
         title,
-        style: Theme.of(context)
-            .textTheme
-            .titleMedium
-            ?.copyWith(
-              fontWeight:
-                  FontWeight.bold,
-              color: AppColors.gray1,
-            ),
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.bold,
+          color: AppColors.gray1,
+        ),
       ),
     );
   }
@@ -329,89 +253,52 @@ class _AccountScreenState
 
   Widget _buildGroupsStatus() {
     return Column(
-      children: _groups.map(
-        (group) {
-          return Padding(
-            padding:
-                const EdgeInsets.only(
-              bottom: 8,
-            ),
-            child:
-                _buildGroupStatusCard(
-              group,
-            ),
-          );
-        },
-      ).toList(),
+      children: _groups.map((group) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: _buildGroupStatusCard(group),
+        );
+      }).toList(),
     );
   }
 
-  Widget _buildGroupStatusCard(
-    _GroupStatusData group,
-  ) {
+  Widget _buildGroupStatusCard(_GroupStatusData group) {
     return Material(
       color: AppColors.white2,
-      borderRadius:
-          BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(12),
       child: InkWell(
-        borderRadius:
-            BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12),
         onTap: () {
-          // 
+          //
           // Navigate to group orders.
         },
         child: Container(
-          padding:
-              const EdgeInsets.fromLTRB(
-            14,
-            10,
-            10,
-            10,
-          ),
+          padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
           decoration: BoxDecoration(
-            borderRadius:
-                BorderRadius.circular(12),
-            border: Border.all(
-              color: AppColors.gray4,
-            ),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.gray4),
           ),
           child: Column(
             children: [
               Row(
                 children: [
-                  _buildGroupAvatar(
-                    group.avatarIcon,
-                  ),
+                  _buildGroupAvatar(group.avatarIcon),
 
                   const SizedBox(width: 10),
 
                   Expanded(
                     child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           group.name,
-                          style: Theme.of(
-                            context,
-                          )
-                              .textTheme
-                              .titleSmall
-                              ?.copyWith(
-                                fontWeight:
-                                    FontWeight.bold,
-                              ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(
-                          height: 3,
-                        ),
+                        const SizedBox(height: 3),
                         Text(
                           '${group.totalPending} سفارش ناتمام، سهم شما ${group.myPending} تا',
-                          style: Theme.of(
-                            context,
-                          )
-                              .textTheme
-                              .bodySmall,
+                          style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
                     ),
@@ -422,17 +309,12 @@ class _AccountScreenState
               const SizedBox(height: 8),
 
               ClipRRect(
-                borderRadius:
-                    BorderRadius.circular(10),
-                child:
-                    LinearProgressIndicator(
+                borderRadius: BorderRadius.circular(10),
+                child: LinearProgressIndicator(
                   value: group.progress,
                   minHeight: 5,
-                  backgroundColor:
-                      AppColors.gray4,
-                  valueColor:
-                      const AlwaysStoppedAnimation<
-                          Color>(
+                  backgroundColor: AppColors.gray4,
+                  valueColor: const AlwaysStoppedAnimation<Color>(
                     AppColors.green2,
                   ),
                 ),
@@ -448,22 +330,15 @@ class _AccountScreenState
   // Group Avatar
   // ==================================================
 
-  Widget _buildGroupAvatar(
-    IconData icon,
-  ) {
+  Widget _buildGroupAvatar(IconData icon) {
     return Container(
       width: 46,
       height: 46,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: AppColors.green3
-            .withValues(alpha: 0.25),
+        color: AppColors.green3.withValues(alpha: 0.25),
       ),
-      child: Icon(
-        icon,
-        color: AppColors.green1,
-        size: 25,
-      ),
+      child: Icon(icon, color: AppColors.green1, size: 25),
     );
   }
 
@@ -476,8 +351,7 @@ class _AccountScreenState
       children: [
         _buildStatisticCard(
           value: _completedOrders,
-          label:
-              'سفارش تکمیل‌شده توسط شما تا کنون',
+          label: 'سفارش تکمیل‌شده توسط شما تا کنون',
           icon: Icons.check_circle_outline,
         ),
 
@@ -485,10 +359,8 @@ class _AccountScreenState
 
         _buildStatisticCard(
           value: _createdOrders,
-          label:
-              'سفارش ایجادشده توسط شما تا کنون',
-          icon:
-              Icons.playlist_add_check,
+          label: 'سفارش ایجادشده توسط شما تا کنون',
+          icon: Icons.playlist_add_check,
         ),
       ],
     );
@@ -501,22 +373,12 @@ class _AccountScreenState
   }) {
     return Container(
       width: double.infinity,
-      constraints:
-          const BoxConstraints(
-        minHeight: 64,
-      ),
-      padding:
-          const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 10,
-      ),
+      constraints: const BoxConstraints(minHeight: 64),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: AppColors.white2,
-        borderRadius:
-            BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.gray4,
-        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.gray4),
       ),
       child: Row(
         children: [
@@ -527,11 +389,7 @@ class _AccountScreenState
               shape: BoxShape.circle,
               color: AppColors.gray4,
             ),
-            child: Icon(
-              icon,
-              size: 21,
-              color: AppColors.green1,
-            ),
+            child: Icon(icon, size: 21, color: AppColors.green1),
           ),
 
           const SizedBox(width: 12),
@@ -539,13 +397,9 @@ class _AccountScreenState
           Expanded(
             child: Text(
               label,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(
-                    color:
-                        AppColors.gray2,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.gray2),
             ),
           ),
 
@@ -553,15 +407,10 @@ class _AccountScreenState
 
           Text(
             _formatNumber(value),
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(
-                  fontWeight:
-                      FontWeight.bold,
-                  color:
-                      AppColors.gray1,
-                ),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.gray1,
+            ),
           ),
         ],
       ),
@@ -572,19 +421,13 @@ class _AccountScreenState
   // Number Formatter
   // ==================================================
 
-  String _formatNumber(
-    int number,
-  ) {
-    final value =
-        number.toString();
+  String _formatNumber(int number) {
+    final value = number.toString();
 
     final buffer = StringBuffer();
 
-    for (int i = 0;
-        i < value.length;
-        i++) {
-      if (i > 0 &&
-          (value.length - i) % 3 == 0) {
+    for (int i = 0; i < value.length; i++) {
+      if (i > 0 && (value.length - i) % 3 == 0) {
         buffer.write(',');
       }
 

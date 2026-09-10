@@ -9,17 +9,13 @@ import 'package:mage_nagoftam/widgets/notifications/notification_feed.dart';
 import 'package:mage_nagoftam/widgets/notifications/notification_filter.dart';
 
 class NotificationsScreen extends StatefulWidget {
-  const NotificationsScreen({
-    super.key,
-  });
+  const NotificationsScreen({super.key});
 
   @override
-  State<NotificationsScreen> createState() =>
-      _NotificationsScreenState();
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
 }
 
-class _NotificationsScreenState
-    extends State<NotificationsScreen> {
+class _NotificationsScreenState extends State<NotificationsScreen> {
   List<AppNotification> _notifications = [];
   List<Group> _groups = [];
 
@@ -53,18 +49,14 @@ class _NotificationsScreenState
         return;
       }
 
-      final notificationResult =
-          results[0] as NotificationResult;
+      final notificationResult = results[0] as NotificationResult;
 
-      final groups =
-          results[1] as List<Group>;
+      final groups = results[1] as List<Group>;
 
       setState(() {
-        _notifications =
-            notificationResult.notifications;
+        _notifications = notificationResult.notifications;
 
-        _unreadCount =
-            notificationResult.unreadCount;
+        _unreadCount = notificationResult.unreadCount;
 
         _groups = groups;
 
@@ -89,8 +81,7 @@ class _NotificationsScreenState
 
       setState(() {
         _isLoading = false;
-        _errorMessage =
-            _messageFromError(e);
+        _errorMessage = _messageFromError(e);
       });
     }
   }
@@ -106,18 +97,14 @@ class _NotificationsScreenState
         return;
       }
 
-      final notificationResult =
-          results[0] as NotificationResult;
+      final notificationResult = results[0] as NotificationResult;
 
-      final groups =
-          results[1] as List<Group>;
+      final groups = results[1] as List<Group>;
 
       setState(() {
-        _notifications =
-            notificationResult.notifications;
+        _notifications = notificationResult.notifications;
 
-        _unreadCount =
-            notificationResult.unreadCount;
+        _unreadCount = notificationResult.unreadCount;
 
         _groups = groups;
       });
@@ -138,14 +125,9 @@ class _NotificationsScreenState
         return;
       }
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
-        SnackBar(
-          content: Text(
-            _messageFromError(e),
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(_messageFromError(e))));
     }
   }
 
@@ -167,45 +149,36 @@ class _NotificationsScreenState
     return 'خطا در دریافت اعلان‌ها.';
   }
 
-  List<AppNotification>
-      get _filteredNotifications {
+  List<AppNotification> get _filteredNotifications {
     if (_selectedGroupId == null) {
       return _notifications;
     }
 
-    return _notifications.where(
-      (notification) =>
-          notification.groupId ==
-          _selectedGroupId,
-    ).toList();
+    return _notifications
+        .where((notification) => notification.groupId == _selectedGroupId)
+        .toList();
   }
 
   Widget _buildEmptyState() {
     return RefreshIndicator(
       onRefresh: _refresh,
       child: ListView(
-        physics:
-            const AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
         children: [
           SizedBox(
-            height:
-                MediaQuery.of(context).size.height *
-                    0.55,
+            height: MediaQuery.of(context).size.height * 0.55,
             child: const Center(
               child: Padding(
                 padding: EdgeInsets.all(32),
                 child: Column(
-                  mainAxisSize:
-                      MainAxisSize.min,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       'اعلانی ندارید',
-                      textAlign:
-                          TextAlign.center,
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 18,
-                        fontWeight:
-                            FontWeight.bold,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     SizedBox(height: 8),
@@ -213,8 +186,7 @@ class _NotificationsScreenState
                       'وقتی اتفاق مهمی در گروه‌های '
                       'شما رخ دهد، اعلان آن را '
                       'اینجا خواهید دید.',
-                      textAlign:
-                          TextAlign.center,
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
@@ -230,18 +202,14 @@ class _NotificationsScreenState
     return RefreshIndicator(
       onRefresh: _refresh,
       child: ListView(
-        physics:
-            const AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
         children: [
           SizedBox(
-            height:
-                MediaQuery.of(context).size.height *
-                    0.45,
+            height: MediaQuery.of(context).size.height * 0.45,
             child: const Center(
               child: Text(
                 'اعلانی برای این گروه وجود ندارد.',
-                textAlign:
-                    TextAlign.center,
+                textAlign: TextAlign.center,
               ),
             ),
           ),
@@ -255,22 +223,15 @@ class _NotificationsScreenState
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
-          mainAxisSize:
-              MainAxisSize.min,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              _errorMessage!,
-              textAlign:
-                  TextAlign.center,
-            ),
+            Text(_errorMessage!, textAlign: TextAlign.center),
 
             const SizedBox(height: 16),
 
             FilledButton(
               onPressed: _loadData,
-              child: const Text(
-                'تلاش دوباره',
-              ),
+              child: const Text('تلاش دوباره'),
             ),
           ],
         ),
@@ -280,17 +241,14 @@ class _NotificationsScreenState
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_errorMessage != null) {
       return _buildErrorState();
     }
 
-    final notifications =
-        _filteredNotifications;
+    final notifications = _filteredNotifications;
 
     if (_notifications.isEmpty) {
       return _buildEmptyState();
@@ -300,52 +258,36 @@ class _NotificationsScreenState
       return _buildNoFilterResult();
     }
 
-    return NotificationFeed(
-      notifications: notifications,
-      onRefresh: _refresh,
-    );
+    return NotificationFeed(notifications: notifications, onRefresh: _refresh);
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            'اعلان‌ها',
-          ),
-        ),
+        appBar: AppBar(title: const Text('اعلان‌ها')),
 
         body: Column(
           children: [
             if (_groups.isNotEmpty)
               Padding(
-                padding:
-                    const EdgeInsets.only(
-                  top: 8,
-                  bottom: 4,
-                ),
+                padding: const EdgeInsets.only(top: 8, bottom: 4),
                 child: NotificationFilter(
                   groups: _groups,
-                  selectedGroupId:
-                      _selectedGroupId,
+                  selectedGroupId: _selectedGroupId,
                   onChanged: (groupId) {
                     setState(() {
-                      _selectedGroupId =
-                          groupId;
+                      _selectedGroupId = groupId;
                     });
                   },
                 ),
               ),
 
-            Expanded(
-              child: _buildBody(),
-            ),
+            Expanded(child: _buildBody()),
           ],
         ),
 
-        bottomNavigationBar:
-            const MyBottomNavigationBar(),
+        bottomNavigationBar: const MyBottomNavigationBar(),
       ),
     );
   }

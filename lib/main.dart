@@ -7,40 +7,22 @@ import 'package:mage_nagoftam/core/app_routes.dart';
 import 'package:mage_nagoftam/style/theme.dart';
 
 void main() {
-  runApp(
-    const MyApp(),
-  );
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({
-    super.key,
-  });
+  const MyApp({super.key});
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     return MaterialApp(
-      locale: const Locale(
-        'fa',
-        'IR',
-      ),
+      locale: const Locale('fa', 'IR'),
 
       theme: AppTheme.lightTheme,
 
       title: 'مگه نگفتم',
 
-      supportedLocales: const [
-        Locale(
-          'fa',
-          'IR',
-        ),
-        Locale(
-          'en',
-          'US',
-        ),
-      ],
+      supportedLocales: const [Locale('fa', 'IR'), Locale('en', 'US')],
 
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
@@ -48,26 +30,18 @@ class MyApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
 
-      onGenerateInitialRoutes: (
-        String initialRoute,
-      ) {
+      onGenerateInitialRoutes: (String initialRoute) {
         final uri = Uri.base;
 
         final path = uri.path;
 
         if (path.startsWith('/join/')) {
-          final token = path
-              .substring('/join/'.length)
-              .trim();
+          final token = path.substring('/join/'.length).trim();
 
           if (token.isNotEmpty) {
             return [
               RouteGenerator.generateRoute(
-                RouteSettings(
-                  name: AppRoutes.joinGroup(
-                    token,
-                  ),
-                ),
+                RouteSettings(name: AppRoutes.joinGroup(token)),
               ),
             ];
           }
@@ -75,15 +49,12 @@ class MyApp extends StatelessWidget {
 
         return [
           RouteGenerator.generateRoute(
-            const RouteSettings(
-              name: AppRoutes.splash,
-            ),
+            const RouteSettings(name: AppRoutes.splash),
           ),
         ];
       },
 
-      onGenerateRoute:
-          RouteGenerator.generateRoute,
+      onGenerateRoute: RouteGenerator.generateRoute,
 
       debugShowCheckedModeBanner: false,
     );

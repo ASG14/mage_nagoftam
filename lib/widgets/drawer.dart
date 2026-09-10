@@ -4,30 +4,21 @@ import 'package:mage_nagoftam/core/app_routes.dart';
 import 'package:mage_nagoftam/services/auth_service.dart';
 
 class MyDrawer extends StatefulWidget {
-  const MyDrawer({
-    super.key,
-  });
+  const MyDrawer({super.key});
 
   @override
-  State<MyDrawer> createState() =>
-      _MyDrawerState();
+  State<MyDrawer> createState() => _MyDrawerState();
 }
 
-class _MyDrawerState
-    extends State<MyDrawer> {
+class _MyDrawerState extends State<MyDrawer> {
   // --------------------------------------------------
   // Navigation
   // --------------------------------------------------
 
-  void _navigateTo(
-    String route,
-  ) {
+  void _navigateTo(String route) {
     Navigator.pop(context);
 
-    Navigator.pushReplacementNamed(
-      context,
-      route,
-    );
+    Navigator.pushReplacementNamed(context, route);
   }
 
   // --------------------------------------------------
@@ -55,9 +46,7 @@ class _MyDrawerState
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text(
-            'خروج از حساب',
-          ),
+          title: const Text('خروج از حساب'),
 
           content: const Text(
             'آیا مطمئن هستید که می‌خواهید '
@@ -70,32 +59,22 @@ class _MyDrawerState
                 Expanded(
                   child: TextButton(
                     onPressed: () {
-                      Navigator.pop(
-                        dialogContext,
-                      );
+                      Navigator.pop(dialogContext);
                     },
-                    child: const Text(
-                      'انصراف',
-                    ),
+                    child: const Text('انصراف'),
                   ),
                 ),
 
-                const SizedBox(
-                  width: 5,
-                ),
+                const SizedBox(width: 5),
 
                 Expanded(
                   child: FilledButton(
                     onPressed: () {
-                      Navigator.pop(
-                        dialogContext,
-                      );
+                      Navigator.pop(dialogContext);
 
                       _logout();
                     },
-                    child: const Text(
-                      'خروج',
-                    ),
+                    child: const Text('خروج'),
                   ),
                 ),
               ],
@@ -117,9 +96,7 @@ class _MyDrawerState
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text(
-            'آموزش استفاده',
-          ),
+          title: const Text('آموزش استفاده'),
 
           content: const SingleChildScrollView(
             child: Text(
@@ -136,9 +113,7 @@ class _MyDrawerState
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text(
-                'باشه',
-              ),
+              child: const Text('باشه'),
             ),
           ],
         );
@@ -157,12 +132,9 @@ class _MyDrawerState
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text(
-            'قوانین و شرایط استفاده',
-          ),
+          title: const Text('قوانین و شرایط استفاده'),
 
-          content:
-              const SingleChildScrollView(
+          content: const SingleChildScrollView(
             child: Text(
               'استفاده از برنامه (مگه نگفتم) به معنای پذیرش قوانین '
               'و شرایط استفاده از برنامه است.\n\n'
@@ -178,9 +150,7 @@ class _MyDrawerState
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text(
-                'باشه',
-              ),
+              child: const Text('باشه'),
             ),
           ],
         );
@@ -193,119 +163,74 @@ class _MyDrawerState
   // --------------------------------------------------
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     return Drawer(
       child: SafeArea(
         child: Column(
           children: [
             _buildHeader(),
 
-            const Divider(
-              height: 1,
-            ),
+            const Divider(height: 1),
 
             Expanded(
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
                   ListTile(
-                    leading: const Icon(
-                      Icons.home_outlined,
-                    ),
-                    title: const Text(
-                      'خانه',
-                    ),
+                    leading: const Icon(Icons.home_outlined),
+                    title: const Text('خانه'),
                     onTap: () {
-                      _navigateTo(
-                        AppRoutes.account,
-                      );
+                      _navigateTo(AppRoutes.account);
                     },
                   ),
 
                   ListTile(
-                    leading: const Icon(
-                      Icons.groups_outlined,
-                    ),
-                    title: const Text(
-                      'گروه‌های من',
-                    ),
+                    leading: const Icon(Icons.groups_outlined),
+                    title: const Text('گروه‌های من'),
                     onTap: () {
-                      _navigateTo(
-                        AppRoutes.groups,
-                      );
+                      _navigateTo(AppRoutes.groups);
                     },
                   ),
 
                   ListTile(
-                    leading: const Icon(
-                      Icons.notifications_outlined,
-                    ),
-                    title: const Text(
-                      'اعلان‌ها',
-                    ),
+                    leading: const Icon(Icons.notifications_outlined),
+                    title: const Text('اعلان‌ها'),
                     onTap: () {
-                      _navigateTo(
-                        AppRoutes.notifications,
-                      );
+                      _navigateTo(AppRoutes.notifications);
                     },
                   ),
 
                   const Divider(),
 
                   ListTile(
-                    leading: const Icon(
-                      Icons.settings_outlined,
-                    ),
-                    title: const Text(
-                      'تنظیمات',
-                    ),
+                    leading: const Icon(Icons.settings_outlined),
+                    title: const Text('تنظیمات'),
                     onTap: () {
-                      _navigateTo(
-                        AppRoutes.settings,
-                      );
+                      _navigateTo(AppRoutes.settings);
                     },
                   ),
 
                   ListTile(
-                    leading: const Icon(
-                      Icons.help_outline,
-                    ),
-                    title: const Text(
-                      'آموزش و سوالات متداول',
-                    ),
-                    onTap:
-                        _showHelpDialog,
+                    leading: const Icon(Icons.help_outline),
+                    title: const Text('آموزش و سوالات متداول'),
+                    onTap: _showHelpDialog,
                   ),
 
                   ListTile(
-                    leading: const Icon(
-                      Icons.description_outlined,
-                    ),
-                    title: const Text(
-                      'قوانین و شرایط استفاده',
-                    ),
-                    onTap:
-                        _showTermsDialog,
+                    leading: const Icon(Icons.description_outlined),
+                    title: const Text('قوانین و شرایط استفاده'),
+                    onTap: _showTermsDialog,
                   ),
                 ],
               ),
             ),
 
-            const Divider(
-              height: 1,
-            ),
+            const Divider(height: 1),
 
             ListTile(
-              leading: const Icon(
-                Icons.logout,
-              ),
-              title: const Text(
-                'خروج از حساب',
-              ),
-              onTap:
-                  _showLogoutDialog,
+              leading: const Icon(Icons.logout),
+              title: const Text('خروج از حساب'),
+              onTap: _showLogoutDialog,
             ),
           ],
         ),
@@ -320,41 +245,26 @@ class _MyDrawerState
   Widget _buildHeader() {
     return FutureBuilder<int?>(
       future: AuthService.getUserId(),
-      builder: (
-        context,
-        snapshot,
-      ) {
-        final userId =
-            snapshot.data;
+      builder: (context, snapshot) {
+        final userId = snapshot.data;
 
         return UserAccountsDrawerHeader(
           margin: EdgeInsets.zero,
 
-          currentAccountPicture:
-              const CircleAvatar(
-            child: Icon(
-              Icons.person,
-              size: 32,
-            ),
+          currentAccountPicture: const CircleAvatar(
+            child: Icon(Icons.person, size: 32),
           ),
 
-          accountName: const Text(
-            'حساب کاربری',
-          ),
+          accountName: const Text('حساب کاربری'),
 
           accountEmail: Text(
-            userId == null
-                ? 'شناسه کاربر'
-                : 'شناسه کاربر: $userId',
+            userId == null ? 'شناسه کاربر' : 'شناسه کاربر: $userId',
           ),
 
           onDetailsPressed: () {
             Navigator.pop(context);
 
-            Navigator.pushReplacementNamed(
-              context,
-              AppRoutes.settings,
-            );
+            Navigator.pushReplacementNamed(context, AppRoutes.settings);
           },
         );
       },

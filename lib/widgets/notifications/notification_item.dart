@@ -8,15 +8,10 @@ class NotificationItem extends StatelessWidget {
   final AppNotification notification;
   final VoidCallback? onTap;
 
-  const NotificationItem({
-    super.key,
-    required this.notification,
-    this.onTap,
-  });
+  const NotificationItem({super.key, required this.notification, this.onTap});
 
   String _timeText() {
-    final difference =
-        DateTime.now().difference(notification.createdAt);
+    final difference = DateTime.now().difference(notification.createdAt);
 
     if (difference.isNegative) {
       return 'همین الان';
@@ -51,27 +46,17 @@ class NotificationItem extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 12,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: notification.isRead
-              ? Colors.transparent
-              : AppColors.white1,
-          border: Border(
-            bottom: BorderSide(
-              color: AppColors.gray4,
-            ),
-          ),
+          color: notification.isRead ? Colors.transparent : AppColors.white1,
+          border: Border(bottom: BorderSide(color: AppColors.gray4)),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
                     notification.title,
@@ -102,9 +87,7 @@ class NotificationItem extends StatelessWidget {
                   Text(
                     _timeText(),
                     textAlign: TextAlign.left,
-                    style: AppTypography.h10.copyWith(
-                      color: AppColors.gray2,
-                    ),
+                    style: AppTypography.h10.copyWith(color: AppColors.gray2),
                   ),
                 ],
               ),
@@ -114,10 +97,7 @@ class NotificationItem extends StatelessWidget {
               Container(
                 width: 6,
                 height: 6,
-                margin: const EdgeInsets.only(
-                  left: 8,
-                  top: 7,
-                ),
+                margin: const EdgeInsets.only(left: 8, top: 7),
                 decoration: BoxDecoration(
                   color: AppColors.green1,
                   shape: BoxShape.circle,

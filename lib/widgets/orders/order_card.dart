@@ -31,8 +31,8 @@ class OrderCard extends StatefulWidget {
 class _OrderCardState extends State<OrderCard> {
   bool get _isCurrentUserAssigned {
     return widget.currentUserId != null &&
-        widget.order.assignedUserId != null &&
-        widget.currentUserId == widget.order.assignedUserId;
+        widget.order.assignment != null &&
+        widget.currentUserId == widget.order.assignment!.userId;
   }
 
   bool get _isCurrentUserCreator {
@@ -41,7 +41,7 @@ class _OrderCardState extends State<OrderCard> {
   }
 
   bool get _hasAssignedUser {
-    return widget.order.assignedUserId != null;
+    return widget.order.assignment != null;
   }
 
   String _priorityText(Priority priority) {
@@ -71,16 +71,17 @@ class _OrderCardState extends State<OrderCard> {
   }
 
   String _assignedText() {
-    if (widget.order.assignedUserName != null &&
-        widget.order.assignedUserName!.trim().isNotEmpty) {
-      return '${widget.order.assignedUserName} مسئولیت سفارش را به عهده گرفته است.';
+    final assignment = widget.order.assignment;
+
+    if (assignment == null) {
+      return 'هنوز کسی مسئولیت سفارش را به عهده نگرفته است.';
     }
 
-    if (widget.order.assignedUserId != null) {
-      return 'کاربر ${widget.order.assignedUserId} مسئولیت سفارش را به عهده گرفته است.';
+    if (_isCurrentUserAssigned) {
+      return 'شما مسئولیت سفارش را به عهده گرفته‌اید.';
     }
 
-    return 'هنوز کسی مسئولیت سفارش را به عهده نگرفته است.';
+    return 'کاربر ${assignment.userId} مسئولیت سفارش را به عهده گرفته است.';
   }
 
   Future<void> _confirmDelete() async {
@@ -91,9 +92,7 @@ class _OrderCardState extends State<OrderCard> {
       builder: (context) {
         return AlertDialog(
           title: const Text('حذف سفارش'),
-          content: const Text(
-            'آیا از حذف این سفارش مطمئن هستید؟',
-          ),
+          content: const Text('آیا از حذف این سفارش مطمئن هستید؟'),
           actions: [
             TextButton(
               onPressed: () {
@@ -121,10 +120,7 @@ class _OrderCardState extends State<OrderCard> {
     final color = _priorityColor(widget.order.priority);
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 4,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(5),
@@ -142,10 +138,7 @@ class _OrderCardState extends State<OrderCard> {
   Widget _buildActionButtons() {
     final order = widget.order;
 
-    // --------------------------------
     // سفارش هنوز مسئول ندارد
-    // --------------------------------
-
     if (order.status == Status.pending && !_hasAssignedUser) {
       return Row(
         children: [
@@ -158,21 +151,15 @@ class _OrderCardState extends State<OrderCard> {
                   borderRadius: BorderRadius.circular(5),
                 ),
               ),
-              child: const Text(
-                'قبول مسئولیت',
-              ),
+              child: const Text('قبول مسئولیت'),
             ),
           ),
         ],
       );
     }
 
-    // --------------------------------
     // سفارش در اختیار کاربر فعلی است
-    // --------------------------------
-
-    if (order.status == Status.reserved &&
-        _isCurrentUserAssigned) {
+    if (order.status == Status.reserved && _isCurrentUserAssigned) {
       return Row(
         children: [
           Expanded(
@@ -184,14 +171,10 @@ class _OrderCardState extends State<OrderCard> {
                   borderRadius: BorderRadius.circular(5),
                 ),
               ),
-              child: const Text(
-                'لغو مسئولیت',
-              ),
+              child: const Text('لغو مسئولیت'),
             ),
           ),
-
           const SizedBox(width: 8),
-
           Expanded(
             child: FilledButton(
               onPressed: widget.onComplete,
@@ -201,19 +184,14 @@ class _OrderCardState extends State<OrderCard> {
                   borderRadius: BorderRadius.circular(5),
                 ),
               ),
-              child: const Text(
-                'تکمیل سفارش',
-              ),
+              child: const Text('تکمیل سفارش'),
             ),
           ),
         ],
       );
     }
 
-    // --------------------------------
     // شخص دیگری مسئول سفارش است
-    // --------------------------------
-
     return const SizedBox.shrink();
   }
 
@@ -227,26 +205,16 @@ class _OrderCardState extends State<OrderCard> {
       children: [
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(
-            14,
-            12,
-            14,
-            12,
-          ),
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
           decoration: BoxDecoration(
             color: AppColors.white2,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: AppColors.gray4,
-            ),
+            border: Border.all(color: AppColors.gray4),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // --------------------------------
               // عنوان سفارش + حذف
-              // --------------------------------
-
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -260,7 +228,6 @@ class _OrderCardState extends State<OrderCard> {
                       ),
                     ),
                   ),
-
                   if (_isCurrentUserCreator)
                     IconButton(
                       onPressed: _confirmDelete,
@@ -269,10 +236,7 @@ class _OrderCardState extends State<OrderCard> {
                         minWidth: 32,
                         minHeight: 32,
                       ),
-                      icon: const Icon(
-                        Icons.delete_outline,
-                        size: 22,
-                      ),
+                      icon: const Icon(Icons.delete_outline, size: 22),
                       color: AppColors.red1,
                       tooltip: 'حذف سفارش',
                     ),
@@ -281,67 +245,45 @@ class _OrderCardState extends State<OrderCard> {
 
               const SizedBox(height: 6),
 
-              // --------------------------------
               // مقدار + اولویت
-              // --------------------------------
-
               Row(
                 children: [
                   Expanded(
                     child: Text(
                       'مقدار: ${order.quantity ?? 'مشخص نشده'}',
                       textAlign: TextAlign.right,
-                      style: AppTypography.h8.copyWith(
-                        color: AppColors.gray1,
-                      ),
+                      style: AppTypography.h8.copyWith(color: AppColors.gray1),
                     ),
                   ),
-
                   _buildPriority(),
                 ],
               ),
 
               const SizedBox(height: 6),
 
-              // --------------------------------
               // زمان ایجاد
-              // --------------------------------
-
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'ساعت ${_formatTime(order.createdAt)}',
-                  style: AppTypography.h10.copyWith(
-                    color: AppColors.gray2,
-                  ),
+                  style: AppTypography.h10.copyWith(color: AppColors.gray2),
                 ),
               ),
 
               const SizedBox(height: 8),
 
-              Divider(
-                height: 1,
-                color: AppColors.gray4,
-              ),
+              Divider(height: 1, color: AppColors.gray4),
 
               const SizedBox(height: 8),
 
-              // --------------------------------
               // وضعیت مسئولیت
-              // --------------------------------
-
               Text(
                 _assignedText(),
                 textAlign: TextAlign.right,
-                style: AppTypography.h8.copyWith(
-                  color: AppColors.gray1,
-                ),
+                style: AppTypography.h8.copyWith(color: AppColors.gray1),
               ),
 
-              // --------------------------------
               // دکمه‌های عملیات
-              // --------------------------------
-
               if (!isCompleted) ...[
                 const SizedBox(height: 10),
                 _buildActionButtons(),
@@ -350,19 +292,14 @@ class _OrderCardState extends State<OrderCard> {
           ),
         ),
 
-        // --------------------------------
         // Overlay سفارش تکمیل‌شده
-        // --------------------------------
-
         if (isCompleted)
           Positioned.fill(
             child: IgnorePointer(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: Container(
-                  color: AppColors.gray1.withValues(
-                    alpha: 0.72,
-                  ),
+                  color: AppColors.gray1.withValues(alpha: 0.72),
                   alignment: Alignment.center,
                   child: Icon(
                     Icons.check_circle,

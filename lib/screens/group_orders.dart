@@ -15,18 +15,13 @@ import 'package:mage_nagoftam/widgets/orders/add_order_button.dart';
 class GroupOrdersScreen extends StatefulWidget {
   final Group group;
 
-  const GroupOrdersScreen({
-    super.key,
-    required this.group,
-  });
+  const GroupOrdersScreen({super.key, required this.group});
 
   @override
-  State<GroupOrdersScreen> createState() =>
-      _GroupOrdersScreenState();
+  State<GroupOrdersScreen> createState() => _GroupOrdersScreenState();
 }
 
-class _GroupOrdersScreenState
-    extends State<GroupOrdersScreen> {
+class _GroupOrdersScreenState extends State<GroupOrdersScreen> {
   List<Order> _orders = [];
 
   int? _currentUserId;
@@ -52,8 +47,7 @@ class _GroupOrdersScreenState
   // ==================================================
 
   Future<void> _initialize() async {
-    _currentUserId =
-        await AuthService.getUserId();
+    _currentUserId = await AuthService.getUserId();
 
     await _loadMemberCount();
 
@@ -68,10 +62,7 @@ class _GroupOrdersScreenState
 
   Future<void> _loadMemberCount() async {
     try {
-      final members =
-          await GroupService.getMembers(
-        groupId: widget.group.id,
-      );
+      final members = await GroupService.getMembers(groupId: widget.group.id);
 
       if (!mounted) return;
 
@@ -100,10 +91,7 @@ class _GroupOrdersScreenState
     }
 
     try {
-      final orders =
-          await OrderService.getOrders(
-        groupId: widget.group.id,
-      );
+      final orders = await OrderService.getOrders(groupId: widget.group.id);
 
       if (!mounted) return;
 
@@ -116,8 +104,7 @@ class _GroupOrdersScreenState
 
       setState(() {
         _isLoading = false;
-        _error =
-            'دریافت سفارش‌ها انجام نشد.';
+        _error = 'دریافت سفارش‌ها انجام نشد.';
       });
     }
   }
@@ -126,9 +113,7 @@ class _GroupOrdersScreenState
   // Reserve Order
   // ==================================================
 
-  Future<void> _reserveOrder(
-    Order order,
-  ) async {
+  Future<void> _reserveOrder(Order order) async {
     if (_processingOrderIds.contains(order.id)) {
       return;
     }
@@ -138,17 +123,22 @@ class _GroupOrdersScreenState
     });
 
     try {
-      await OrderService.assignOrder(
-        orderId: order.id,
-      );
+      await OrderService.assignOrder(orderId: order.id);
+
+      final orders = await OrderService.getOrders(groupId: widget.group.id);
 
       if (!mounted) return;
 
+      final updatedOrder = orders.firstWhere((item) => item.id == order.id);
+
       setState(() {
-        order.status = Status.reserved;
-        order.assignedUserId =
-            _currentUserId;
-        order.assignedUserName = 'شما';
+        _orders = _orders.map((item) {
+          if (item.id == order.id) {
+            return updatedOrder;
+          }
+
+          return item;
+        }).toList();
 
         _processingOrderIds.remove(order.id);
       });
@@ -159,9 +149,7 @@ class _GroupOrdersScreenState
         _processingOrderIds.remove(order.id);
       });
 
-      _showMessage(
-        'قبول مسئولیت سفارش انجام نشد.',
-      );
+      _showMessage('قبول مسئولیت سفارش انجام نشد.');
     }
   }
 
@@ -169,14 +157,9 @@ class _GroupOrdersScreenState
   // Complete Order
   // ==================================================
 
-  Future<void> _completeOrder(
-    Order order,
-  ) async {
-    if (order.assignedUserId !=
-        _currentUserId) {
-      _showMessage(
-        'شما مسئول این سفارش نیستید.',
-      );
+  Future<void> _completeOrder(Order order) async {
+    if (order.assignment?.userId != _currentUserId) {
+      _showMessage('شما مسئول این سفارش نیستید.');
 
       return;
     }
@@ -190,14 +173,18 @@ class _GroupOrdersScreenState
     });
 
     try {
-      await OrderService.completeOrder(
-        orderId: order.id,
-      );
+      await OrderService.completeOrder(orderId: order.id);
 
       if (!mounted) return;
 
       setState(() {
-        order.status = Status.completed;
+        _orders = _orders.map((item) {
+          if (item.id == order.id) {
+            return item.copyWith(status: Status.completed);
+          }
+
+          return item;
+        }).toList();
 
         _processingOrderIds.remove(order.id);
       });
@@ -208,9 +195,7 @@ class _GroupOrdersScreenState
         _processingOrderIds.remove(order.id);
       });
 
-      _showMessage(
-        'تکمیل سفارش انجام نشد.',
-      );
+      _showMessage('تکمیل سفارش انجام نشد.');
     }
   }
 
@@ -218,14 +203,9 @@ class _GroupOrdersScreenState
   // Delete Order
   // ==================================================
 
-  Future<void> _deleteOrder(
-    Order order,
-  ) async {
-    if (order.createdBy !=
-        _currentUserId) {
-      _showMessage(
-        'شما اجازه حذف این سفارش را ندارید.',
-      );
+  Future<void> _deleteOrder(Order order) async {
+    if (order.createdBy != _currentUserId) {
+      _showMessage('شما اجازه حذف این سفارش را ندارید.');
 
       return;
     }
@@ -239,16 +219,12 @@ class _GroupOrdersScreenState
     });
 
     try {
-      await OrderService.deleteOrder(
-        orderId: order.id,
-      );
+      await OrderService.deleteOrder(orderId: order.id);
 
       if (!mounted) return;
 
       setState(() {
-        _orders.removeWhere(
-          (item) => item.id == order.id,
-        );
+        _orders.removeWhere((item) => item.id == order.id);
 
         _processingOrderIds.remove(order.id);
       });
@@ -259,9 +235,7 @@ class _GroupOrdersScreenState
         _processingOrderIds.remove(order.id);
       });
 
-      _showMessage(
-        'حذف سفارش انجام نشد.',
-      );
+      _showMessage('حذف سفارش انجام نشد.');
     }
   }
 
@@ -269,16 +243,11 @@ class _GroupOrdersScreenState
   // Add Order
   // ==================================================
 
-  void _onOrderCreated(
-    Order order,
-  ) {
+  void _onOrderCreated(Order order) {
     if (!mounted) return;
 
     setState(() {
-      _orders.insert(
-        0,
-        order,
-      );
+      _orders.insert(0, order);
     });
   }
 
@@ -286,18 +255,12 @@ class _GroupOrdersScreenState
   // Message
   // ==================================================
 
-  void _showMessage(
-    String message,
-  ) {
+  void _showMessage(String message) {
     if (!mounted) return;
 
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-        ),
-      );
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   // ==================================================
@@ -305,13 +268,10 @@ class _GroupOrdersScreenState
   // ==================================================
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor:
-            const Color(0xFFF8FAF9),
+        backgroundColor: const Color(0xFFF8FAF9),
 
         appBar: GroupOrdersAppBar(
           group: widget.group,
@@ -320,15 +280,12 @@ class _GroupOrdersScreenState
 
         body: _buildBody(),
 
-        floatingActionButton:
-            AddOrderButton(
+        floatingActionButton: AddOrderButton(
           groupId: widget.group.id,
-          onOrderCreated:
-              _onOrderCreated,
+          onOrderCreated: _onOrderCreated,
         ),
 
-        bottomNavigationBar:
-            const MyBottomNavigationBar(),
+        bottomNavigationBar: const MyBottomNavigationBar(),
       ),
     );
   }
@@ -339,10 +296,7 @@ class _GroupOrdersScreenState
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(
-        child:
-            CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_error != null) {
@@ -354,16 +308,11 @@ class _GroupOrdersScreenState
 
       child: OrdersList(
         orders: _orders,
-        currentUserId:
-            _currentUserId,
-        onReserve:
-            _reserveOrder,
-        onComplete:
-            _completeOrder,
-        onDelete:
-            _deleteOrder,
-        onCancelReserve:
-            null,
+        currentUserId: _currentUserId,
+        onReserve: _reserveOrder,
+        onComplete: _completeOrder,
+        onDelete: _deleteOrder,
+        onCancelReserve: null,
       ),
     );
   }
@@ -375,44 +324,26 @@ class _GroupOrdersScreenState
   Widget _buildError() {
     return Center(
       child: Padding(
-        padding:
-            const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(24),
 
         child: Column(
-          mainAxisSize:
-              MainAxisSize.min,
+          mainAxisSize: MainAxisSize.min,
 
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 52,
-            ),
+            const Icon(Icons.error_outline, size: 52),
 
-            const SizedBox(
-              height: 16,
-            ),
+            const SizedBox(height: 16),
 
-            Text(
-              _error!,
-              textAlign:
-                  TextAlign.center,
-            ),
+            Text(_error!, textAlign: TextAlign.center),
 
-            const SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 20),
 
             FilledButton.icon(
-              onPressed:
-                  _loadOrders,
+              onPressed: _loadOrders,
 
-              icon: const Icon(
-                Icons.refresh,
-              ),
+              icon: const Icon(Icons.refresh),
 
-              label: const Text(
-                'تلاش مجدد',
-              ),
+              label: const Text('تلاش مجدد'),
             ),
           ],
         ),

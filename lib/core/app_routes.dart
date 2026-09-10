@@ -85,8 +85,9 @@ class RouteGenerator {
       default:
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) =>
-              const Scaffold(body: Center(child: Text('صفحه مورد نظر پیدا نشد'))),
+          builder: (_) => const Scaffold(
+            body: Center(child: Text('صفحه مورد نظر پیدا نشد')),
+          ),
         );
     }
   }

@@ -23,24 +23,14 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     if (loggedIn) {
-      Navigator.pushReplacementNamed(
-        context,
-        AppRoutes.account,
-      );
+      Navigator.pushReplacementNamed(context, AppRoutes.account);
     } else {
-      Navigator.pushReplacementNamed(
-        context,
-        AppRoutes.login,
-      );
+      Navigator.pushReplacementNamed(context, AppRoutes.login);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
+    return const Scaffold(body: Center(child: CircularProgressIndicator()));
   }
 }

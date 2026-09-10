@@ -5,22 +5,16 @@ import 'package:http/http.dart' as http;
 import 'auth_service.dart';
 
 class ApiClient {
-  static const String baseUrl =
-      'https://magenagoftam.ir/api';
+  static const String baseUrl = 'https://magenagoftam.ir/api';
 
   // --------------------------------------------------
   // GET
   // --------------------------------------------------
 
-  static Future<http.Response> get(
-    String endpoint,
-  ) async {
+  static Future<http.Response> get(String endpoint) async {
     final token = await AuthService.getToken();
 
-    return http.get(
-      Uri.parse('$baseUrl/$endpoint'),
-      headers: _headers(token),
-    );
+    return http.get(Uri.parse('$baseUrl/$endpoint'), headers: _headers(token));
   }
 
   // --------------------------------------------------
@@ -95,9 +89,7 @@ class ApiClient {
   // JSON Headers
   // --------------------------------------------------
 
-  static Map<String, String> _headers(
-    String? token,
-  ) {
+  static Map<String, String> _headers(String? token) {
     final headers = <String, String>{
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -114,12 +106,8 @@ class ApiClient {
   // Form Headers
   // --------------------------------------------------
 
-  static Map<String, String> _formHeaders(
-    String? token,
-  ) {
-    final headers = <String, String>{
-      'Accept': 'application/json',
-    };
+  static Map<String, String> _formHeaders(String? token) {
+    final headers = <String, String>{'Accept': 'application/json'};
 
     if (token != null && token.isNotEmpty) {
       headers['Authorization'] = 'Bearer $token';

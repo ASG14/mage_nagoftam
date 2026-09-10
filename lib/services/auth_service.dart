@@ -4,8 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  static const String baseUrl =
-      'https://magenagoftam.ir/api';
+  static const String baseUrl = 'https://magenagoftam.ir/api';
 
   static Future<bool> login({
     required String username,
@@ -13,13 +12,8 @@ class AuthService {
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/auth/login.php'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'username': username,
-        'password': password,
-      }),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'username': username, 'password': password}),
     );
 
     if (response.statusCode != 200) {
@@ -49,9 +43,7 @@ class AuthService {
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/auth/register.php'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'phone': phone,
         'first_name': firstName,

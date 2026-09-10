@@ -20,17 +20,11 @@ class NotificationFeed extends StatelessWidget {
     return RefreshIndicator(
       onRefresh: onRefreshAsync ?? () async {},
       child: ListView.builder(
-        physics:
-            const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.only(
-          top: 4,
-          bottom: 24,
-        ),
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.only(top: 4, bottom: 24),
         itemCount: notifications.length,
         itemBuilder: (context, index) {
-          return NotificationItem(
-            notification: notifications[index],
-          );
+          return NotificationItem(notification: notifications[index]);
         },
       ),
     );

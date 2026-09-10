@@ -4,17 +4,13 @@ import 'package:mage_nagoftam/core/app_routes.dart';
 import 'package:mage_nagoftam/services/notification_service.dart';
 
 class MyBottomNavigationBar extends StatefulWidget {
-  const MyBottomNavigationBar({
-    super.key,
-  });
+  const MyBottomNavigationBar({super.key});
 
   @override
-  State<MyBottomNavigationBar> createState() =>
-      _MyBottomNavigationBarState();
+  State<MyBottomNavigationBar> createState() => _MyBottomNavigationBarState();
 }
 
-class _MyBottomNavigationBarState
-    extends State<MyBottomNavigationBar> {
+class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
   int _unreadCount = 0;
 
   bool _isLoadingUnreadCount = true;
@@ -31,8 +27,7 @@ class _MyBottomNavigationBarState
   // ==================================================
 
   Future<void> _loadUnreadCount() async {
-    final routeName =
-        ModalRoute.of(context)?.settings.name;
+    final routeName = ModalRoute.of(context)?.settings.name;
 
     if (routeName == AppRoutes.notifications) {
       if (mounted) {
@@ -46,8 +41,7 @@ class _MyBottomNavigationBarState
     }
 
     try {
-      final result =
-          await NotificationService.getNotifications();
+      final result = await NotificationService.getNotifications();
 
       if (!mounted) {
         return;
@@ -74,8 +68,7 @@ class _MyBottomNavigationBarState
   // ==================================================
 
   int _getCurrentIndex() {
-    final routeName =
-        ModalRoute.of(context)?.settings.name;
+    final routeName = ModalRoute.of(context)?.settings.name;
 
     switch (routeName) {
       case AppRoutes.account:
@@ -116,34 +109,25 @@ class _MyBottomNavigationBarState
         return;
     }
 
-    final currentRoute =
-        ModalRoute.of(context)?.settings.name;
+    final currentRoute = ModalRoute.of(context)?.settings.name;
 
     if (currentRoute == route) {
       return;
     }
 
-    Navigator.pushReplacementNamed(
-      context,
-      route,
-    );
+    Navigator.pushReplacementNamed(context, route);
   }
 
   // ==================================================
   // Notification Icon
   // ==================================================
 
-  Widget _notificationIcon({
-    required bool selected,
-  }) {
+  Widget _notificationIcon({required bool selected}) {
     final icon = Icon(
-      selected
-          ? Icons.notifications
-          : Icons.notifications_outlined,
+      selected ? Icons.notifications : Icons.notifications_outlined,
     );
 
-    if (_isLoadingUnreadCount ||
-        _unreadCount <= 0) {
+    if (_isLoadingUnreadCount || _unreadCount <= 0) {
       return icon;
     }
 
@@ -156,31 +140,19 @@ class _MyBottomNavigationBarState
           right: -10,
           top: -8,
           child: Container(
-            constraints: const BoxConstraints(
-              minWidth: 18,
-              minHeight: 18,
-            ),
-            padding: const EdgeInsets.symmetric(
-              horizontal: 4,
-            ),
+            constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+            padding: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
-              color: Theme.of(context)
-                  .colorScheme
-                  .error,
-              borderRadius:
-                  BorderRadius.circular(9),
+              color: Theme.of(context).colorScheme.error,
+              borderRadius: BorderRadius.circular(9),
               border: Border.all(
-                color: Theme.of(context)
-                    .colorScheme
-                    .surface,
+                color: Theme.of(context).colorScheme.surface,
                 width: 1.5,
               ),
             ),
             alignment: Alignment.center,
             child: Text(
-              _unreadCount > 99
-                  ? '99+'
-                  : _unreadCount.toString(),
+              _unreadCount > 99 ? '99+' : _unreadCount.toString(),
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 9,
@@ -202,36 +174,23 @@ class _MyBottomNavigationBarState
   Widget build(BuildContext context) {
     return NavigationBar(
       selectedIndex: _getCurrentIndex(),
-      onDestinationSelected:
-          _onItemSelected,
+      onDestinationSelected: _onItemSelected,
       destinations: [
         const NavigationDestination(
-          icon: Icon(
-            Icons.person_outline,
-          ),
-          selectedIcon: Icon(
-            Icons.person,
-          ),
+          icon: Icon(Icons.person_outline),
+          selectedIcon: Icon(Icons.person),
           label: 'من',
         ),
 
         const NavigationDestination(
-          icon: Icon(
-            Icons.groups_outlined,
-          ),
-          selectedIcon: Icon(
-            Icons.groups,
-          ),
+          icon: Icon(Icons.groups_outlined),
+          selectedIcon: Icon(Icons.groups),
           label: 'گروه‌ها',
         ),
 
         NavigationDestination(
-          icon: _notificationIcon(
-            selected: false,
-          ),
-          selectedIcon: _notificationIcon(
-            selected: true,
-          ),
+          icon: _notificationIcon(selected: false),
+          selectedIcon: _notificationIcon(selected: true),
           label: 'اعلان‌ها',
         ),
       ],
