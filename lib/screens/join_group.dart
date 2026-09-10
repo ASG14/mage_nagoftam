@@ -61,7 +61,7 @@ class _JoinGroupScreenState
 
       Navigator.pushNamedAndRemoveUntil(
         context,
-        AppRoutes.home,
+        AppRoutes.account,
         (route) => false,
         arguments: group,
       );

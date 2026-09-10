@@ -37,6 +37,9 @@ class _GroupOrdersScreenState
 
   String? _error;
 
+  // سفارش‌هایی که در حال پردازش هستند
+  final Set<int> _processingOrderIds = {};
+
   @override
   void initState() {
     super.initState();
@@ -126,6 +129,14 @@ class _GroupOrdersScreenState
   Future<void> _reserveOrder(
     Order order,
   ) async {
+    if (_processingOrderIds.contains(order.id)) {
+      return;
+    }
+
+    setState(() {
+      _processingOrderIds.add(order.id);
+    });
+
     try {
       await OrderService.assignOrder(
         orderId: order.id,
@@ -133,9 +144,20 @@ class _GroupOrdersScreenState
 
       if (!mounted) return;
 
-      await _loadOrders();
+      setState(() {
+        order.status = Status.reserved;
+        order.assignedUserId =
+            _currentUserId;
+        order.assignedUserName = 'شما';
+
+        _processingOrderIds.remove(order.id);
+      });
     } catch (_) {
       if (!mounted) return;
+
+      setState(() {
+        _processingOrderIds.remove(order.id);
+      });
 
       _showMessage(
         'قبول مسئولیت سفارش انجام نشد.',
@@ -159,6 +181,14 @@ class _GroupOrdersScreenState
       return;
     }
 
+    if (_processingOrderIds.contains(order.id)) {
+      return;
+    }
+
+    setState(() {
+      _processingOrderIds.add(order.id);
+    });
+
     try {
       await OrderService.completeOrder(
         orderId: order.id,
@@ -166,9 +196,17 @@ class _GroupOrdersScreenState
 
       if (!mounted) return;
 
-      await _loadOrders();
+      setState(() {
+        order.status = Status.completed;
+
+        _processingOrderIds.remove(order.id);
+      });
     } catch (_) {
       if (!mounted) return;
+
+      setState(() {
+        _processingOrderIds.remove(order.id);
+      });
 
       _showMessage(
         'تکمیل سفارش انجام نشد.',
@@ -192,6 +230,14 @@ class _GroupOrdersScreenState
       return;
     }
 
+    if (_processingOrderIds.contains(order.id)) {
+      return;
+    }
+
+    setState(() {
+      _processingOrderIds.add(order.id);
+    });
+
     try {
       await OrderService.deleteOrder(
         orderId: order.id,
@@ -203,9 +249,15 @@ class _GroupOrdersScreenState
         _orders.removeWhere(
           (item) => item.id == order.id,
         );
+
+        _processingOrderIds.remove(order.id);
       });
     } catch (_) {
       if (!mounted) return;
+
+      setState(() {
+        _processingOrderIds.remove(order.id);
+      });
 
       _showMessage(
         'حذف سفارش انجام نشد.',
@@ -220,6 +272,8 @@ class _GroupOrdersScreenState
   void _onOrderCreated(
     Order order,
   ) {
+    if (!mounted) return;
+
     setState(() {
       _orders.insert(
         0,

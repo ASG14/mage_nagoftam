@@ -10,45 +10,37 @@ import 'package:mage_nagoftam/screens/register.dart';
 import 'package:mage_nagoftam/screens/join_group.dart';
 
 class AppRoutes {
-  static const String home = '/';
-  static const String login = '/login';
+  static const String account = '/';
   static const String splash = '/splash';
+  static const String register = '/register';
+  static const String login = '/login';
   static const String groups = '/groups';
   static const String notifications = '/notifications';
   static const String settings = '/settings';
-  static const String register = '/register';
   static const String join = '/join';
 
-  static String joinGroup(
-    String token,
-  ) {
+  static String joinGroup(String token) {
     return '$join/$token';
   }
 }
 
 class RouteGenerator {
-  static Route<dynamic> generateRoute(
-    RouteSettings settings,
-  ) {
+  static Route<dynamic> generateRoute(RouteSettings settings) {
     final routeName = settings.name ?? '';
 
     if (routeName.startsWith('${AppRoutes.join}/')) {
-      final token = routeName
-          .substring('${AppRoutes.join}/'.length)
-          .trim();
+      final token = routeName.substring('${AppRoutes.join}/'.length).trim();
 
       if (token.isNotEmpty) {
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => JoinGroupScreen(
-            token: token,
-          ),
+          builder: (_) => JoinGroupScreen(token: token),
         );
       }
     }
 
     switch (routeName) {
-      case AppRoutes.home:
+      case AppRoutes.account:
         return MaterialPageRoute(
           settings: settings,
           builder: (_) => const AccountScreen(),
@@ -93,13 +85,8 @@ class RouteGenerator {
       default:
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => const Scaffold(
-            body: Center(
-              child: Text(
-                'صفحه پیدا نشد',
-              ),
-            ),
-          ),
+          builder: (_) =>
+              const Scaffold(body: Center(child: Text('صفحه مورد نظر پیدا نشد'))),
         );
     }
   }

@@ -78,7 +78,7 @@ class _MyBottomNavigationBarState
         ModalRoute.of(context)?.settings.name;
 
     switch (routeName) {
-      case AppRoutes.home:
+      case AppRoutes.account:
         return 0;
 
       case AppRoutes.groups:
@@ -101,7 +101,7 @@ class _MyBottomNavigationBarState
 
     switch (index) {
       case 0:
-        route = AppRoutes.home;
+        route = AppRoutes.account;
         break;
 
       case 1:

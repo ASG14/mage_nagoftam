@@ -56,7 +56,7 @@ class _RegisterState extends State<Register> {
       if (success) {
         Navigator.pushReplacementNamed(
           context,
-          AppRoutes.home,
+          AppRoutes.account,
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

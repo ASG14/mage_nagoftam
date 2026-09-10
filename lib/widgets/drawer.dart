@@ -219,7 +219,7 @@ class _MyDrawerState
                     ),
                     onTap: () {
                       _navigateTo(
-                        AppRoutes.home,
+                        AppRoutes.account,
                       );
                     },
                   ),
