@@ -32,16 +32,27 @@ class _OrderCardState extends State<OrderCard> {
   bool get _isCurrentUserAssigned {
     return widget.currentUserId != null &&
         widget.order.assignment != null &&
-        widget.currentUserId == widget.order.assignment!.userId;
+        widget.currentUserId ==
+            widget.order.assignment!.userId;
   }
 
   bool get _isCurrentUserCreator {
     return widget.currentUserId != null &&
-        widget.currentUserId == widget.order.createdBy;
+        widget.currentUserId ==
+            widget.order.createdBy;
   }
 
   bool get _hasAssignedUser {
     return widget.order.assignment != null;
+  }
+
+  bool get _isCompleted {
+    return widget.order.status == Status.completed;
+  }
+
+  bool get _isAssignedToOtherUser {
+    return _hasAssignedUser &&
+        !_isCurrentUserAssigned;
   }
 
   String _priorityText(Priority priority) {
@@ -92,7 +103,9 @@ class _OrderCardState extends State<OrderCard> {
       builder: (context) {
         return AlertDialog(
           title: const Text('حذف سفارش'),
-          content: const Text('آیا از حذف این سفارش مطمئن هستید؟'),
+          content: const Text(
+            'آیا از حذف این سفارش مطمئن هستید؟',
+          ),
           actions: [
             TextButton(
               onPressed: () {
@@ -117,10 +130,15 @@ class _OrderCardState extends State<OrderCard> {
   }
 
   Widget _buildPriority() {
-    final color = _priorityColor(widget.order.priority);
+    final color = _priorityColor(
+      widget.order.priority,
+    );
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 4,
+      ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(5),
@@ -138,8 +156,12 @@ class _OrderCardState extends State<OrderCard> {
   Widget _buildActionButtons() {
     final order = widget.order;
 
-    // سفارش هنوز مسئول ندارد
-    if (order.status == Status.pending && !_hasAssignedUser) {
+    // ----------------------------------------------
+    // سفارش بدون مسئول
+    // ----------------------------------------------
+
+    if (order.status == Status.pending &&
+        !_hasAssignedUser) {
       return Row(
         children: [
           Expanded(
@@ -151,27 +173,9 @@ class _OrderCardState extends State<OrderCard> {
                   borderRadius: BorderRadius.circular(5),
                 ),
               ),
-              child: const Text('قبول مسئولیت'),
-            ),
-          ),
-        ],
-      );
-    }
-
-    // سفارش در اختیار کاربر فعلی است
-    if (order.status == Status.reserved && _isCurrentUserAssigned) {
-      return Row(
-        children: [
-          Expanded(
-            child: OutlinedButton(
-              onPressed: widget.onCancelReserve,
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size.fromHeight(42),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                ),
+              child: const Text(
+                'بسپارش به من',
               ),
-              child: const Text('لغو مسئولیت'),
             ),
           ),
           const SizedBox(width: 8),
@@ -184,139 +188,239 @@ class _OrderCardState extends State<OrderCard> {
                   borderRadius: BorderRadius.circular(5),
                 ),
               ),
-              child: const Text('تکمیل سفارش'),
+              child: const Text(
+                'انجام شد',
+              ),
             ),
           ),
         ],
       );
     }
 
-    // شخص دیگری مسئول سفارش است
+    // ----------------------------------------------
+    // سفارش در اختیار کاربر فعلی
+    // ----------------------------------------------
+
+    if (order.status == Status.reserved &&
+        _isCurrentUserAssigned) {
+      return Row(
+        children: [
+          Expanded(
+            child: OutlinedButton(
+              onPressed: widget.onCancelReserve,
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(42),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+              ),
+              child: const Text(
+                'لغو مسئولیت',
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: FilledButton(
+              onPressed: widget.onComplete,
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(42),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+              ),
+              child: const Text(
+                'انجام شد',
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     return const SizedBox.shrink();
+  }
+
+  Widget _buildCardContent() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(
+        14,
+        12,
+        14,
+        12,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.white2,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: AppColors.gray4,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.stretch,
+        children: [
+          // عنوان سفارش + حذف
+          Row(
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  widget.order.title,
+                  textAlign: TextAlign.right,
+                  style: AppTypography.h5.copyWith(
+                    color: AppColors.gray1,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+
+              if (_isCurrentUserCreator)
+                IconButton(
+                  onPressed: _confirmDelete,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
+                  ),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    size: 22,
+                  ),
+                  color: AppColors.red1,
+                  tooltip: 'حذف سفارش',
+                ),
+            ],
+          ),
+
+          const SizedBox(height: 6),
+
+          // مقدار + اولویت
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'مقدار: ${widget.order.quantity ?? 'مشخص نشده'}',
+                  textAlign: TextAlign.right,
+                  style: AppTypography.h8.copyWith(
+                    color: AppColors.gray1,
+                  ),
+                ),
+              ),
+              _buildPriority(),
+            ],
+          ),
+
+          const SizedBox(height: 6),
+
+          // زمان ایجاد
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'ساعت ${_formatTime(widget.order.createdAt)}',
+              style: AppTypography.h10.copyWith(
+                color: AppColors.gray2,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          Divider(
+            height: 1,
+            color: AppColors.gray4,
+          ),
+
+          const SizedBox(height: 8),
+
+          // وضعیت مسئولیت
+          Text(
+            _assignedText(),
+            textAlign: TextAlign.right,
+            style: AppTypography.h8.copyWith(
+              color: AppColors.gray1,
+            ),
+          ),
+
+          // دکمه‌ها
+          if (!_isCompleted &&
+              !_isAssignedToOtherUser) ...[
+            const SizedBox(height: 10),
+            _buildActionButtons(),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDisabledOverlay({
+    required IconData icon,
+    required Color iconColor,
+  }) {
+    return Positioned.fill(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          color: AppColors.gray1.withValues(
+            alpha: 0.72,
+          ),
+          alignment: Alignment.center,
+          child: Icon(
+            icon,
+            size: 64,
+            color: iconColor,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final order = widget.order;
-
-    final bool isCompleted = order.status == Status.completed;
+    final bool isDisabled =
+        _isCompleted || _isAssignedToOtherUser;
 
     return Stack(
       children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-          decoration: BoxDecoration(
-            color: AppColors.white2,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: AppColors.gray4),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // عنوان سفارش + حذف
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      order.title,
-                      textAlign: TextAlign.right,
-                      style: AppTypography.h5.copyWith(
-                        color: AppColors.gray1,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  if (_isCurrentUserCreator)
-                    IconButton(
-                      onPressed: _confirmDelete,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(
-                        minWidth: 32,
-                        minHeight: 32,
-                      ),
-                      icon: const Icon(Icons.delete_outline, size: 22),
-                      color: AppColors.red1,
-                      tooltip: 'حذف سفارش',
-                    ),
-                ],
-              ),
-
-              const SizedBox(height: 6),
-
-              // مقدار + اولویت
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'مقدار: ${order.quantity ?? 'مشخص نشده'}',
-                      textAlign: TextAlign.right,
-                      style: AppTypography.h8.copyWith(color: AppColors.gray1),
-                    ),
-                  ),
-                  _buildPriority(),
-                ],
-              ),
-
-              const SizedBox(height: 6),
-
-              // زمان ایجاد
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'ساعت ${_formatTime(order.createdAt)}',
-                  style: AppTypography.h10.copyWith(color: AppColors.gray2),
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              Divider(height: 1, color: AppColors.gray4),
-
-              const SizedBox(height: 8),
-
-              // وضعیت مسئولیت
-              Text(
-                _assignedText(),
-                textAlign: TextAlign.right,
-                style: AppTypography.h8.copyWith(color: AppColors.gray1),
-              ),
-
-              // دکمه‌های عملیات
-              if (!isCompleted) ...[
-                const SizedBox(height: 10),
-                _buildActionButtons(),
-              ],
-            ],
-          ),
+        AbsorbPointer(
+          absorbing: isDisabled,
+          child: _buildCardContent(),
         ),
 
-        // Overlay سفارش تکمیل‌شده
-        if (isCompleted)
-          Positioned.fill(
-            child: IgnorePointer(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Container(
-                  color: AppColors.gray1.withValues(alpha: 0.72),
-                  alignment: Alignment.center,
-                  child: Icon(
-                    Icons.check_circle,
-                    size: 64,
-                    color: AppColors.green3,
-                  ),
-                ),
-              ),
-            ),
+        // ------------------------------------------
+        // سفارش تکمیل‌شده
+        // ------------------------------------------
+
+        if (_isCompleted)
+          _buildDisabledOverlay(
+            icon: Icons.check_circle,
+            iconColor: AppColors.green3,
+          ),
+
+        // ------------------------------------------
+        // سفارش در اختیار کاربر دیگر
+        // ------------------------------------------
+
+        if (_isAssignedToOtherUser &&
+            !_isCompleted)
+          _buildDisabledOverlay(
+            icon: Icons.person_outline,
+            iconColor: AppColors.gray4,
           ),
       ],
     );
   }
 
   String _formatTime(DateTime dateTime) {
-    final hour = dateTime.hour.toString().padLeft(2, '0');
-    final minute = dateTime.minute.toString().padLeft(2, '0');
+    final hour = dateTime.hour
+        .toString()
+        .padLeft(2, '0');
+
+    final minute = dateTime.minute
+        .toString()
+        .padLeft(2, '0');
 
     return '$hour:$minute';
   }

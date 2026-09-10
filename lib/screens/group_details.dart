@@ -62,12 +62,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   // ==================================================
 
   Future<void> _loadMembers() async {
-    if (mounted) {
-      setState(() {
-        _isLoading = true;
-        _errorMessage = null;
-      });
-    }
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
     try {
       final members = await GroupService.getMembers(groupId: widget.group.id);
@@ -87,7 +85,6 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       });
     }
   }
-
   // ==================================================
   // Edit Group
   // ==================================================
@@ -374,28 +371,27 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     final message = error.toString();
 
     if (message.contains('unauthorized')) {
-      return 'نشست شما منقضی شده است.';
+      return 'نشست شما منقضی شده است. لطفاً دوباره وارد شوید.';
     }
 
-    if (message.contains('not the owner')) {
-      return 'فقط صاحب گروه می‌تواند این عملیات را انجام دهد.';
+    if (message.contains('not_owner')) {
+      return 'شما اجازه انجام این عملیات را ندارید.';
     }
 
     if (message.contains('server_error')) {
-      return 'خطا در ارتباط با سرور.';
+      return 'خطایی در ارتباط با سرور رخ داد.';
     }
 
     if (message.contains('invalid_invite_token')) {
-      return 'توکن دعوت نامعتبر دریافت شد.';
+      return 'لینک دعوت نامعتبر است.';
     }
 
-    if (message.contains('not found')) {
-      return 'گروه یا عضو موردنظر پیدا نشد.';
+    if (message.contains('not_found')) {
+      return 'گروه موردنظر پیدا نشد.';
     }
 
     return 'عملیات با خطا مواجه شد.';
   }
-
   // ==================================================
   // Message
   // ==================================================

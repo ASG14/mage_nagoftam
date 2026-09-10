@@ -6,10 +6,7 @@ import 'package:mage_nagoftam/models/group_member.dart';
 import 'api_client.dart';
 
 class GroupService {
-  // ==================================================
   // Get Groups
-  // ==================================================
-
   static Future<List<Group>> getGroups() async {
     final response = await ApiClient.get('groups/list.php');
 
@@ -36,10 +33,7 @@ class GroupService {
         .toList();
   }
 
-  // ==================================================
   // Create Group
-  // ==================================================
-
   static Future<Group> createGroup({required String title}) async {
     final response = await ApiClient.post(
       'groups/create.php',
@@ -75,10 +69,7 @@ class GroupService {
     }
   }
 
-  // ==================================================
   // Update Group
-  // ==================================================
-
   static Future<void> updateGroup({
     required int groupId,
     required String title,
@@ -101,10 +92,7 @@ class GroupService {
     }
   }
 
-  // ==================================================
   // Delete Group
-  // ==================================================
-
   static Future<void> deleteGroup({required int groupId}) async {
     final response = await ApiClient.delete(
       'groups/delete.php?group_id=$groupId',
@@ -123,10 +111,8 @@ class GroupService {
     }
   }
 
-  // ==================================================
   // Get Members
-  // ==================================================
-
+  // Get Members
   static Future<List<GroupMember>> getMembers({required int groupId}) async {
     final response = await ApiClient.get(
       'groups/members.php?group_id=$groupId',
@@ -160,10 +146,7 @@ class GroupService {
         .toList();
   }
 
-  // ==================================================
   // Remove Member
-  // ==================================================
-
   static Future<void> removeMember({
     required int groupId,
     required int memberId,
@@ -186,10 +169,7 @@ class GroupService {
     }
   }
 
-  // ==================================================
   // Create Invite
-  // ==================================================
-
   static Future<String> createInvite({required int groupId}) async {
     final response = await ApiClient.post(
       'groups/create_invite.php',
@@ -225,10 +205,7 @@ class GroupService {
     return tokenString;
   }
 
-  // ==================================================
   // Join Group
-  // ==================================================
-
   static Future<Group> joinGroup({required String token}) async {
     final cleanToken = token.trim();
 
@@ -270,27 +247,15 @@ class GroupService {
     }
   }
 
-  // ==================================================
-  // Invite Token Validation
-  // ==================================================
-
   static bool _isValidInviteToken(String token) {
     return RegExp(r'^[A-HJ-NP-Za-hj-km-z2-9]{8}$').hasMatch(token);
   }
-
-  // ==================================================
-  // Unauthorized
-  // ==================================================
 
   static void _handleUnauthorized(int statusCode) {
     if (statusCode == 401) {
       throw Exception('unauthorized');
     }
   }
-
-  // ==================================================
-  // API Error
-  // ==================================================
 
   static String _errorFromResponse(
     dynamic response, {

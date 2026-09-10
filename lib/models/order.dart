@@ -1,8 +1,17 @@
 import 'assign.dart';
 
-enum Status { pending, reserved, completed, cancelled }
+enum Status {
+  pending,
+  reserved,
+  completed,
+  cancelled,
+}
 
-enum Priority { low, medium, high }
+enum Priority {
+  low,
+  medium,
+  high,
+}
 
 class Order {
   final int id;
@@ -36,7 +45,9 @@ class Order {
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
-    final assignedUserId = _parseInt(json['assigned_user_id']);
+    final assignedUserId = _parseInt(
+      json['assigned_user_id'],
+    );
 
     Assign? assignment;
 
@@ -44,11 +55,6 @@ class Order {
       assignment = Assign(
         orderId: _parseInt(json['id']) ?? 0,
         userId: assignedUserId,
-        status: AssignmentStatus.active,
-        assignedAt:
-            _parseDate(json['updated_at']) ??
-            _parseDate(json['created_at']) ??
-            DateTime.fromMillisecondsSinceEpoch(0),
       );
     }
 
@@ -58,8 +64,12 @@ class Order {
       createdBy: _parseInt(json['created_by']) ?? 0,
       title: json['title']?.toString() ?? '',
       quantity: json['quantity']?.toString(),
-      priority: _priorityFromString(json['priority']?.toString()),
-      status: _statusFromString(json['status']?.toString()),
+      priority: _priorityFromString(
+        json['priority']?.toString(),
+      ),
+      status: _statusFromString(
+        json['status']?.toString(),
+      ),
       deadline: _parseDate(json['deadline']),
       createdAt:
           _parseDate(json['created_at']) ??
@@ -82,7 +92,6 @@ class Order {
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
       'assigned_user_id': assignment?.userId,
-      'assigned_user_name': null,
     };
   }
 
@@ -132,13 +141,11 @@ class Order {
 
   static int? _parseInt(dynamic value) {
     if (value == null) return null;
-
     return int.tryParse(value.toString());
   }
 
   static DateTime? _parseDate(dynamic value) {
     if (value == null) return null;
-
     return DateTime.tryParse(value.toString());
   }
 

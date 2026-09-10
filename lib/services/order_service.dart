@@ -4,12 +4,12 @@ import 'package:mage_nagoftam/models/order.dart';
 import 'package:mage_nagoftam/services/api_client.dart';
 
 class OrderService {
-  // --------------------------------------------------
-  // Get Orders
-  // --------------------------------------------------
-
-  static Future<List<Order>> getOrders({required int groupId}) async {
-    final response = await ApiClient.get('orders/list.php?group_id=$groupId');
+  static Future<List<Order>> getOrders({
+    required int groupId,
+  }) async {
+    final response = await ApiClient.get(
+      'orders/list.php?group_id=$groupId',
+    );
 
     if (response.statusCode == 401) {
       throw Exception('unauthorized');
@@ -26,19 +26,21 @@ class OrderService {
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
-      throw Exception(result['message'] ?? 'خطا در دریافت سفارش‌ها');
+      throw Exception(
+        result['message'] ?? 'خطا در دریافت سفارش‌ها',
+      );
     }
 
     final orders = result['data']['orders'];
 
     return (orders as List)
-        .map((json) => Order.fromJson(json as Map<String, dynamic>))
+        .map(
+          (json) => Order.fromJson(
+            json as Map<String, dynamic>,
+          ),
+        )
         .toList();
   }
-
-  // --------------------------------------------------
-  // Create Order
-  // --------------------------------------------------
 
   static Future<Order> createOrder({
     required int groupId,
@@ -54,7 +56,9 @@ class OrderService {
         'title': title,
         'quantity': quantity,
         'priority': _priorityToString(priority),
-        'deadline': deadline != null ? _formatDateTime(deadline) : null,
+        'deadline': deadline != null
+            ? _formatDateTime(deadline)
+            : null,
       },
     );
 
@@ -73,20 +77,28 @@ class OrderService {
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
-      throw Exception(result['message'] ?? 'خطا در ایجاد سفارش');
+      throw Exception(
+        result['message'] ?? 'خطا در ایجاد سفارش',
+      );
     }
 
-    return Order.fromJson(result['data']['order'] as Map<String, dynamic>);
+    return Order.fromJson(
+      result['data']['order'] as Map<String, dynamic>,
+    );
   }
 
   // --------------------------------------------------
   // Assign Order
   // --------------------------------------------------
 
-  static Future<void> assignOrder({required int orderId}) async {
+  static Future<void> assignOrder({
+    required int orderId,
+  }) async {
     final response = await ApiClient.postForm(
       'orders/assign.php',
-      body: {'order_id': orderId.toString()},
+      body: {
+        'order_id': orderId.toString(),
+      },
     );
 
     if (response.statusCode == 401) {
@@ -112,7 +124,52 @@ class OrderService {
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
-      throw Exception(result['message'] ?? 'خطا در سپردن سفارش');
+      throw Exception(
+        result['message'] ?? 'خطا در سپردن سفارش',
+      );
+    }
+  }
+
+  // --------------------------------------------------
+  // Unassign Order
+  // --------------------------------------------------
+
+  static Future<void> unassignOrder({
+    required int orderId,
+  }) async {
+    final response = await ApiClient.postForm(
+      'orders/unassign.php',
+      body: {
+        'order_id': orderId.toString(),
+      },
+    );
+
+    if (response.statusCode == 401) {
+      throw Exception('unauthorized');
+    }
+
+    if (response.statusCode == 403) {
+      throw Exception('forbidden');
+    }
+
+    if (response.statusCode == 404) {
+      throw Exception('not_found');
+    }
+
+    if (response.statusCode == 409) {
+      throw Exception('not_assigned');
+    }
+
+    if (response.statusCode != 200) {
+      throw Exception('server_error');
+    }
+
+    final result = jsonDecode(response.body);
+
+    if (result['success'] != true) {
+      throw Exception(
+        result['message'] ?? 'خطا در لغو مسئولیت',
+      );
     }
   }
 
@@ -120,10 +177,14 @@ class OrderService {
   // Complete Order
   // --------------------------------------------------
 
-  static Future<void> completeOrder({required int orderId}) async {
+  static Future<void> completeOrder({
+    required int orderId,
+  }) async {
     final response = await ApiClient.postForm(
       'orders/complete.php',
-      body: {'order_id': orderId.toString()},
+      body: {
+        'order_id': orderId.toString(),
+      },
     );
 
     if (response.statusCode == 401) {
@@ -141,7 +202,9 @@ class OrderService {
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
-      throw Exception(result['message'] ?? 'خطا در تکمیل سفارش');
+      throw Exception(
+        result['message'] ?? 'خطا در تکمیل سفارش',
+      );
     }
   }
 
@@ -149,10 +212,14 @@ class OrderService {
   // Delete Order
   // --------------------------------------------------
 
-  static Future<void> deleteOrder({required int orderId}) async {
+  static Future<void> deleteOrder({
+    required int orderId,
+  }) async {
     final response = await ApiClient.postForm(
       'orders/delete.php',
-      body: {'order_id': orderId.toString()},
+      body: {
+        'order_id': orderId.toString(),
+      },
     );
 
     if (response.statusCode == 401) {
@@ -174,7 +241,9 @@ class OrderService {
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
-      throw Exception(result['message'] ?? 'خطا در حذف سفارش');
+      throw Exception(
+        result['message'] ?? 'خطا در حذف سفارش',
+      );
     }
   }
 
@@ -182,7 +251,9 @@ class OrderService {
   // Helpers
   // --------------------------------------------------
 
-  static String _priorityToString(Priority priority) {
+  static String _priorityToString(
+    Priority priority,
+  ) {
     switch (priority) {
       case Priority.low:
         return 'low';
@@ -195,18 +266,32 @@ class OrderService {
     }
   }
 
-  static String _formatDateTime(DateTime dateTime) {
-    final year = dateTime.year.toString().padLeft(4, '0');
+  static String _formatDateTime(
+    DateTime dateTime,
+  ) {
+    final year = dateTime.year
+        .toString()
+        .padLeft(4, '0');
 
-    final month = dateTime.month.toString().padLeft(2, '0');
+    final month = dateTime.month
+        .toString()
+        .padLeft(2, '0');
 
-    final day = dateTime.day.toString().padLeft(2, '0');
+    final day = dateTime.day
+        .toString()
+        .padLeft(2, '0');
 
-    final hour = dateTime.hour.toString().padLeft(2, '0');
+    final hour = dateTime.hour
+        .toString()
+        .padLeft(2, '0');
 
-    final minute = dateTime.minute.toString().padLeft(2, '0');
+    final minute = dateTime.minute
+        .toString()
+        .padLeft(2, '0');
 
-    final second = dateTime.second.toString().padLeft(2, '0');
+    final second = dateTime.second
+        .toString()
+        .padLeft(2, '0');
 
     return '$year-$month-$day '
         '$hour:$minute:$second';

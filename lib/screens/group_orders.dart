@@ -15,7 +15,10 @@ import 'package:mage_nagoftam/widgets/orders/add_order_button.dart';
 class GroupOrdersScreen extends StatefulWidget {
   final Group group;
 
-  const GroupOrdersScreen({super.key, required this.group});
+  const GroupOrdersScreen({
+    super.key,
+    required this.group,
+  });
 
   @override
   State<GroupOrdersScreen> createState() => _GroupOrdersScreenState();
@@ -32,7 +35,6 @@ class _GroupOrdersScreenState extends State<GroupOrdersScreen> {
 
   String? _error;
 
-  // سفارش‌هایی که در حال پردازش هستند
   final Set<int> _processingOrderIds = {};
 
   @override
@@ -62,7 +64,9 @@ class _GroupOrdersScreenState extends State<GroupOrdersScreen> {
 
   Future<void> _loadMemberCount() async {
     try {
-      final members = await GroupService.getMembers(groupId: widget.group.id);
+      final members = await GroupService.getMembers(
+        groupId: widget.group.id,
+      );
 
       if (!mounted) return;
 
@@ -91,7 +95,9 @@ class _GroupOrdersScreenState extends State<GroupOrdersScreen> {
     }
 
     try {
-      final orders = await OrderService.getOrders(groupId: widget.group.id);
+      final orders = await OrderService.getOrders(
+        groupId: widget.group.id,
+      );
 
       if (!mounted) return;
 
@@ -123,23 +129,18 @@ class _GroupOrdersScreenState extends State<GroupOrdersScreen> {
     });
 
     try {
-      await OrderService.assignOrder(orderId: order.id);
+      await OrderService.assignOrder(
+        orderId: order.id,
+      );
 
-      final orders = await OrderService.getOrders(groupId: widget.group.id);
+      final orders = await OrderService.getOrders(
+        groupId: widget.group.id,
+      );
 
       if (!mounted) return;
 
-      final updatedOrder = orders.firstWhere((item) => item.id == order.id);
-
       setState(() {
-        _orders = _orders.map((item) {
-          if (item.id == order.id) {
-            return updatedOrder;
-          }
-
-          return item;
-        }).toList();
-
+        _orders = orders;
         _processingOrderIds.remove(order.id);
       });
     } catch (_) {
@@ -149,7 +150,58 @@ class _GroupOrdersScreenState extends State<GroupOrdersScreen> {
         _processingOrderIds.remove(order.id);
       });
 
-      _showMessage('قبول مسئولیت سفارش انجام نشد.');
+      _showMessage(
+        'قبول مسئولیت سفارش انجام نشد.',
+      );
+    }
+  }
+
+  // ==================================================
+  // Cancel Reserve
+  // ==================================================
+
+  Future<void> _unassignOrder(Order order) async {
+    if (_processingOrderIds.contains(order.id)) {
+      return;
+    }
+
+    if (order.assignment?.userId != _currentUserId) {
+      _showMessage(
+        'شما مسئول این سفارش نیستید.',
+      );
+
+      return;
+    }
+
+    setState(() {
+      _processingOrderIds.add(order.id);
+    });
+
+    try {
+      await OrderService.unassignOrder(
+        orderId: order.id,
+      );
+
+      final orders = await OrderService.getOrders(
+        groupId: widget.group.id,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _orders = orders;
+        _processingOrderIds.remove(order.id);
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      setState(() {
+        _processingOrderIds.remove(order.id);
+      });
+
+      _showMessage(
+        'لغو مسئولیت سفارش انجام نشد.',
+      );
     }
   }
 
@@ -158,12 +210,6 @@ class _GroupOrdersScreenState extends State<GroupOrdersScreen> {
   // ==================================================
 
   Future<void> _completeOrder(Order order) async {
-    if (order.assignment?.userId != _currentUserId) {
-      _showMessage('شما مسئول این سفارش نیستید.');
-
-      return;
-    }
-
     if (_processingOrderIds.contains(order.id)) {
       return;
     }
@@ -173,19 +219,18 @@ class _GroupOrdersScreenState extends State<GroupOrdersScreen> {
     });
 
     try {
-      await OrderService.completeOrder(orderId: order.id);
+      await OrderService.completeOrder(
+        orderId: order.id,
+      );
+
+      final orders = await OrderService.getOrders(
+        groupId: widget.group.id,
+      );
 
       if (!mounted) return;
 
       setState(() {
-        _orders = _orders.map((item) {
-          if (item.id == order.id) {
-            return item.copyWith(status: Status.completed);
-          }
-
-          return item;
-        }).toList();
-
+        _orders = orders;
         _processingOrderIds.remove(order.id);
       });
     } catch (_) {
@@ -195,7 +240,9 @@ class _GroupOrdersScreenState extends State<GroupOrdersScreen> {
         _processingOrderIds.remove(order.id);
       });
 
-      _showMessage('تکمیل سفارش انجام نشد.');
+      _showMessage(
+        'تکمیل سفارش انجام نشد.',
+      );
     }
   }
 
@@ -205,7 +252,9 @@ class _GroupOrdersScreenState extends State<GroupOrdersScreen> {
 
   Future<void> _deleteOrder(Order order) async {
     if (order.createdBy != _currentUserId) {
-      _showMessage('شما اجازه حذف این سفارش را ندارید.');
+      _showMessage(
+        'شما اجازه حذف این سفارش را ندارید.',
+      );
 
       return;
     }
@@ -219,12 +268,16 @@ class _GroupOrdersScreenState extends State<GroupOrdersScreen> {
     });
 
     try {
-      await OrderService.deleteOrder(orderId: order.id);
+      await OrderService.deleteOrder(
+        orderId: order.id,
+      );
 
       if (!mounted) return;
 
       setState(() {
-        _orders.removeWhere((item) => item.id == order.id);
+        _orders.removeWhere(
+          (item) => item.id == order.id,
+        );
 
         _processingOrderIds.remove(order.id);
       });
@@ -235,7 +288,9 @@ class _GroupOrdersScreenState extends State<GroupOrdersScreen> {
         _processingOrderIds.remove(order.id);
       });
 
-      _showMessage('حذف سفارش انجام نشد.');
+      _showMessage(
+        'حذف سفارش انجام نشد.',
+      );
     }
   }
 
@@ -260,7 +315,11 @@ class _GroupOrdersScreenState extends State<GroupOrdersScreen> {
 
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+        ),
+      );
   }
 
   // ==================================================
@@ -285,7 +344,8 @@ class _GroupOrdersScreenState extends State<GroupOrdersScreen> {
           onOrderCreated: _onOrderCreated,
         ),
 
-        bottomNavigationBar: const MyBottomNavigationBar(),
+        bottomNavigationBar:
+            const MyBottomNavigationBar(),
       ),
     );
   }
@@ -296,7 +356,9 @@ class _GroupOrdersScreenState extends State<GroupOrdersScreen> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
     }
 
     if (_error != null) {
@@ -305,14 +367,13 @@ class _GroupOrdersScreenState extends State<GroupOrdersScreen> {
 
     return RefreshIndicator(
       onRefresh: _loadOrders,
-
       child: OrdersList(
         orders: _orders,
         currentUserId: _currentUserId,
         onReserve: _reserveOrder,
         onComplete: _completeOrder,
         onDelete: _deleteOrder,
-        onCancelReserve: null,
+        onCancelReserve: _unassignOrder,
       ),
     );
   }
@@ -325,24 +386,26 @@ class _GroupOrdersScreenState extends State<GroupOrdersScreen> {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-
         child: Column(
           mainAxisSize: MainAxisSize.min,
-
           children: [
-            const Icon(Icons.error_outline, size: 52),
+            const Icon(
+              Icons.error_outline,
+              size: 52,
+            ),
 
             const SizedBox(height: 16),
 
-            Text(_error!, textAlign: TextAlign.center),
+            Text(
+              _error!,
+              textAlign: TextAlign.center,
+            ),
 
             const SizedBox(height: 20),
 
             FilledButton.icon(
               onPressed: _loadOrders,
-
               icon: const Icon(Icons.refresh),
-
               label: const Text('تلاش مجدد'),
             ),
           ],
