@@ -29,16 +29,12 @@ class RouteGenerator {
     final routeName = settings.name ?? '';
 
     if (routeName.startsWith('${AppRoutes.join}/')) {
-      final token = routeName
-          .substring('${AppRoutes.join}/'.length)
-          .trim();
+      final token = routeName.substring('${AppRoutes.join}/'.length).trim();
 
       if (token.isNotEmpty) {
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => JoinGroupScreen(
-            token: token,
-          ),
+          builder: (_) => JoinGroupScreen(token: token),
         );
       }
     }
@@ -87,16 +83,18 @@ class RouteGenerator {
       case AppRoutes.register:
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => const Register(),
+          builder: (_) => Register(
+            redirectRoute: settings.arguments is String
+                ? settings.arguments as String
+                : null,
+          ),
         );
 
       default:
         return MaterialPageRoute(
           settings: settings,
           builder: (_) => const Scaffold(
-            body: Center(
-              child: Text('صفحه مورد نظر پیدا نشد'),
-            ),
+            body: Center(child: Text('صفحه مورد نظر پیدا نشد')),
           ),
         );
     }

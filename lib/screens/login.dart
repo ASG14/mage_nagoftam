@@ -1,7 +1,8 @@
+import 'package:flutter/material.dart';
+
+import 'package:mage_nagoftam/core/app_routes.dart';
 import 'package:mage_nagoftam/services/auth_service.dart';
 import 'package:mage_nagoftam/style/color.dart';
-import 'package:flutter/material.dart';
-import 'package:mage_nagoftam/core/app_routes.dart';
 
 class Login extends StatefulWidget {
   final String? redirectRoute;
@@ -18,23 +19,37 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _usernameController =
+  final TextEditingController _phoneController =
       TextEditingController();
 
-  final TextEditingController _passwordController =
+  final TextEditingController _codeController =
       TextEditingController();
 
-  bool _obscurePassword = true;
+  bool _isCodeSent = false;
   bool _isLoading = false;
 
   @override
   void dispose() {
-    _usernameController.dispose();
-    _passwordController.dispose();
+    _phoneController.dispose();
+    _codeController.dispose();
     super.dispose();
   }
 
-  Future<void> _login() async {
+  String? _validatePhone(String? value) {
+    final phone = value?.trim() ?? '';
+
+    if (phone.isEmpty) {
+      return 'شماره موبایل را وارد کنید';
+    }
+
+    if (!RegExp(r'^09\d{9}$').hasMatch(phone)) {
+      return 'شماره موبایل معتبر نیست';
+    }
+
+    return null;
+  }
+
+  Future<void> _sendCode() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -44,38 +59,34 @@ class _LoginState extends State<Login> {
     });
 
     try {
-      final success = await AuthService.login(
-        username: _usernameController.text.trim(),
-        password: _passwordController.text,
+      await AuthService.sendOtp(
+        phone: _phoneController.text.trim(),
       );
 
       if (!mounted) {
         return;
       }
 
-      if (success) {
-        Navigator.pushReplacementNamed(
-          context,
-          widget.redirectRoute ?? AppRoutes.account,
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'نام کاربری یا کلمه عبور اشتباه است',
-            ),
+      setState(() {
+        _isCodeSent = true;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'کد تأیید برای شما ارسال شد',
           ),
-        );
-      }
+        ),
+      );
     } catch (e) {
       if (!mounted) {
         return;
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'ارتباط با سرور برقرار نشد',
+            e.toString().replaceFirst('Exception: ', ''),
           ),
         ),
       );
@@ -86,6 +97,75 @@ class _LoginState extends State<Login> {
         });
       }
     }
+  }
+
+  Future<void> _verifyCode() async {
+    final code = _codeController.text.trim();
+
+    if (code.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'کد تأیید را وارد کنید',
+          ),
+        ),
+      );
+
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final result = await AuthService.verifyOtp(
+        phone: _phoneController.text.trim(),
+        code: code,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      if (result.isNewUser) {
+        Navigator.pushReplacementNamed(
+          context,
+          AppRoutes.register,
+          arguments: widget.redirectRoute,
+        );
+      } else {
+        Navigator.pushReplacementNamed(
+          context,
+          widget.redirectRoute ?? AppRoutes.groups,
+        );
+      }
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toString().replaceFirst('Exception: ', ''),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _changePhone() {
+    setState(() {
+      _isCodeSent = false;
+      _codeController.clear();
+    });
   }
 
   @override
@@ -117,88 +197,93 @@ class _LoginState extends State<Login> {
               child: Form(
                 key: _formKey,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.stretch,
                   children: [
-                    TextFormField(
-                      controller: _usernameController,
+                    Text(
+                      _isCodeSent
+                          ? 'کد تأیید را وارد کنید'
+                          : 'شماره موبایل خود را وارد کنید',
                       textAlign: TextAlign.center,
-                      decoration: const InputDecoration(
-                        hintText: 'نام کاربری',
-                        suffixIcon: Icon(
-                          Icons.supervised_user_circle_rounded,
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null ||
-                            value.trim().isEmpty) {
-                          return 'نام کاربری را وارد کنید';
-                        }
-
-                        return null;
-                      },
                     ),
 
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 24),
 
-                    TextFormField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                        hintText: 'کلمه عبور',
-                        suffixIcon: IconButton(
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword =
-                                  !_obscurePassword;
-                            });
-                          },
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility
-                                : Icons.visibility_off,
+                    if (!_isCodeSent) ...[
+                      TextFormField(
+                        controller: _phoneController,
+                        keyboardType: TextInputType.phone,
+                        textAlign: TextAlign.center,
+                        maxLength: 11,
+                        decoration: const InputDecoration(
+                          hintText: 'شماره موبایل',
+                          counterText: '',
+                          suffixIcon: Icon(
+                            Icons.phone_android_rounded,
+                          ),
+                        ),
+                        validator: _validatePhone,
+                      ),
+
+                      const SizedBox(height: 40),
+
+                      FilledButton(
+                        onPressed:
+                            _isLoading ? null : _sendCode,
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child:
+                                    CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text('دریافت کد تأیید'),
+                      ),
+                    ] else ...[
+                      TextFormField(
+                        controller: _codeController,
+                        keyboardType: TextInputType.number,
+                        textAlign: TextAlign.center,
+                        maxLength: 6,
+                        autofocus: true,
+                        decoration: const InputDecoration(
+                          hintText: 'کد تأیید',
+                          counterText: '',
+                          suffixIcon: Icon(
+                            Icons.sms_rounded,
                           ),
                         ),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'کلمه عبور را وارد کنید';
-                        }
 
-                        return null;
-                      },
-                    ),
+                      const SizedBox(height: 40),
 
-                    const SizedBox(height: 40),
-
-                    FilledButton(
-                      onPressed: _isLoading ? null : _login,
-                      child: _isLoading
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : const Text('ورود'),
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    TextButton(
-                      onPressed: _isLoading
-                          ? null
-                          : () {
-                              Navigator.pushNamed(
-                                context,
-                                AppRoutes.register,
-                              );
-                            },
-                      child: const Text(
-                        'حساب کاربری ندارید؟ ثبت نام کنید',
+                      FilledButton(
+                        onPressed:
+                            _isLoading ? null : _verifyCode,
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child:
+                                    CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text('تأیید و ورود'),
                       ),
-                    ),
+
+                      const SizedBox(height: 8),
+
+                      TextButton(
+                        onPressed:
+                            _isLoading ? null : _changePhone,
+                        child: const Text(
+                          'تغییر شماره موبایل',
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
