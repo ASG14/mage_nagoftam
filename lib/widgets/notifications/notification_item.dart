@@ -8,36 +8,53 @@ class NotificationItem extends StatelessWidget {
   final AppNotification notification;
   final VoidCallback? onTap;
 
-  const NotificationItem({super.key, required this.notification, this.onTap});
+  const NotificationItem({
+    super.key,
+    required this.notification,
+    this.onTap,
+  });
 
   String _timeText() {
-    final difference = DateTime.now().difference(notification.createdAt);
-
-    if (difference.isNegative) {
-      return 'همین الان';
-    }
-
-    if (difference.inMinutes < 1) {
-      return 'همین الان';
-    }
-
-    if (difference.inMinutes < 60) {
-      return '${difference.inMinutes} دقیقه پیش';
-    }
-
-    if (difference.inHours < 24) {
-      return '${difference.inHours} ساعت پیش';
-    }
-
-    if (difference.inDays < 7) {
-      return '${difference.inDays} روز پیش';
-    }
-
     final date = notification.createdAt;
 
-    return '${date.year}/'
-        '${date.month.toString().padLeft(2, '0')}/'
-        '${date.day.toString().padLeft(2, '0')}';
+    return '${date.hour.toString().padLeft(2, '0')}:'
+        '${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  String _actorText() {
+    final name = notification.actorName.trim();
+
+    return name.isEmpty ? 'نامشخص' : name;
+  }
+
+  Widget _infoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 3),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        textDirection: TextDirection.rtl,
+        children: [
+          Text(
+            '$label: ',
+            textAlign: TextAlign.right,
+            style: AppTypography.h10.copyWith(
+              color: AppColors.gray2,
+            ),
+          ),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.h10.copyWith(
+                color: AppColors.gray1,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -46,18 +63,42 @@ class NotificationItem extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 9,
+        ),
         decoration: BoxDecoration(
-          color: notification.isRead ? Colors.transparent : AppColors.white1,
-          border: Border(bottom: BorderSide(color: AppColors.gray4)),
+          color: notification.isRead
+              ? Colors.transparent
+              : AppColors.white1,
+          border: Border(
+            bottom: BorderSide(
+              color: AppColors.gray4,
+            ),
+          ),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (!notification.isRead)
+              Container(
+                width: 6,
+                height: 6,
+                margin: const EdgeInsets.only(
+                  left: 8,
+                  top: 7,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.green1,
+                  shape: BoxShape.circle,
+                ),
+              ),
+
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // تیتر اعلان
                   Text(
                     notification.title,
                     textAlign: TextAlign.right,
@@ -69,40 +110,43 @@ class NotificationItem extends StatelessWidget {
                     ),
                   ),
 
-                  if (notification.message.isNotEmpty) ...[
-                    const SizedBox(height: 4),
+                  const SizedBox(height: 3),
 
-                    Text(
-                      notification.message,
-                      textAlign: TextAlign.right,
-                      style: AppTypography.h9.copyWith(
-                        color: AppColors.gray1,
-                        height: 1.5,
-                      ),
+                  // کاربر
+                  _infoRow(
+                    'کاربر',
+                    _actorText(),
+                  ),
+
+                  // سفارش
+                  if (notification.orderTitle != null &&
+                      notification.orderTitle!.trim().isNotEmpty)
+                    _infoRow(
+                      'سفارش',
+                      notification.orderTitle!.trim(),
                     ),
-                  ],
 
-                  const SizedBox(height: 5),
+                  // گروه
+                  if (notification.groupTitle != null &&
+                      notification.groupTitle!.trim().isNotEmpty)
+                    _infoRow(
+                      'گروه',
+                      notification.groupTitle!.trim(),
+                    ),
 
+                  const SizedBox(height: 4),
+
+                  // فقط ساعت — سمت چپ کارت
                   Text(
                     _timeText(),
                     textAlign: TextAlign.left,
-                    style: AppTypography.h10.copyWith(color: AppColors.gray2),
+                    style: AppTypography.h10.copyWith(
+                      color: AppColors.gray2,
+                    ),
                   ),
                 ],
               ),
             ),
-
-            if (!notification.isRead)
-              Container(
-                width: 6,
-                height: 6,
-                margin: const EdgeInsets.only(left: 8, top: 7),
-                decoration: BoxDecoration(
-                  color: AppColors.green1,
-                  shape: BoxShape.circle,
-                ),
-              ),
           ],
         ),
       ),

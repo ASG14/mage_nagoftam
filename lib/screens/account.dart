@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
 
+import 'package:mage_nagoftam/models/group.dart';
+import 'package:mage_nagoftam/models/user.dart';
+
+import 'package:mage_nagoftam/screens/group_orders.dart';
+
+import 'package:mage_nagoftam/services/group_service.dart';
+import 'package:mage_nagoftam/services/user_service.dart';
+
 import 'package:mage_nagoftam/style/color.dart';
+
 import 'package:mage_nagoftam/widgets/bottom_navigation_bar.dart';
 
 class AccountScreen extends StatefulWidget {
@@ -11,32 +20,84 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
+  User? _user;
+
+  List<Group> _groups = [];
+
+  bool _isLoading = true;
+
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _loadAccount();
+  }
+
   // ==================================================
-  // Mock Data
+  // Load Account
   // ==================================================
 
-  final String _userName = 'مریم حسینی';
-  final String _username = '@maryam_h1350';
+  Future<void> _loadAccount() async {
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+    }
 
-  final List<_GroupStatusData> _groups = [
-    _GroupStatusData(
-      name: 'دوستان',
-      totalPending: 18,
-      myPending: 3,
-      progress: 0.22,
-      avatarIcon: Icons.groups,
-    ),
-    _GroupStatusData(
-      name: 'خانواده',
-      totalPending: 18,
-      myPending: 3,
-      progress: 0.22,
-      avatarIcon: Icons.home,
-    ),
-  ];
+    try {
+      final results = await Future.wait([
+        UserService.getCurrentUser(),
+        GroupService.getGroups(),
+      ]);
 
-  final int _completedOrders = 1128;
-  final int _createdOrders = 743;
+      if (!mounted) return;
+
+      setState(() {
+        _user = results[0] as User;
+        _groups = results[1] as List<Group>;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+        _errorMessage = _getErrorMessage(e);
+      });
+    }
+  }
+
+  // ==================================================
+  // Open Group
+  // ==================================================
+
+  void _openGroup(Group group) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => GroupOrdersScreen(group: group)),
+    );
+  }
+
+  // ==================================================
+  // Error
+  // ==================================================
+
+  String _getErrorMessage(Object error) {
+    final message = error.toString();
+
+    if (message.contains('unauthorized')) {
+      return 'نشست شما منقضی شده است.';
+    }
+
+    if (message.contains('server_error')) {
+      return 'خطا در ارتباط با سرور.';
+    }
+
+    return 'دریافت اطلاعات حساب با خطا مواجه شد.';
+  }
 
   // ==================================================
   // Build
@@ -85,47 +146,49 @@ class _AccountScreenState extends State<AccountScreen> {
   // ==================================================
 
   Widget _buildBody() {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 600),
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-          children: [
-            _buildHeroSection(),
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-            const SizedBox(height: 12),
+    if (_errorMessage != null) {
+      return _buildErrorState();
+    }
 
-            _buildAnnouncementSection(),
+    return RefreshIndicator(
+      onRefresh: _loadAccount,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+            children: [
+              _buildProfileSection(),
 
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-            _buildSectionTitle('وضعیت گروه‌ها'),
+              _buildSectionTitle('گروه‌های شما'),
 
-            const SizedBox(height: 8),
+              const SizedBox(height: 8),
 
-            _buildGroupsStatus(),
-
-            const SizedBox(height: 24),
-
-            _buildSectionTitle('آمار کلی'),
-
-            const SizedBox(height: 8),
-
-            _buildStatistics(),
-          ],
+              _buildGroupsSection(),
+            ],
+          ),
         ),
       ),
     );
   }
 
   // ==================================================
-  // Hero
+  // Profile
   // ==================================================
 
-  Widget _buildHeroSection() {
+  Widget _buildProfileSection() {
+    final user = _user!;
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       decoration: BoxDecoration(
         color: AppColors.white2,
         borderRadius: BorderRadius.circular(18),
@@ -142,33 +205,40 @@ class _AccountScreenState extends State<AccountScreen> {
         children: [
           _buildAvatar(),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
 
           Text(
-            _userName,
+            user.fullName,
+            textAlign: TextAlign.center,
             style: Theme.of(
               context,
             ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
           ),
 
-          const SizedBox(height: 2),
+          const SizedBox(height: 6),
 
           Text(
-            _username,
+            user.phone,
+            textDirection: TextDirection.ltr,
             style: Theme.of(
               context,
-            ).textTheme.bodySmall?.copyWith(color: AppColors.gray2),
-            textDirection: TextDirection.ltr,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.gray2),
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 14),
 
-          Text(
-            '👏 این هفته ۱۲ خرید رو انجام دادی',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.gray1,
-              fontWeight: FontWeight.w600,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.gray4,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              '${_groups.length} گروه',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.gray1,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -197,40 +267,6 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   // ==================================================
-  // Announcement
-  // ==================================================
-
-  Widget _buildAnnouncementSection() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: AppColors.white2,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.gray4),
-      ),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.lightbulb_outline,
-            size: 20,
-            color: AppColors.orange1,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              'قابلیت جدید: حالا می‌تونی اعضای خانواده رو راحت‌تر دعوت کنی.',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.gray1),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ==================================================
   // Section Title
   // ==================================================
 
@@ -248,77 +284,75 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   // ==================================================
-  // Groups Status
+  // Groups
   // ==================================================
 
-  Widget _buildGroupsStatus() {
+  Widget _buildGroupsSection() {
+    if (_groups.isEmpty) {
+      return _buildEmptyGroupsState();
+    }
+
     return Column(
       children: _groups.map((group) {
         return Padding(
           padding: const EdgeInsets.only(bottom: 8),
-          child: _buildGroupStatusCard(group),
+          child: _buildGroupCard(group),
         );
       }).toList(),
     );
   }
 
-  Widget _buildGroupStatusCard(_GroupStatusData group) {
+  // ==================================================
+  // Group Card
+  // ==================================================
+
+  Widget _buildGroupCard(Group group) {
     return Material(
       color: AppColors.white2,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          //
-          // Navigate to group orders.
+          _openGroup(group);
         },
         child: Container(
-          padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: AppColors.gray4),
           ),
-          child: Column(
+          child: Row(
             children: [
-              Row(
-                children: [
-                  _buildGroupAvatar(group.avatarIcon),
+              _buildGroupAvatar(),
 
-                  const SizedBox(width: 10),
+              const SizedBox(width: 12),
 
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          group.name,
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          '${group.totalPending} سفارش ناتمام، سهم شما ${group.myPending} تا',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      group.title,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                ],
-              ),
 
-              const SizedBox(height: 8),
+                    const SizedBox(height: 4),
 
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: LinearProgressIndicator(
-                  value: group.progress,
-                  minHeight: 5,
-                  backgroundColor: AppColors.gray4,
-                  valueColor: const AlwaysStoppedAnimation<Color>(
-                    AppColors.green2,
-                  ),
+                    Text(
+                      'مشاهده سفارش‌های گروه',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: AppColors.gray2),
+                    ),
+                  ],
                 ),
               ),
+
+              const SizedBox(width: 8),
+
+              const Icon(Icons.chevron_left, color: AppColors.gray2),
             ],
           ),
         ),
@@ -330,7 +364,7 @@ class _AccountScreenState extends State<AccountScreen> {
   // Group Avatar
   // ==================================================
 
-  Widget _buildGroupAvatar(IconData icon) {
+  Widget _buildGroupAvatar() {
     return Container(
       width: 46,
       height: 46,
@@ -338,79 +372,46 @@ class _AccountScreenState extends State<AccountScreen> {
         shape: BoxShape.circle,
         color: AppColors.green3.withValues(alpha: 0.25),
       ),
-      child: Icon(icon, color: AppColors.green1, size: 25),
+      child: const Icon(Icons.groups, color: AppColors.green1, size: 25),
     );
   }
 
   // ==================================================
-  // Statistics
+  // Empty Groups
   // ==================================================
 
-  Widget _buildStatistics() {
-    return Column(
-      children: [
-        _buildStatisticCard(
-          value: _completedOrders,
-          label: 'سفارش تکمیل‌شده توسط شما تا کنون',
-          icon: Icons.check_circle_outline,
-        ),
-
-        const SizedBox(height: 8),
-
-        _buildStatisticCard(
-          value: _createdOrders,
-          label: 'سفارش ایجادشده توسط شما تا کنون',
-          icon: Icons.playlist_add_check,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatisticCard({
-    required int value,
-    required String label,
-    required IconData icon,
-  }) {
+  Widget _buildEmptyGroupsState() {
     return Container(
       width: double.infinity,
-      constraints: const BoxConstraints(minHeight: 64),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
       decoration: BoxDecoration(
         color: AppColors.white2,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.gray4),
       ),
-      child: Row(
+      child: Column(
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.gray4,
-            ),
-            child: Icon(icon, size: 21, color: AppColors.green1),
-          ),
+          const Icon(Icons.groups_outlined, size: 48, color: AppColors.gray2),
 
-          const SizedBox(width: 12),
-
-          Expanded(
-            child: Text(
-              label,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.gray2),
-            ),
-          ),
-
-          const SizedBox(width: 8),
+          const SizedBox(height: 12),
 
           Text(
-            _formatNumber(value),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+            'هنوز عضو هیچ گروهی نیستید.',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.gray1,
+              fontWeight: FontWeight.w600,
             ),
+          ),
+
+          const SizedBox(height: 6),
+
+          Text(
+            'با ایجاد یا پیوستن به یک گروه، خریدهای مشترک خود را مدیریت کنید.',
+            textAlign: TextAlign.center,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: AppColors.gray2),
           ),
         ],
       ),
@@ -418,42 +419,32 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   // ==================================================
-  // Number Formatter
+  // Error State
   // ==================================================
 
-  String _formatNumber(int number) {
-    final value = number.toString();
+  Widget _buildErrorState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, size: 56),
 
-    final buffer = StringBuffer();
+            const SizedBox(height: 16),
 
-    for (int i = 0; i < value.length; i++) {
-      if (i > 0 && (value.length - i) % 3 == 0) {
-        buffer.write(',');
-      }
+            Text(_errorMessage!, textAlign: TextAlign.center),
 
-      buffer.write(value[i]);
-    }
+            const SizedBox(height: 24),
 
-    return buffer.toString();
+            FilledButton.icon(
+              onPressed: _loadAccount,
+              icon: const Icon(Icons.refresh),
+              label: const Text('تلاش مجدد'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
-}
-
-// ==================================================
-// Group Status Model
-// ==================================================
-
-class _GroupStatusData {
-  final String name;
-  final int totalPending;
-  final int myPending;
-  final double progress;
-  final IconData avatarIcon;
-
-  const _GroupStatusData({
-    required this.name,
-    required this.totalPending,
-    required this.myPending,
-    required this.progress,
-    required this.avatarIcon,
-  });
 }

@@ -50,16 +50,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       }
 
       final notificationResult = results[0] as NotificationResult;
-
       final groups = results[1] as List<Group>;
 
       setState(() {
         _notifications = notificationResult.notifications;
-
         _unreadCount = notificationResult.unreadCount;
-
         _groups = groups;
-
         _isLoading = false;
       });
 
@@ -98,14 +94,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       }
 
       final notificationResult = results[0] as NotificationResult;
-
       final groups = results[1] as List<Group>;
 
       setState(() {
         _notifications = notificationResult.notifications;
-
         _unreadCount = notificationResult.unreadCount;
-
         _groups = groups;
       });
 
@@ -125,9 +118,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         return;
       }
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(_messageFromError(e))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _messageFromError(e),
+          ),
+        ),
+      );
     }
   }
 
@@ -155,7 +152,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
 
     return _notifications
-        .where((notification) => notification.groupId == _selectedGroupId)
+        .where(
+          (notification) =>
+              notification.groupId == _selectedGroupId,
+        )
         .toList();
   }
 
@@ -225,7 +225,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(_errorMessage!, textAlign: TextAlign.center),
+            Text(
+              _errorMessage!,
+              textAlign: TextAlign.center,
+            ),
 
             const SizedBox(height: 16),
 
@@ -241,7 +244,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
     }
 
     if (_errorMessage != null) {
@@ -258,20 +263,28 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       return _buildNoFilterResult();
     }
 
-    return NotificationFeed(notifications: notifications, onRefresh: _refresh);
+    return NotificationFeed(
+      notifications: notifications,
+      onRefresh: _refresh,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(title: const Text('اعلان‌ها')),
+        appBar: AppBar(
+          title: const Text('اعلان‌ها'),
+        ),
 
         body: Column(
           children: [
             if (_groups.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.only(top: 8, bottom: 4),
+                padding: const EdgeInsets.only(
+                  top: 8,
+                  bottom: 4,
+                ),
                 child: NotificationFilter(
                   groups: _groups,
                   selectedGroupId: _selectedGroupId,
@@ -283,7 +296,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 ),
               ),
 
-            Expanded(child: _buildBody()),
+            Expanded(
+              child: _buildBody(),
+            ),
           ],
         ),
 

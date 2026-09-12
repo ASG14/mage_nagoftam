@@ -1,74 +1,85 @@
 class AppNotification {
   final int id;
+
+  final int? actorUserId;
+  final String actorName;
+
   final String type;
   final String title;
   final String message;
+
   final int? groupId;
+  final String? groupTitle;
+
   final int? orderId;
+  final String? orderTitle;
+
   final bool isRead;
   final DateTime createdAt;
   final DateTime? readAt;
 
   const AppNotification({
     required this.id,
+    required this.actorUserId,
+    required this.actorName,
     required this.type,
     required this.title,
     required this.message,
-    this.groupId,
-    this.orderId,
+    required this.groupId,
+    required this.groupTitle,
+    required this.orderId,
+    required this.orderTitle,
     required this.isRead,
     required this.createdAt,
-    this.readAt,
+    required this.readAt,
   });
 
-  factory AppNotification.fromJson(Map<String, dynamic> json) {
+  factory AppNotification.fromJson(
+    Map<String, dynamic> json,
+  ) {
     return AppNotification(
-      id: int.parse(json['id'].toString()),
+      id: _parseInt(json['id']) ?? 0,
+
+      actorUserId: _parseInt(json['actor_user_id']),
+      actorName: json['actor_name']?.toString() ?? '',
+
       type: json['type']?.toString() ?? '',
       title: json['title']?.toString() ?? '',
       message: json['message']?.toString() ?? '',
+
       groupId: _parseInt(json['group_id']),
+      groupTitle: json['group_title']?.toString(),
+
       orderId: _parseInt(json['order_id']),
+      orderTitle: json['order_title']?.toString(),
+
       isRead: _parseBool(json['is_read']),
-      createdAt: DateTime.parse(json['created_at'].toString()),
+
+      createdAt:
+          _parseDate(json['created_at']) ??
+          DateTime.fromMillisecondsSinceEpoch(0),
+
       readAt: _parseDate(json['read_at']),
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'type': type,
-      'title': title,
-      'message': message,
-      'group_id': groupId,
-      'order_id': orderId,
-      'is_read': isRead,
-      'created_at': createdAt.toIso8601String(),
-      'read_at': readAt?.toIso8601String(),
-    };
-  }
-
   AppNotification copyWith({
-    int? id,
-    String? type,
-    String? title,
-    String? message,
-    int? groupId,
-    int? orderId,
     bool? isRead,
-    DateTime? createdAt,
     DateTime? readAt,
   }) {
     return AppNotification(
-      id: id ?? this.id,
-      type: type ?? this.type,
-      title: title ?? this.title,
-      message: message ?? this.message,
-      groupId: groupId ?? this.groupId,
-      orderId: orderId ?? this.orderId,
+      id: id,
+      actorUserId: actorUserId,
+      actorName: actorName,
+      type: type,
+      title: title,
+      message: message,
+      groupId: groupId,
+      groupTitle: groupTitle,
+      orderId: orderId,
+      orderTitle: orderTitle,
       isRead: isRead ?? this.isRead,
-      createdAt: createdAt ?? this.createdAt,
+      createdAt: createdAt,
       readAt: readAt ?? this.readAt,
     );
   }
@@ -93,6 +104,6 @@ class AppNotification {
       return null;
     }
 
-    return DateTime.tryParse(value.toString());
+    return DateTime.tryParse(value.toString())?.toLocal();
   }
 }

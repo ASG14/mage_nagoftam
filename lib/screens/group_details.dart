@@ -27,6 +27,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
   bool _isLoading = true;
   bool _isDeleting = false;
+  bool _isLeaving = false;
   bool _isGeneratingInvite = false;
 
   String? _errorMessage;
@@ -68,7 +69,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     });
 
     try {
-      final members = await GroupService.getMembers(groupId: widget.group.id);
+      final members = await GroupService.getMembers(
+        groupId: widget.group.id,
+      );
 
       if (!mounted) return;
 
@@ -85,6 +88,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       });
     }
   }
+
   // ==================================================
   // Edit Group
   // ==================================================
@@ -108,7 +112,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             maxLength: 150,
             textInputAction: TextInputAction.done,
 
-            decoration: const InputDecoration(labelText: 'نام گروه'),
+            decoration: const InputDecoration(
+              labelText: 'نام گروه',
+            ),
           ),
 
           actions: [
@@ -180,7 +186,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     });
 
     try {
-      final token = await GroupService.createInvite(groupId: widget.group.id);
+      final token = await GroupService.createInvite(
+        groupId: widget.group.id,
+      );
 
       if (token.trim().isEmpty) {
         throw Exception('invalid_invite_token');
@@ -195,7 +203,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         _isGeneratingInvite = false;
       });
 
-      await Clipboard.setData(ClipboardData(text: link));
+      await Clipboard.setData(
+        ClipboardData(text: link),
+      );
 
       if (!mounted) return;
 
@@ -216,7 +226,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       return;
     }
 
-    await Clipboard.setData(ClipboardData(text: _inviteLink!));
+    await Clipboard.setData(
+      ClipboardData(text: _inviteLink!),
+    );
 
     if (!mounted) return;
 
@@ -262,7 +274,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                 Navigator.pop(context, true);
               },
 
-              style: FilledButton.styleFrom(backgroundColor: AppColors.red1),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.red1,
+              ),
 
               child: const Text('حذف عضو'),
             ),
@@ -284,12 +298,86 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       if (!mounted) return;
 
       setState(() {
-        _members.removeWhere((item) => item.id == member.id);
+        _members.removeWhere(
+          (item) => item.id == member.id,
+        );
       });
 
       _showMessage('عضو از گروه حذف شد.');
     } catch (e) {
       if (!mounted) return;
+
+      _showMessage(_getErrorMessage(e));
+    }
+  }
+
+  // ==================================================
+  // Leave Group
+  // ==================================================
+
+  Future<void> _leaveGroup() async {
+    if (_isOwner || _isLeaving) {
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('ترک گروه'),
+
+          content: Text(
+            'آیا از ترک گروه «$_groupTitle» مطمئن هستید؟\n\n'
+            'سفارش‌های تکمیل‌شده شما حفظ می‌شوند، اما سفارش‌های '
+            'فعال مرتبط با شما از وضعیت مسئولیت خارج خواهند شد.',
+          ),
+
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: const Text('انصراف'),
+            ),
+
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.red1,
+              ),
+
+              child: const Text('ترک گروه'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) {
+      return;
+    }
+
+    setState(() {
+      _isLeaving = true;
+    });
+
+    try {
+      await GroupService.leaveGroup(
+        groupId: widget.group.id,
+      );
+
+      if (!mounted) return;
+
+      Navigator.of(context).pop(true);
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLeaving = false;
+      });
 
       _showMessage(_getErrorMessage(e));
     }
@@ -329,7 +417,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                 Navigator.pop(context, true);
               },
 
-              style: FilledButton.styleFrom(backgroundColor: AppColors.red1),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.red1,
+              ),
 
               child: const Text('حذف گروه'),
             ),
@@ -347,7 +437,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     });
 
     try {
-      await GroupService.deleteGroup(groupId: widget.group.id);
+      await GroupService.deleteGroup(
+        groupId: widget.group.id,
+      );
 
       if (!mounted) return;
 
@@ -378,6 +470,14 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       return 'شما اجازه انجام این عملیات را ندارید.';
     }
 
+    if (message.contains('creator cannot leave')) {
+      return 'مالک گروه نمی‌تواند گروه را ترک کند.';
+    }
+
+    if (message.contains('not a member')) {
+      return 'شما دیگر عضو این گروه نیستید.';
+    }
+
     if (message.contains('server_error')) {
       return 'خطایی در ارتباط با سرور رخ داد.';
     }
@@ -392,6 +492,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
     return 'عملیات با خطا مواجه شد.';
   }
+
   // ==================================================
   // Message
   // ==================================================
@@ -401,7 +502,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+      ..showSnackBar(
+        SnackBar(content: Text(message)),
+      );
   }
 
   // ==================================================
@@ -444,7 +547,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
     }
 
     if (_errorMessage != null) {
@@ -457,7 +562,12 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
 
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 32),
+        padding: const EdgeInsets.fromLTRB(
+          12,
+          12,
+          12,
+          32,
+        ),
 
         children: [
           _buildGroupHeader(),
@@ -509,7 +619,11 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             radius: 28,
             backgroundColor: AppColors.green3,
 
-            child: const Icon(Icons.groups, size: 28, color: AppColors.white2),
+            child: const Icon(
+              Icons.groups,
+              size: 28,
+              color: AppColors.white2,
+            ),
           ),
 
           const SizedBox(width: 14),
@@ -534,7 +648,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                 Text(
                   '${_members.length} عضو',
 
-                  style: const TextStyle(fontSize: 13, color: AppColors.gray2),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.gray2,
+                  ),
                 ),
               ],
             ),
@@ -556,7 +673,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.link, color: AppColors.green2),
+              const Icon(
+                Icons.link,
+                color: AppColors.green2,
+              ),
 
               const SizedBox(width: 10),
 
@@ -567,6 +687,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                   children: [
                     const Text(
                       'دعوت اعضای جدید',
+
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -577,7 +698,11 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
                     Text(
                       'لینک دعوت گروه را برای اعضای خانواده بفرستید.',
-                      style: TextStyle(fontSize: 12, color: AppColors.gray2),
+
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.gray2,
+                      ),
                     ),
                   ],
                 ),
@@ -601,7 +726,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                 _inviteLink!,
                 textDirection: TextDirection.ltr,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12),
+
+                style: const TextStyle(
+                  fontSize: 12,
+                ),
               ),
             ),
 
@@ -609,18 +737,29 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           ],
 
           FilledButton.icon(
-            onPressed: _isGeneratingInvite ? null : _createInvite,
+            onPressed: _isGeneratingInvite
+                ? null
+                : _createInvite,
 
             icon: _isGeneratingInvite
                 ? const SizedBox(
                     width: 18,
                     height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                    ),
                   )
-                : Icon(_inviteLink == null ? Icons.link : Icons.copy),
+                : Icon(
+                    _inviteLink == null
+                        ? Icons.link
+                        : Icons.copy,
+                  ),
 
             label: Text(
-              _inviteLink == null ? 'ایجاد لینک دعوت' : 'کپی لینک دعوت',
+              _inviteLink == null
+                  ? 'ایجاد لینک دعوت'
+                  : 'کپی لینک دعوت',
             ),
           ),
         ],
@@ -633,12 +772,17 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   // ==================================================
 
   Widget _buildMemberCard(GroupMember member) {
-    final bool isOwner = member.id == widget.group.creatorId;
+    final bool isOwner =
+        member.id == widget.group.creatorId;
 
-    final bool canRemove = _isOwner && member.id != _currentUserId;
+    final bool canRemove =
+        _isOwner && member.id != _currentUserId;
 
     return _SectionCard(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: 6,
+      ),
 
       child: ListTile(
         contentPadding: EdgeInsets.zero,
@@ -646,14 +790,19 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         leading: CircleAvatar(
           backgroundColor: AppColors.green3,
 
-          child: const Icon(Icons.person, color: AppColors.white2),
+          child: const Icon(
+            Icons.person,
+            color: AppColors.white2,
+          ),
         ),
 
         title: Text(
           member.fullName,
           textAlign: TextAlign.right,
 
-          style: const TextStyle(fontWeight: FontWeight.w600),
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+          ),
         ),
 
         subtitle: Text(
@@ -661,22 +810,30 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           textDirection: TextDirection.ltr,
           textAlign: TextAlign.right,
 
-          style: const TextStyle(fontSize: 12, color: AppColors.gray2),
+          style: const TextStyle(
+            fontSize: 12,
+            color: AppColors.gray2,
+          ),
         ),
 
         trailing: isOwner
-            ? const Chip(label: Text('مالک'))
-            : canRemove
-            ? IconButton(
-                tooltip: 'حذف عضو',
-
-                onPressed: () {
-                  _removeMember(member);
-                },
-
-                icon: const Icon(Icons.delete_outline, color: AppColors.red1),
+            ? const Chip(
+                label: Text('مالک'),
               )
-            : null,
+            : canRemove
+                ? IconButton(
+                    tooltip: 'حذف عضو',
+
+                    onPressed: () {
+                      _removeMember(member);
+                    },
+
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      color: AppColors.red1,
+                    ),
+                  )
+                : null,
       ),
     );
   }
@@ -692,41 +849,71 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       children: [
         if (_isOwner)
           OutlinedButton.icon(
-            onPressed: _isDeleting ? null : _deleteGroup,
+            onPressed: _isDeleting
+                ? null
+                : _deleteGroup,
 
             icon: _isDeleting
                 ? const SizedBox(
                     width: 18,
                     height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                    ),
                   )
-                : const Icon(Icons.delete_outline, color: AppColors.red1),
+                : const Icon(
+                    Icons.delete_outline,
+                    color: AppColors.red1,
+                  ),
 
             label: const Text(
               'حذف گروه',
-              style: TextStyle(color: AppColors.red1),
+
+              style: TextStyle(
+                color: AppColors.red1,
+              ),
             ),
 
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: AppColors.red1),
+              side: const BorderSide(
+                color: AppColors.red1,
+              ),
             ),
           ),
 
         if (!_isOwner)
           OutlinedButton.icon(
-            onPressed: () {
-              _showMessage('قابلیت ترک گروه در مرحله بعد اضافه می‌شود.');
-            },
+            onPressed: _isLeaving
+                ? null
+                : _leaveGroup,
 
-            icon: const Icon(Icons.logout, color: AppColors.red1),
+            icon: _isLeaving
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Icon(
+                    Icons.logout,
+                    color: AppColors.red1,
+                  ),
 
             label: const Text(
               'ترک گروه',
-              style: TextStyle(color: AppColors.red1),
+
+              style: TextStyle(
+                color: AppColors.red1,
+              ),
             ),
 
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: AppColors.red1),
+              side: const BorderSide(
+                color: AppColors.red1,
+              ),
             ),
           ),
       ],
@@ -746,20 +933,31 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           mainAxisSize: MainAxisSize.min,
 
           children: [
-            const Icon(Icons.error_outline, size: 56, color: AppColors.red1),
+            const Icon(
+              Icons.error_outline,
+              size: 56,
+              color: AppColors.red1,
+            ),
 
             const SizedBox(height: 16),
 
-            Text(_errorMessage!, textAlign: TextAlign.center),
+            Text(
+              _errorMessage!,
+              textAlign: TextAlign.center,
+            ),
 
             const SizedBox(height: 20),
 
             FilledButton.icon(
               onPressed: _loadMembers,
 
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(
+                Icons.refresh,
+              ),
 
-              label: const Text('تلاش مجدد'),
+              label: const Text(
+                'تلاش مجدد',
+              ),
             ),
           ],
         ),
@@ -794,7 +992,9 @@ class _SectionCard extends StatelessWidget {
 
         borderRadius: BorderRadius.circular(10),
 
-        border: Border.all(color: AppColors.gray4),
+        border: Border.all(
+          color: AppColors.gray4,
+        ),
       ),
 
       child: child,

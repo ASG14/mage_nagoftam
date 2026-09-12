@@ -19,7 +19,9 @@ class GroupService {
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
-      throw Exception(result['message']?.toString() ?? 'خطا در دریافت گروه‌ها');
+      throw Exception(
+        result['message']?.toString() ?? 'خطا در دریافت گروه‌ها',
+      );
     }
 
     final groupsData = result['data']?['groups'];
@@ -49,7 +51,9 @@ class GroupService {
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
-      throw Exception(result['message']?.toString() ?? 'خطا در ایجاد گروه');
+      throw Exception(
+        result['message']?.toString() ?? 'خطا در ایجاد گروه',
+      );
     }
 
     final groupId = result['data']?['group']?['id'];
@@ -88,7 +92,9 @@ class GroupService {
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
-      throw Exception(result['message']?.toString() ?? 'خطا در ویرایش گروه');
+      throw Exception(
+        result['message']?.toString() ?? 'خطا در ویرایش گروه',
+      );
     }
   }
 
@@ -107,13 +113,16 @@ class GroupService {
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
-      throw Exception(result['message']?.toString() ?? 'خطا در حذف گروه');
+      throw Exception(
+        result['message']?.toString() ?? 'خطا در حذف گروه',
+      );
     }
   }
 
   // Get Members
-  // Get Members
-  static Future<List<GroupMember>> getMembers({required int groupId}) async {
+  static Future<List<GroupMember>> getMembers({
+    required int groupId,
+  }) async {
     final response = await ApiClient.get(
       'groups/members.php?group_id=$groupId',
     );
@@ -165,7 +174,38 @@ class GroupService {
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
-      throw Exception(result['message']?.toString() ?? 'خطا در حذف عضو');
+      throw Exception(
+        result['message']?.toString() ?? 'خطا در حذف عضو',
+      );
+    }
+  }
+
+  // Leave Group
+  static Future<void> leaveGroup({
+    required int groupId,
+  }) async {
+    final response = await ApiClient.post(
+      'groups/leave.php',
+      body: {'group_id': groupId},
+    );
+
+    _handleUnauthorized(response.statusCode);
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        _errorFromResponse(
+          response,
+          fallback: 'server_error',
+        ),
+      );
+    }
+
+    final result = jsonDecode(response.body);
+
+    if (result['success'] != true) {
+      throw Exception(
+        result['message']?.toString() ?? 'خطا در ترک گروه',
+      );
     }
   }
 
@@ -221,13 +261,17 @@ class GroupService {
     _handleUnauthorized(response.statusCode);
 
     if (response.statusCode != 200) {
-      throw Exception(_errorFromResponse(response, fallback: 'server_error'));
+      throw Exception(
+        _errorFromResponse(response, fallback: 'server_error'),
+      );
     }
 
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
-      throw Exception(result['message']?.toString() ?? 'خطا در عضویت در گروه');
+      throw Exception(
+        result['message']?.toString() ?? 'خطا در عضویت در گروه',
+      );
     }
 
     final groupId = result['data']?['group_id'];
