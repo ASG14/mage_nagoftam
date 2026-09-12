@@ -7,16 +7,40 @@ import 'package:mage_nagoftam/services/group_service.dart';
 class JoinGroupScreen extends StatefulWidget {
   final String token;
 
-  const JoinGroupScreen({super.key, required this.token});
+  const JoinGroupScreen({
+    super.key,
+    required this.token,
+  });
 
   @override
   State<JoinGroupScreen> createState() => _JoinGroupScreenState();
 }
 
 class _JoinGroupScreenState extends State<JoinGroupScreen> {
+  bool _isLoggedIn = false;
+  bool _isCheckingAuth = true;
   bool _isJoining = false;
 
   String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAuth();
+  }
+
+  Future<void> _checkAuth() async {
+    final loggedIn = await AuthService.isLoggedIn();
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _isLoggedIn = loggedIn;
+      _isCheckingAuth = false;
+    });
+  }
 
   Future<void> _joinGroup() async {
     if (_isJoining) {
@@ -29,19 +53,9 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
     });
 
     try {
-      final loggedIn = await AuthService.isLoggedIn();
-
-      if (!mounted) {
-        return;
-      }
-
-      if (!loggedIn) {
-        Navigator.pushNamed(context, AppRoutes.login);
-
-        return;
-      }
-
-      final group = await GroupService.joinGroup(token: widget.token);
+      final group = await GroupService.joinGroup(
+        token: widget.token,
+      );
 
       if (!mounted) {
         return;
@@ -75,13 +89,10 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
       }
 
       setState(() {
-        _isJoining = false;
         _error = message;
       });
-
-      return;
     } finally {
-      if (mounted && _isJoining) {
+      if (mounted) {
         setState(() {
           _isJoining = false;
         });
@@ -90,25 +101,36 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
   }
 
   void _goToLogin() {
-    Navigator.pushNamed(context, AppRoutes.login);
+    Navigator.pushNamed(
+      context,
+      AppRoutes.login,
+      arguments: AppRoutes.joinGroup(widget.token),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('پیوستن به گروه')),
+      appBar: AppBar(
+        title: const Text('پیوستن به گروه'),
+      ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
+            constraints: const BoxConstraints(
+              maxWidth: 420,
+            ),
             child: Card(
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.group_add_outlined, size: 64),
+                    const Icon(
+                      Icons.group_add_outlined,
+                      size: 64,
+                    ),
 
                     const SizedBox(height: 20),
 
@@ -137,34 +159,47 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(5),
                         ),
-                        child: Text(_error!, textAlign: TextAlign.center),
+                        child: Text(
+                          _error!,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
 
                       const SizedBox(height: 16),
                     ],
 
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton(
-                        onPressed: _isJoining ? null : _joinGroup,
-                        child: _isJoining
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Text('پیوستن به گروه'),
+                    if (_isCheckingAuth)
+                      const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                        ),
+                      )
+                    else if (_isLoggedIn)
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: _isJoining ? null : _joinGroup,
+                          child: _isJoining
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Text('پیوستن به گروه'),
+                        ),
+                      )
+                    else
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: _goToLogin,
+                          child: const Text('ورود به حساب کاربری'),
+                        ),
                       ),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    TextButton(
-                      onPressed: _isJoining ? null : _goToLogin,
-                      child: const Text('ورود به حساب کاربری'),
-                    ),
                   ],
                 ),
               ),

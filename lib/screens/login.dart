@@ -4,7 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:mage_nagoftam/core/app_routes.dart';
 
 class Login extends StatefulWidget {
-  const Login({super.key});
+  final String? redirectRoute;
+
+  const Login({
+    super.key,
+    this.redirectRoute,
+  });
 
   @override
   State<Login> createState() => _LoginState();
@@ -13,9 +18,11 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _usernameController =
+      TextEditingController();
 
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _passwordController =
+      TextEditingController();
 
   bool _obscurePassword = true;
   bool _isLoading = false;
@@ -42,20 +49,35 @@ class _LoginState extends State<Login> {
         password: _passwordController.text,
       );
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       if (success) {
-        Navigator.pushReplacementNamed(context, '/');
+        Navigator.pushReplacementNamed(
+          context,
+          widget.redirectRoute ?? AppRoutes.account,
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('نام کاربری یا کلمه عبور اشتباه است')),
+          const SnackBar(
+            content: Text(
+              'نام کاربری یا کلمه عبور اشتباه است',
+            ),
+          ),
         );
       }
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ارتباط با سرور برقرار نشد')),
+        const SnackBar(
+          content: Text(
+            'ارتباط با سرور برقرار نشد',
+          ),
+        ),
       );
     } finally {
       if (mounted) {
@@ -80,11 +102,17 @@ class _LoginState extends State<Login> {
             padding: const EdgeInsets.all(16),
             child: Container(
               padding: const EdgeInsets.all(16),
-              constraints: const BoxConstraints(maxWidth: 600, minWidth: 200),
+              constraints: const BoxConstraints(
+                maxWidth: 600,
+                minWidth: 200,
+              ),
               decoration: BoxDecoration(
                 color: AppColors.white1,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(width: 0.5, color: AppColors.gray4),
+                border: Border.all(
+                  width: 0.5,
+                  color: AppColors.gray4,
+                ),
               ),
               child: Form(
                 key: _formKey,
@@ -96,10 +124,13 @@ class _LoginState extends State<Login> {
                       textAlign: TextAlign.center,
                       decoration: const InputDecoration(
                         hintText: 'نام کاربری',
-                        suffixIcon: Icon(Icons.supervised_user_circle_rounded),
+                        suffixIcon: Icon(
+                          Icons.supervised_user_circle_rounded,
+                        ),
                       ),
                       validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
+                        if (value == null ||
+                            value.trim().isEmpty) {
                           return 'نام کاربری را وارد کنید';
                         }
 
@@ -118,7 +149,8 @@ class _LoginState extends State<Login> {
                         suffixIcon: IconButton(
                           onPressed: () {
                             setState(() {
-                              _obscurePassword = !_obscurePassword;
+                              _obscurePassword =
+                                  !_obscurePassword;
                             });
                           },
                           icon: Icon(
@@ -145,19 +177,27 @@ class _LoginState extends State<Login> {
                           ? const SizedBox(
                               width: 22,
                               height: 22,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
                             )
                           : const Text('ورود'),
                     ),
+
                     const SizedBox(height: 8),
 
                     TextButton(
                       onPressed: _isLoading
                           ? null
                           : () {
-                              Navigator.pushNamed(context, AppRoutes.register);
+                              Navigator.pushNamed(
+                                context,
+                                AppRoutes.register,
+                              );
                             },
-                      child: const Text('حساب کاربری ندارید؟ ثبت نام کنید'),
+                      child: const Text(
+                        'حساب کاربری ندارید؟ ثبت نام کنید',
+                      ),
                     ),
                   ],
                 ),
