@@ -98,17 +98,20 @@ class ApiClient {
 
   static Future<String?> _getToken() async {
     /*
-     * Flutter Web uses HttpOnly cookie.
+     * Flutter Web:
+     * Authentication is handled by the HttpOnly cookie.
      *
-     * JavaScript cannot access the cookie,
-     * so there is no reason to read a token.
+     * Therefore the token must NOT be read from
+     * SharedPreferences and must NOT be sent manually.
      */
     if (kIsWeb) {
       return null;
     }
 
     /*
-     * Mobile continues using Bearer Token.
+     * Android / iOS:
+     * Continue using the Bearer token stored by
+     * AuthService.
      */
     return AuthService.getToken();
   }
