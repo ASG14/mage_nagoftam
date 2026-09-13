@@ -805,17 +805,6 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           ),
         ),
 
-        subtitle: Text(
-          member.phone,
-          textDirection: TextDirection.ltr,
-          textAlign: TextAlign.right,
-
-          style: const TextStyle(
-            fontSize: 12,
-            color: AppColors.gray2,
-          ),
-        ),
-
         trailing: isOwner
             ? const Chip(
                 label: Text('مالک'),

@@ -459,7 +459,6 @@ class _MemberCard extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         leading: const CircleAvatar(child: Icon(Icons.person)),
         title: Text(member.fullName),
-        subtitle: Text(member.phone, textDirection: TextDirection.ltr),
         trailing: isOwner
             ? const Chip(label: Text('مالک'))
             : canRemove

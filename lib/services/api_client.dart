@@ -1,20 +1,27 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import 'auth_service.dart';
 
 class ApiClient {
-  static const String baseUrl = 'https://magenagoftam.ir/api';
+  static const String baseUrl =
+      'https://magenagoftam.ir/api';
 
   // --------------------------------------------------
   // GET
   // --------------------------------------------------
 
-  static Future<http.Response> get(String endpoint) async {
-    final token = await AuthService.getToken();
+  static Future<http.Response> get(
+    String endpoint,
+  ) async {
+    final token = await _getToken();
 
-    return http.get(Uri.parse('$baseUrl/$endpoint'), headers: _headers(token));
+    return http.get(
+      Uri.parse('$baseUrl/$endpoint'),
+      headers: _headers(token),
+    );
   }
 
   // --------------------------------------------------
@@ -25,7 +32,7 @@ class ApiClient {
     String endpoint, {
     Map<String, dynamic>? body,
   }) async {
-    final token = await AuthService.getToken();
+    final token = await _getToken();
 
     return http.post(
       Uri.parse('$baseUrl/$endpoint'),
@@ -42,7 +49,7 @@ class ApiClient {
     String endpoint, {
     required Map<String, String> body,
   }) async {
-    final token = await AuthService.getToken();
+    final token = await _getToken();
 
     return http.post(
       Uri.parse('$baseUrl/$endpoint'),
@@ -59,7 +66,7 @@ class ApiClient {
     String endpoint, {
     Map<String, dynamic>? body,
   }) async {
-    final token = await AuthService.getToken();
+    final token = await _getToken();
 
     return http.put(
       Uri.parse('$baseUrl/$endpoint'),
@@ -76,7 +83,7 @@ class ApiClient {
     String endpoint, {
     Map<String, dynamic>? body,
   }) async {
-    final token = await AuthService.getToken();
+    final token = await _getToken();
 
     return http.delete(
       Uri.parse('$baseUrl/$endpoint'),
@@ -86,10 +93,33 @@ class ApiClient {
   }
 
   // --------------------------------------------------
+  // Token
+  // --------------------------------------------------
+
+  static Future<String?> _getToken() async {
+    /*
+     * Flutter Web uses HttpOnly cookie.
+     *
+     * JavaScript cannot access the cookie,
+     * so there is no reason to read a token.
+     */
+    if (kIsWeb) {
+      return null;
+    }
+
+    /*
+     * Mobile continues using Bearer Token.
+     */
+    return AuthService.getToken();
+  }
+
+  // --------------------------------------------------
   // JSON Headers
   // --------------------------------------------------
 
-  static Map<String, String> _headers(String? token) {
+  static Map<String, String> _headers(
+    String? token,
+  ) {
     final headers = <String, String>{
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -106,8 +136,12 @@ class ApiClient {
   // Form Headers
   // --------------------------------------------------
 
-  static Map<String, String> _formHeaders(String? token) {
-    final headers = <String, String>{'Accept': 'application/json'};
+  static Map<String, String> _formHeaders(
+    String? token,
+  ) {
+    final headers = <String, String>{
+      'Accept': 'application/json',
+    };
 
     if (token != null && token.isNotEmpty) {
       headers['Authorization'] = 'Bearer $token';

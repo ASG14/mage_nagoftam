@@ -5,32 +5,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'api_client.dart';
 
 class AuthService {
-  static Future<void> sendOtp({
-    required String phone,
-  }) async {
+  static Future<void> sendOtp({required String phone}) async {
     final response = await ApiClient.postForm(
       'auth/send_code.php',
-      body: {
-        'phone': phone,
-      },
+      body: {'phone': phone},
     );
 
     if (response.statusCode != 200) {
       throw Exception(
-        _errorFromResponse(
-          response.body,
-          fallback: 'خطا در ارسال کد تأیید',
-        ),
+        _errorFromResponse(response.body, fallback: 'خطا در ارسال کد تأیید'),
       );
     }
 
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
-      throw Exception(
-        result['message']?.toString() ??
-            'خطا در ارسال کد تأیید',
-      );
+      throw Exception(result['message']?.toString() ?? 'خطا در ارسال کد تأیید');
     }
   }
 
@@ -40,28 +30,19 @@ class AuthService {
   }) async {
     final response = await ApiClient.postForm(
       'auth/verify_code.php',
-      body: {
-        'phone': phone,
-        'code': code,
-      },
+      body: {'phone': phone, 'code': code},
     );
 
     if (response.statusCode != 200) {
       throw Exception(
-        _errorFromResponse(
-          response.body,
-          fallback: 'کد تأیید نامعتبر است',
-        ),
+        _errorFromResponse(response.body, fallback: 'کد تأیید نامعتبر است'),
       );
     }
 
     final result = jsonDecode(response.body);
 
     if (result['success'] != true) {
-      throw Exception(
-        result['message']?.toString() ??
-            'کد تأیید نامعتبر است',
-      );
+      throw Exception(result['message']?.toString() ?? 'کد تأیید نامعتبر است');
     }
 
     final data = result['data'];
@@ -73,33 +54,23 @@ class AuthService {
     final token = data['token']?.toString();
     final userData = data['user'];
 
-    if (token == null ||
-        token.isEmpty ||
-        userData is! Map) {
+    if (token == null || token.isEmpty || userData is! Map) {
       throw Exception('پاسخ نامعتبر از سرور');
     }
 
-    final userId = int.tryParse(
-      userData['id'].toString(),
-    );
+    final userId = int.tryParse(userData['id'].toString());
 
     if (userId == null) {
       throw Exception('شناسه کاربر نامعتبر است');
     }
 
-    final phoneNumber =
-        userData['phone']?.toString() ?? phone;
+    final phoneNumber = userData['phone']?.toString() ?? phone;
 
-    final firstName =
-        userData['first_name']?.toString();
+    final firstName = userData['first_name']?.toString();
 
-    final lastName =
-        userData['last_name']?.toString();
+    final lastName = userData['last_name']?.toString();
 
-    await _saveSession(
-      token: token,
-      userId: userId,
-    );
+    await _saveSession(token: token, userId: userId);
 
     return AuthResult(
       token: token,
@@ -119,18 +90,12 @@ class AuthService {
   }) async {
     final response = await ApiClient.post(
       'auth/update_profile.php',
-      body: {
-        'first_name': firstName,
-        'last_name': lastName,
-      },
+      body: {'first_name': firstName, 'last_name': lastName},
     );
 
     if (response.statusCode != 200) {
       throw Exception(
-        _errorFromResponse(
-          response.body,
-          fallback: 'خطا در ثبت اطلاعات کاربر',
-        ),
+        _errorFromResponse(response.body, fallback: 'خطا در ثبت اطلاعات کاربر'),
       );
     }
 
@@ -138,8 +103,7 @@ class AuthService {
 
     if (result['success'] != true) {
       throw Exception(
-        result['message']?.toString() ??
-            'خطا در ثبت اطلاعات کاربر',
+        result['message']?.toString() ?? 'خطا در ثبت اطلاعات کاربر',
       );
     }
   }
@@ -173,21 +137,23 @@ class AuthService {
   }
 
   static Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
+    try {
+      await ApiClient.post('auth/logout.php');
+    } catch (_) {
+      // خروج محلی حتی در صورت قطع بودن سرور انجام می‌شود.
+    } finally {
+      final prefs = await SharedPreferences.getInstance();
 
-    await prefs.remove('token');
-    await prefs.remove('user_id');
+      await prefs.remove('token');
+      await prefs.remove('user_id');
+    }
   }
 
-  static String _errorFromResponse(
-    String body, {
-    required String fallback,
-  }) {
+  static String _errorFromResponse(String body, {required String fallback}) {
     try {
       final result = jsonDecode(body);
 
-      if (result is Map &&
-          result['message'] != null) {
+      if (result is Map && result['message'] != null) {
         return result['message'].toString();
       }
     } catch (_) {}
@@ -213,4 +179,3 @@ class AuthResult {
     required this.isNewUser,
   });
 }
-
