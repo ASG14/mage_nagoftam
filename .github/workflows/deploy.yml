@@ -5,35 +5,62 @@ on:
     branches:
       - main
 
+  workflow_dispatch:
+
 jobs:
   build-and-deploy:
+    name: Build and Deploy Flutter Web
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
+      # ----------------------------------------
+      # 1. دریافت کد پروژه
+      # ----------------------------------------
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
+      # ----------------------------------------
+      # 2. نصب Flutter
+      # ----------------------------------------
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
 
+      # ----------------------------------------
+      # 3. نصب Dependencies
+      # ----------------------------------------
       - name: Install dependencies
         run: flutter pub get
 
+      # ----------------------------------------
+      # 4. بررسی کد Flutter
+      # ----------------------------------------
       - name: Analyze Flutter project
         run: flutter analyze
 
+      # ----------------------------------------
+      # 5. ساخت نسخه Web
+      # ----------------------------------------
       - name: Build Flutter Web
         run: flutter build web --release --base-href /app/
 
+      # ----------------------------------------
+      # 6. Deploy به هاست cPanel
+      # ----------------------------------------
       - name: Deploy to cPanel
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+
           protocol: ftps
+          port: 21
+
           local-dir: ./build/web/
-          server-dir: /
+          server-dir: ./
+
+          timeout: 120000
