@@ -47,7 +47,7 @@ class NotificationService {
 
   static Future<void> markAsRead({required int notificationId}) async {
     final response = await ApiClient.post(
-      'notifications/read.php',
+      'notifications/mark_read.php',
       body: {'notification_id': notificationId},
     );
 
