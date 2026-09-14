@@ -8,7 +8,7 @@ import 'package:mage_nagoftam/services/group_service.dart';
 import 'package:mage_nagoftam/services/order_service.dart';
 
 import 'package:mage_nagoftam/widgets/bottom_navigation_bar.dart';
-import 'package:mage_nagoftam/widgets/orders/group_orders_app_bar.dart';
+import 'package:mage_nagoftam/widgets/groups/group_orders_app_bar.dart';
 import 'package:mage_nagoftam/widgets/orders/orders_list.dart';
 import 'package:mage_nagoftam/widgets/orders/add_order_button.dart';
 
@@ -367,6 +367,7 @@ class _GroupOrdersScreenState extends State<GroupOrdersScreen> {
 
     return RefreshIndicator(
       onRefresh: _loadOrders,
+
       child: OrdersList(
         orders: _orders,
         currentUserId: _currentUserId,
@@ -386,8 +387,10 @@ class _GroupOrdersScreenState extends State<GroupOrdersScreen> {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
+
         child: Column(
           mainAxisSize: MainAxisSize.min,
+
           children: [
             const Icon(
               Icons.error_outline,

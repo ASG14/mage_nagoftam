@@ -2,14 +2,25 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/browser_client.dart' as browser;
 
 import 'auth_service.dart';
-
 import 'session_manager.dart';
 
 class ApiClient {
   static const String baseUrl =
       'https://magenagoftam.ir/api';
+
+  static final http.Client _client = _createClient();
+
+  static http.Client _createClient() {
+    if (kIsWeb) {
+      return browser.BrowserClient()
+        ..withCredentials = true;
+    }
+
+    return http.Client();
+  }
 
   // --------------------------------------------------
   // GET
@@ -21,7 +32,7 @@ class ApiClient {
   }) async {
     final token = await _getToken();
 
-    final response = await http.get(
+    final response = await _client.get(
       Uri.parse('$baseUrl/$endpoint'),
       headers: _headers(token),
     );
@@ -43,7 +54,7 @@ class ApiClient {
   }) async {
     final token = await _getToken();
 
-    final response = await http.post(
+    final response = await _client.post(
       Uri.parse('$baseUrl/$endpoint'),
       headers: _headers(token),
       body: body == null ? null : jsonEncode(body),
@@ -66,7 +77,7 @@ class ApiClient {
   }) async {
     final token = await _getToken();
 
-    final response = await http.post(
+    final response = await _client.post(
       Uri.parse('$baseUrl/$endpoint'),
       headers: _formHeaders(token),
       body: body,
@@ -89,7 +100,7 @@ class ApiClient {
   }) async {
     final token = await _getToken();
 
-    final response = await http.put(
+    final response = await _client.put(
       Uri.parse('$baseUrl/$endpoint'),
       headers: _headers(token),
       body: body == null ? null : jsonEncode(body),
@@ -112,7 +123,7 @@ class ApiClient {
   }) async {
     final token = await _getToken();
 
-    final response = await http.delete(
+    final response = await _client.delete(
       Uri.parse('$baseUrl/$endpoint'),
       headers: _headers(token),
       body: body == null ? null : jsonEncode(body),
@@ -125,20 +136,21 @@ class ApiClient {
   }
 
   // --------------------------------------------------
-  // Unauthorized
+  // Response handling
   // --------------------------------------------------
 
   static Future<http.Response> _handleResponse(
-  http.Response response, {
-  required bool handleUnauthorized,
-}) async {
-  if (response.statusCode == 401 &&
-      handleUnauthorized) {
-    await SessionManager.handleUnauthorized();
+    http.Response response, {
+    required bool handleUnauthorized,
+  }) async {
+    if (response.statusCode == 401 &&
+        handleUnauthorized) {
+      await SessionManager.handleUnauthorized();
+    }
+
+    return response;
   }
 
-  return response;
-}
   // --------------------------------------------------
   // Token
   // --------------------------------------------------
@@ -176,8 +188,7 @@ class ApiClient {
     };
 
     if (token != null && token.isNotEmpty) {
-      headers['Authorization'] =
-          'Bearer $token';
+      headers['Authorization'] = 'Bearer $token';
     }
 
     return headers;
@@ -195,8 +206,7 @@ class ApiClient {
     };
 
     if (token != null && token.isNotEmpty) {
-      headers['Authorization'] =
-          'Bearer $token';
+      headers['Authorization'] = 'Bearer $token';
     }
 
     return headers;

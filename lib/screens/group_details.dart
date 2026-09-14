@@ -12,13 +12,18 @@ import 'package:mage_nagoftam/style/color.dart';
 class GroupDetailsScreen extends StatefulWidget {
   final Group group;
 
-  const GroupDetailsScreen({super.key, required this.group});
+  const GroupDetailsScreen({
+    super.key,
+    required this.group,
+  });
 
   @override
-  State<GroupDetailsScreen> createState() => _GroupDetailsScreenState();
+  State<GroupDetailsScreen> createState() =>
+      _GroupDetailsScreenState();
 }
 
-class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
+class _GroupDetailsScreenState
+    extends State<GroupDetailsScreen> {
   List<GroupMember> _members = [];
 
   int? _currentUserId;
@@ -98,7 +103,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       return;
     }
 
-    final controller = TextEditingController(text: _groupTitle);
+    final controller =
+        TextEditingController(text: _groupTitle);
 
     final newTitle = await showDialog<String>(
       context: context,
@@ -127,7 +133,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
             FilledButton(
               onPressed: () {
-                final value = controller.text.trim();
+                final value =
+                    controller.text.trim();
 
                 if (value.isEmpty) {
                   return;
@@ -162,11 +169,15 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         _groupTitle = newTitle.trim();
       });
 
-      _showMessage('نام گروه با موفقیت تغییر کرد.');
+      _showMessage(
+        'نام گروه با موفقیت تغییر کرد.',
+      );
     } catch (e) {
       if (!mounted) return;
 
-      _showMessage(_getErrorMessage(e));
+      _showMessage(
+        _getErrorMessage(e),
+      );
     }
   }
 
@@ -191,10 +202,13 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       );
 
       if (token.trim().isEmpty) {
-        throw Exception('invalid_invite_token');
+        throw Exception(
+          'invalid_invite_token',
+        );
       }
 
-      final link = 'https://magenagoftam.ir/join/${token.trim()}';
+      final link =
+          'https://magenagoftam.ir/join/${token.trim()}';
 
       if (!mounted) return;
 
@@ -209,7 +223,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
       if (!mounted) return;
 
-      _showMessage('لینک دعوت ایجاد و کپی شد.');
+      _showMessage(
+        'لینک دعوت ایجاد و کپی شد.',
+      );
     } catch (e) {
       if (!mounted) return;
 
@@ -217,7 +233,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         _isGeneratingInvite = false;
       });
 
-      _showMessage(_getErrorMessage(e));
+      _showMessage(
+        _getErrorMessage(e),
+      );
     }
   }
 
@@ -232,20 +250,26 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
     if (!mounted) return;
 
-    _showMessage('لینک دعوت کپی شد.');
+    _showMessage(
+      'لینک دعوت کپی شد.',
+    );
   }
 
   // ==================================================
   // Remove Member
   // ==================================================
 
-  Future<void> _removeMember(GroupMember member) async {
+  Future<void> _removeMember(
+    GroupMember member,
+  ) async {
     if (!_isOwner) {
       return;
     }
 
     if (member.id == _currentUserId) {
-      _showMessage('صاحب گروه نمی‌تواند خودش را حذف کند.');
+      _showMessage(
+        'صاحب گروه نمی‌تواند خودش را حذف کند.',
+      );
 
       return;
     }
@@ -303,11 +327,15 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         );
       });
 
-      _showMessage('عضو از گروه حذف شد.');
+      _showMessage(
+        'عضو از گروه حذف شد.',
+      );
     } catch (e) {
       if (!mounted) return;
 
-      _showMessage(_getErrorMessage(e));
+      _showMessage(
+        _getErrorMessage(e),
+      );
     }
   }
 
@@ -379,7 +407,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         _isLeaving = false;
       });
 
-      _showMessage(_getErrorMessage(e));
+      _showMessage(
+        _getErrorMessage(e),
+      );
     }
   }
 
@@ -443,6 +473,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
       if (!mounted) return;
 
+      // true یعنی گروه با موفقیت حذف شده است.
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
@@ -451,7 +482,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         _isDeleting = false;
       });
 
-      _showMessage(_getErrorMessage(e));
+      _showMessage(
+        _getErrorMessage(e),
+      );
     }
   }
 
@@ -464,6 +497,14 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
     if (message.contains('unauthorized')) {
       return 'نشست شما منقضی شده است. لطفاً دوباره وارد شوید.';
+    }
+
+    // Backend برای حذف گروه در صورت عدم مالکیت
+    // پاسخ 403 با این پیام را برمی‌گرداند.
+    if (message.contains(
+      'You are not allowed to delete this group',
+    )) {
+      return 'فقط مالک گروه می‌تواند آن را حذف کند.';
     }
 
     if (message.contains('not_owner')) {
@@ -490,6 +531,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       return 'گروه موردنظر پیدا نشد.';
     }
 
+    if (message.contains('Method not allowed')) {
+      return 'عملیات حذف گروه توسط سرور مجاز نیست.';
+    }
+
     return 'عملیات با خطا مواجه شد.';
   }
 
@@ -503,7 +548,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        SnackBar(content: Text(message)),
+        SnackBar(
+          content: Text(message),
+        ),
       );
   }
 
@@ -516,14 +563,18 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: Text('مشخصات گروه $_groupTitle'),
+          title: Text(
+            'مشخصات گروه $_groupTitle',
+          ),
 
           leading: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
 
-            icon: const Icon(Icons.arrow_back),
+            icon: const Icon(
+              Icons.arrow_back,
+            ),
           ),
 
           actions: [
@@ -531,7 +582,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
               IconButton(
                 tooltip: 'ویرایش نام گروه',
                 onPressed: _editGroupName,
-                icon: const Icon(Icons.edit_outlined),
+                icon: const Icon(
+                  Icons.edit_outlined,
+                ),
               ),
           ],
         ),
@@ -560,7 +613,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       onRefresh: _loadMembers,
 
       child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
+        physics:
+            const AlwaysScrollableScrollPhysics(),
 
         padding: const EdgeInsets.fromLTRB(
           12,
@@ -578,11 +632,11 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
           const SizedBox(height: 20),
 
-          Text(
+          const Text(
             'اعضای گروه',
             textAlign: TextAlign.right,
 
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: AppColors.gray1,
@@ -591,13 +645,19 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
           const SizedBox(height: 10),
 
-          ..._members.map((member) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+          ..._members.map(
+            (member) {
+              return Padding(
+                padding:
+                    const EdgeInsets.only(
+                  bottom: 8,
+                ),
 
-              child: _buildMemberCard(member),
-            );
-          }),
+                child:
+                    _buildMemberCard(member),
+              );
+            },
+          ),
 
           const SizedBox(height: 24),
 
@@ -630,7 +690,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
 
               children: [
                 Text(
@@ -668,7 +729,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   Widget _buildInviteCard() {
     return _SectionCard(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment:
+            CrossAxisAlignment.stretch,
 
         children: [
           Row(
@@ -682,7 +744,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
 
                   children: [
                     const Text(
@@ -714,17 +777,19 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
           if (_inviteLink != null) ...[
             Container(
-              padding: const EdgeInsets.all(10),
+              padding:
+                  const EdgeInsets.all(10),
 
               decoration: BoxDecoration(
                 color: AppColors.gray4,
-
-                borderRadius: BorderRadius.circular(6),
+                borderRadius:
+                    BorderRadius.circular(6),
               ),
 
               child: SelectableText(
                 _inviteLink!,
-                textDirection: TextDirection.ltr,
+                textDirection:
+                    TextDirection.ltr,
                 textAlign: TextAlign.center,
 
                 style: const TextStyle(
@@ -746,7 +811,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                     width: 18,
                     height: 18,
 
-                    child: CircularProgressIndicator(
+                    child:
+                        CircularProgressIndicator(
                       strokeWidth: 2,
                     ),
                   )
@@ -771,15 +837,19 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   // Member Card
   // ==================================================
 
-  Widget _buildMemberCard(GroupMember member) {
+  Widget _buildMemberCard(
+    GroupMember member,
+  ) {
     final bool isOwner =
         member.id == widget.group.creatorId;
 
     final bool canRemove =
-        _isOwner && member.id != _currentUserId;
+        _isOwner &&
+        member.id != _currentUserId;
 
     return _SectionCard(
-      padding: const EdgeInsets.symmetric(
+      padding:
+          const EdgeInsets.symmetric(
         horizontal: 12,
         vertical: 6,
       ),
@@ -788,7 +858,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         contentPadding: EdgeInsets.zero,
 
         leading: CircleAvatar(
-          backgroundColor: AppColors.green3,
+          backgroundColor:
+              AppColors.green3,
 
           child: const Icon(
             Icons.person,
@@ -814,12 +885,15 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                     tooltip: 'حذف عضو',
 
                     onPressed: () {
-                      _removeMember(member);
+                      _removeMember(
+                        member,
+                      );
                     },
 
                     icon: const Icon(
                       Icons.delete_outline,
-                      color: AppColors.red1,
+                      color:
+                          AppColors.red1,
                     ),
                   )
                 : null,
@@ -833,7 +907,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
   Widget _buildDangerSection() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment:
+          CrossAxisAlignment.stretch,
 
       children: [
         if (_isOwner)
@@ -847,13 +922,15 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                     width: 18,
                     height: 18,
 
-                    child: CircularProgressIndicator(
+                    child:
+                        CircularProgressIndicator(
                       strokeWidth: 2,
                     ),
                   )
                 : const Icon(
                     Icons.delete_outline,
-                    color: AppColors.red1,
+                    color:
+                        AppColors.red1,
                   ),
 
             label: const Text(
@@ -864,7 +941,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
               ),
             ),
 
-            style: OutlinedButton.styleFrom(
+            style:
+                OutlinedButton.styleFrom(
               side: const BorderSide(
                 color: AppColors.red1,
               ),
@@ -882,13 +960,15 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                     width: 18,
                     height: 18,
 
-                    child: CircularProgressIndicator(
+                    child:
+                        CircularProgressIndicator(
                       strokeWidth: 2,
                     ),
                   )
                 : const Icon(
                     Icons.logout,
-                    color: AppColors.red1,
+                    color:
+                        AppColors.red1,
                   ),
 
             label: const Text(
@@ -899,7 +979,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
               ),
             ),
 
-            style: OutlinedButton.styleFrom(
+            style:
+                OutlinedButton.styleFrom(
               side: const BorderSide(
                 color: AppColors.red1,
               ),
@@ -916,10 +997,12 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   Widget _buildError() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding:
+            const EdgeInsets.all(32),
 
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize:
+              MainAxisSize.min,
 
           children: [
             const Icon(
@@ -932,7 +1015,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
             Text(
               _errorMessage!,
-              textAlign: TextAlign.center,
+              textAlign:
+                  TextAlign.center,
             ),
 
             const SizedBox(height: 20),
@@ -959,18 +1043,22 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 // Section Card
 // ==================================================
 
-class _SectionCard extends StatelessWidget {
+class _SectionCard
+    extends StatelessWidget {
   final Widget child;
 
   final EdgeInsetsGeometry padding;
 
   const _SectionCard({
     required this.child,
-    this.padding = const EdgeInsets.all(14),
+    this.padding =
+        const EdgeInsets.all(14),
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+    BuildContext context,
+  ) {
     return Container(
       width: double.infinity,
 
@@ -979,7 +1067,8 @@ class _SectionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white2,
 
-        borderRadius: BorderRadius.circular(10),
+        borderRadius:
+            BorderRadius.circular(10),
 
         border: Border.all(
           color: AppColors.gray4,
