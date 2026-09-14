@@ -1,18 +1,11 @@
 import 'package:flutter/material.dart';
 
 import 'package:mage_nagoftam/models/group.dart';
-
-import 'package:mage_nagoftam/services/auth_service.dart';
 import 'package:mage_nagoftam/services/group_service.dart';
-
-import 'package:mage_nagoftam/style/color.dart';
-
 import 'package:mage_nagoftam/widgets/bottom_navigation_bar.dart';
 import 'package:mage_nagoftam/widgets/groups/group_card.dart';
 
 import 'package:mage_nagoftam/screens/group_orders.dart';
-
-import 'members.dart';
 
 class GroupsScreen extends StatefulWidget {
   const GroupsScreen({super.key});
@@ -24,8 +17,6 @@ class GroupsScreen extends StatefulWidget {
 class _GroupsScreenState extends State<GroupsScreen> {
   List<Group> _groups = [];
 
-  int? _currentUserId;
-
   bool _isLoading = true;
 
   String? _errorMessage;
@@ -34,19 +25,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
   void initState() {
     super.initState();
 
-    _initialize();
-  }
-
-  // ==================================================
-  // Initialize
-  // ==================================================
-
-  Future<void> _initialize() async {
-    _currentUserId = await AuthService.getUserId();
-
-    if (!mounted) return;
-
-    await _loadGroups();
+    _loadGroups();
   }
 
   // ==================================================
@@ -95,7 +74,9 @@ class _GroupsScreenState extends State<GroupsScreen> {
     }
 
     try {
-      await GroupService.createGroup(title: title.trim());
+      await GroupService.createGroup(
+        title: title.trim(),
+      );
 
       if (!mounted) return;
 
@@ -112,115 +93,15 @@ class _GroupsScreenState extends State<GroupsScreen> {
   }
 
   // ==================================================
-  // Edit Group
-  // ==================================================
-
-  Future<void> _editGroup(Group group) async {
-    final title = await _showGroupTitleDialog(
-      title: 'ویرایش گروه',
-      initialValue: group.title,
-      confirmText: 'ذخیره',
-    );
-
-    if (title == null || title.trim().isEmpty) {
-      return;
-    }
-
-    try {
-      await GroupService.updateGroup(groupId: group.id, title: title.trim());
-
-      if (!mounted) return;
-
-      await _loadGroups();
-
-      if (!mounted) return;
-
-      _showMessage('گروه با موفقیت ویرایش شد.');
-    } catch (e) {
-      if (!mounted) return;
-
-      _showMessage(_getErrorMessage(e));
-    }
-  }
-
-  // ==================================================
-  // Delete Group
-  // ==================================================
-
-  Future<void> _confirmDeleteGroup(Group group) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('حذف گروه'),
-          content: Text(
-            'آیا از حذف گروه «${group.title}» '
-            'مطمئن هستید؟\n\n'
-            'تمام اطلاعات مربوط به این گروه نیز حذف خواهد شد.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context, false);
-              },
-              child: const Text('انصراف'),
-            ),
-            FilledButton(
-              onPressed: () {
-                Navigator.pop(context, true);
-              },
-              style: FilledButton.styleFrom(backgroundColor: AppColors.red1),
-              child: const Text('حذف'),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (confirmed != true) {
-      return;
-    }
-
-    await _deleteGroup(group);
-  }
-
-  Future<void> _deleteGroup(Group group) async {
-    try {
-      await GroupService.deleteGroup(groupId: group.id);
-
-      if (!mounted) return;
-
-      setState(() {
-        _groups.removeWhere((item) => item.id == group.id);
-      });
-
-      _showMessage('گروه با موفقیت حذف شد.');
-    } catch (e) {
-      if (!mounted) return;
-
-      _showMessage(_getErrorMessage(e));
-    }
-  }
-
-  // ==================================================
-  // Open Members
-  // ==================================================
-
-  void _openMembers(Group group) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => MembersScreen(group: group)),
-    );
-  }
-
-  // ==================================================
   // Open Group
   // ==================================================
 
   void _openGroup(Group group) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => GroupOrdersScreen(group: group)),
+      MaterialPageRoute(
+        builder: (_) => GroupOrdersScreen(group: group),
+      ),
     );
   }
 
@@ -233,7 +114,9 @@ class _GroupsScreenState extends State<GroupsScreen> {
     required String confirmText,
     String initialValue = '',
   }) async {
-    final controller = TextEditingController(text: initialValue);
+    final controller = TextEditingController(
+      text: initialValue,
+    );
 
     final result = await showDialog<String>(
       context: context,
@@ -321,7 +204,11 @@ class _GroupsScreenState extends State<GroupsScreen> {
 
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+        ),
+      );
   }
 
   // ==================================================
@@ -334,7 +221,6 @@ class _GroupsScreenState extends State<GroupsScreen> {
       child: Scaffold(
         appBar: AppBar(
           titleSpacing: 16,
-
           title: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -346,7 +232,6 @@ class _GroupsScreenState extends State<GroupsScreen> {
               const Text('گروه‌ها'),
             ],
           ),
-
           actions: [
             IconButton(
               tooltip: 'جستجو',
@@ -376,7 +261,9 @@ class _GroupsScreenState extends State<GroupsScreen> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
     }
 
     if (_errorMessage != null) {
@@ -391,7 +278,12 @@ class _GroupsScreenState extends State<GroupsScreen> {
       onRefresh: _loadGroups,
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
+        padding: const EdgeInsets.fromLTRB(
+          16,
+          12,
+          16,
+          100,
+        ),
         itemCount: _groups.length,
         itemBuilder: (context, index) {
           final group = _groups[index];
@@ -401,18 +293,8 @@ class _GroupsScreenState extends State<GroupsScreen> {
             child: GroupCard(
               group: group,
               index: index,
-              isOwner: group.creatorId == _currentUserId,
               onTap: () {
                 _openGroup(group);
-              },
-              onMembers: () {
-                _openMembers(group);
-              },
-              onEdit: () {
-                _editGroup(group);
-              },
-              onDelete: () {
-                _confirmDeleteGroup(group);
               },
             ),
           );
@@ -485,9 +367,15 @@ class _GroupsScreenState extends State<GroupsScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, size: 56),
+            const Icon(
+              Icons.error_outline,
+              size: 56,
+            ),
             const SizedBox(height: 16),
-            Text(_errorMessage!, textAlign: TextAlign.center),
+            Text(
+              _errorMessage!,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 24),
             FilledButton.icon(
               onPressed: _loadGroups,
@@ -505,6 +393,8 @@ class _GroupsScreenState extends State<GroupsScreen> {
   // ==================================================
 
   void _showSearchMessage() {
-    _showMessage('جستجو را در مرحله بعد اضافه می‌کنیم.');
+    _showMessage(
+      'جستجو را در مرحله بعد اضافه می‌کنیم.',
+    );
   }
 }

@@ -7,30 +7,45 @@ class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  State<SplashScreen> createState() =>
+      _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState
+    extends State<SplashScreen> {
+
   @override
   void initState() {
     super.initState();
-    _checkLogin();
+
+    _checkSession();
   }
 
-  Future<void> _checkLogin() async {
-    final loggedIn = await AuthService.isLoggedIn();
+  Future<void> _checkSession() async {
+    final loggedIn =
+        await AuthService.checkSession();
 
     if (!mounted) return;
 
     if (loggedIn) {
-      Navigator.pushReplacementNamed(context, AppRoutes.account);
+      Navigator.pushReplacementNamed(
+        context,
+        AppRoutes.account,
+      );
     } else {
-      Navigator.pushReplacementNamed(context, AppRoutes.login);
+      Navigator.pushReplacementNamed(
+        context,
+        AppRoutes.login,
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    return const Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
   }
 }

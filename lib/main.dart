@@ -6,6 +6,8 @@ import 'package:mage_nagoftam/core/app_routes.dart';
 
 import 'package:mage_nagoftam/style/theme.dart';
 
+import 'package:mage_nagoftam/services/session_manager.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -16,6 +18,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: SessionManager.navigatorKey,
+
       locale: const Locale('fa', 'IR'),
 
       theme: AppTheme.lightTheme,

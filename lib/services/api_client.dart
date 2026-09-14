@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 
 import 'auth_service.dart';
 
+import 'session_manager.dart';
+
 class ApiClient {
   static const String baseUrl =
       'https://magenagoftam.ir/api';
@@ -14,13 +16,19 @@ class ApiClient {
   // --------------------------------------------------
 
   static Future<http.Response> get(
-    String endpoint,
-  ) async {
+    String endpoint, {
+    bool handleUnauthorized = true,
+  }) async {
     final token = await _getToken();
 
-    return http.get(
+    final response = await http.get(
       Uri.parse('$baseUrl/$endpoint'),
       headers: _headers(token),
+    );
+
+    return _handleResponse(
+      response,
+      handleUnauthorized: handleUnauthorized,
     );
   }
 
@@ -31,13 +39,19 @@ class ApiClient {
   static Future<http.Response> post(
     String endpoint, {
     Map<String, dynamic>? body,
+    bool handleUnauthorized = true,
   }) async {
     final token = await _getToken();
 
-    return http.post(
+    final response = await http.post(
       Uri.parse('$baseUrl/$endpoint'),
       headers: _headers(token),
       body: body == null ? null : jsonEncode(body),
+    );
+
+    return _handleResponse(
+      response,
+      handleUnauthorized: handleUnauthorized,
     );
   }
 
@@ -48,13 +62,19 @@ class ApiClient {
   static Future<http.Response> postForm(
     String endpoint, {
     required Map<String, String> body,
+    bool handleUnauthorized = true,
   }) async {
     final token = await _getToken();
 
-    return http.post(
+    final response = await http.post(
       Uri.parse('$baseUrl/$endpoint'),
       headers: _formHeaders(token),
       body: body,
+    );
+
+    return _handleResponse(
+      response,
+      handleUnauthorized: handleUnauthorized,
     );
   }
 
@@ -65,13 +85,19 @@ class ApiClient {
   static Future<http.Response> put(
     String endpoint, {
     Map<String, dynamic>? body,
+    bool handleUnauthorized = true,
   }) async {
     final token = await _getToken();
 
-    return http.put(
+    final response = await http.put(
       Uri.parse('$baseUrl/$endpoint'),
       headers: _headers(token),
       body: body == null ? null : jsonEncode(body),
+    );
+
+    return _handleResponse(
+      response,
+      handleUnauthorized: handleUnauthorized,
     );
   }
 
@@ -82,16 +108,37 @@ class ApiClient {
   static Future<http.Response> delete(
     String endpoint, {
     Map<String, dynamic>? body,
+    bool handleUnauthorized = true,
   }) async {
     final token = await _getToken();
 
-    return http.delete(
+    final response = await http.delete(
       Uri.parse('$baseUrl/$endpoint'),
       headers: _headers(token),
       body: body == null ? null : jsonEncode(body),
     );
+
+    return _handleResponse(
+      response,
+      handleUnauthorized: handleUnauthorized,
+    );
   }
 
+  // --------------------------------------------------
+  // Unauthorized
+  // --------------------------------------------------
+
+  static Future<http.Response> _handleResponse(
+  http.Response response, {
+  required bool handleUnauthorized,
+}) async {
+  if (response.statusCode == 401 &&
+      handleUnauthorized) {
+    await SessionManager.handleUnauthorized();
+  }
+
+  return response;
+}
   // --------------------------------------------------
   // Token
   // --------------------------------------------------
@@ -129,7 +176,8 @@ class ApiClient {
     };
 
     if (token != null && token.isNotEmpty) {
-      headers['Authorization'] = 'Bearer $token';
+      headers['Authorization'] =
+          'Bearer $token';
     }
 
     return headers;
@@ -147,7 +195,8 @@ class ApiClient {
     };
 
     if (token != null && token.isNotEmpty) {
-      headers['Authorization'] = 'Bearer $token';
+      headers['Authorization'] =
+          'Bearer $token';
     }
 
     return headers;

@@ -30,7 +30,7 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
   }
 
   Future<void> _checkAuth() async {
-    final loggedIn = await AuthService.isLoggedIn();
+    final loggedIn = await AuthService.checkSession();
 
     if (!mounted) {
       return;
