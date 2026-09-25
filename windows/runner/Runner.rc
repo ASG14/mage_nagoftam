@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "begir" "\0"
+            VALUE "FileDescription", "mage_nagoftam" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "begir" "\0"
+            VALUE "InternalName", "mage_nagoftam" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "begir.exe" "\0"
-            VALUE "ProductName", "begir" "\0"
+            VALUE "OriginalFilename", "mage_nagoftam.exe" "\0"
+            VALUE "ProductName", "mage_nagoftam" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

@@ -7,25 +7,30 @@ class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  State<SplashScreen> createState() =>
+      _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState
+    extends State<SplashScreen> {
+
   @override
   void initState() {
     super.initState();
-    _checkLogin();
+
+    _checkSession();
   }
 
-  Future<void> _checkLogin() async {
-    final loggedIn = await AuthService.isLoggedIn();
+  Future<void> _checkSession() async {
+    final loggedIn =
+        await AuthService.checkSession();
 
     if (!mounted) return;
 
     if (loggedIn) {
       Navigator.pushReplacementNamed(
         context,
-        AppRoutes.home,
+        AppRoutes.account,
       );
     } else {
       Navigator.pushReplacementNamed(

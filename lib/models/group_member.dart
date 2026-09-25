@@ -1,13 +1,11 @@
 class GroupMember {
   final int id;
-  final String phone;
   final String firstName;
   final String lastName;
   final DateTime joinedAt;
 
   const GroupMember({
     required this.id,
-    required this.phone,
     required this.firstName,
     required this.lastName,
     required this.joinedAt,
@@ -30,7 +28,6 @@ class GroupMember {
       id: int.parse(
         json['id'].toString(),
       ),
-      phone: json['phone']?.toString() ?? '',
       firstName:
           json['first_name']?.toString() ?? '',
       lastName:

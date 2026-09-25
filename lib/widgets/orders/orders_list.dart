@@ -9,8 +9,12 @@ class OrdersList extends StatelessWidget {
   final int? currentUserId;
 
   final void Function(Order order)? onReserve;
+
   final void Function(Order order)? onComplete;
+
   final void Function(Order order)? onDelete;
+
+  final void Function(Order order)? onCancelReserve;
 
   const OrdersList({
     super.key,
@@ -19,59 +23,65 @@ class OrdersList extends StatelessWidget {
     this.onReserve,
     this.onComplete,
     this.onDelete,
+    this.onCancelReserve,
   });
 
   @override
   Widget build(BuildContext context) {
     if (orders.isEmpty) {
       return ListView(
-        physics:
-            const AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
+
         children: const [
           SizedBox(height: 250),
-          Center(
-            child: Text(
-              'هنوز سفارشی ثبت نشده است',
-            ),
-          ),
+
+          Center(child: Text('هنوز سفارشی ثبت نشده است.')),
         ],
       );
     }
 
     return ListView.separated(
-      physics:
-          const AlwaysScrollableScrollPhysics(),
+      physics: const AlwaysScrollableScrollPhysics(),
 
-      padding: const EdgeInsets.fromLTRB(
-        12,
-        12,
-        12,
-        100,
-      ),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 100),
 
       itemCount: orders.length,
 
-      separatorBuilder: (_, _) =>
-          const SizedBox(height: 10),
+      separatorBuilder: (context, index) {
+        return const SizedBox(height: 10);
+      },
 
       itemBuilder: (context, index) {
         final order = orders[index];
 
         return OrderCard(
           order: order,
+
           currentUserId: currentUserId,
 
-          onReserve: () {
-            onReserve?.call(order);
-          },
+          onReserve: onReserve == null
+              ? null
+              : () {
+                  onReserve!(order);
+                },
 
-          onComplete: () {
-            onComplete?.call(order);
-          },
+          onComplete: onComplete == null
+              ? null
+              : () {
+                  onComplete!(order);
+                },
 
-          onDelete: () {
-            onDelete?.call(order);
-          },
+          onDelete: onDelete == null
+              ? null
+              : () {
+                  onDelete!(order);
+                },
+
+          onCancelReserve: onCancelReserve == null
+              ? null
+              : () {
+                  onCancelReserve!(order);
+                },
         );
       },
     );
