@@ -5,18 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "begir",
+            "name": "mage_nagoftam",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "begir (profile mode)",
+            "name": "mage_nagoftam (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "begir (release mode)",
+            "name": "mage_nagoftam (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"

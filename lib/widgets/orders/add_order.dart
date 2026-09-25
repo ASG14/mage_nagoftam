@@ -143,20 +143,34 @@ class _AddOrderState extends State<AddOrder> {
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: _isLoading ? null : () => Navigator.pop(context),
-          child: const Text('انصراف'),
-        ),
-
-        FilledButton(
-          onPressed: _isLoading ? null : _submit,
-          child: _isLoading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('ثبت سفارش'),
+        Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              flex: 1,
+              child: TextButton(
+                onPressed: _isLoading ? null : () => Navigator.pop(context),
+                style: TextButton.styleFrom(backgroundColor: AppColors.red1),
+                child: const Text('انصراف'),
+              ),
+            ),
+                SizedBox(width: 5,),
+            Expanded(
+              flex: 1,
+              child: FilledButton(
+                onPressed: _isLoading ? null : _submit,
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('ثبت سفارش'),
+              ),
+            ),
+          ],
         ),
       ],
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:mage_nagoftam/models/group.dart';
 import 'package:mage_nagoftam/services/group_service.dart';
+import 'package:mage_nagoftam/style/color.dart';
 import 'package:mage_nagoftam/widgets/bottom_navigation_bar.dart';
 import 'package:mage_nagoftam/widgets/groups/group_card.dart';
 
@@ -74,9 +75,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
     }
 
     try {
-      await GroupService.createGroup(
-        title: title.trim(),
-      );
+      await GroupService.createGroup(title: title.trim());
 
       if (!mounted) return;
 
@@ -99,9 +98,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
   void _openGroup(Group group) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => GroupOrdersScreen(group: group),
-      ),
+      MaterialPageRoute(builder: (_) => GroupOrdersScreen(group: group)),
     );
   }
 
@@ -114,9 +111,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
     required String confirmText,
     String initialValue = '',
   }) async {
-    final controller = TextEditingController(
-      text: initialValue,
-    );
+    final controller = TextEditingController(text: initialValue);
 
     final result = await showDialog<String>(
       context: context,
@@ -141,23 +136,39 @@ class _GroupsScreenState extends State<GroupsScreen> {
             },
           ),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('انصراف'),
-            ),
-            FilledButton(
-              onPressed: () {
-                final value = controller.text.trim();
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: AppColors.red1,
+                    ),
+                    child: const Text('انصراف'),
+                  ),
+                ),
+                SizedBox(width: 5),
+                Expanded(
+                  flex: 1,
+                  child: FilledButton(
+                    onPressed: () {
+                      final value = controller.text.trim();
 
-                if (value.isEmpty) {
-                  return;
-                }
+                      if (value.isEmpty) {
+                        return;
+                      }
 
-                Navigator.pop(context, value);
-              },
-              child: Text(confirmText),
+                      Navigator.pop(context, value);
+                    },
+                    child: Text(confirmText),
+                  ),
+                ),
+              ],
             ),
           ],
         );
@@ -204,11 +215,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
 
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-        ),
-      );
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   // ==================================================
@@ -261,9 +268,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_errorMessage != null) {
@@ -278,12 +283,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
       onRefresh: _loadGroups,
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
-          16,
-          12,
-          16,
-          100,
-        ),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
         itemCount: _groups.length,
         itemBuilder: (context, index) {
           final group = _groups[index];
@@ -337,7 +337,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
                     ),
                     const SizedBox(height: 10),
                     const Text(
-                      'یک گروه بساز و خریدهای مشترک را با دیگران مدیریت کن.',
+                      'ابتدا یک گروه بساز و خریدهای مشترک را با دیگران مدیریت کن.',
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
@@ -367,15 +367,9 @@ class _GroupsScreenState extends State<GroupsScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 56,
-            ),
+            const Icon(Icons.error_outline, size: 56),
             const SizedBox(height: 16),
-            Text(
-              _errorMessage!,
-              textAlign: TextAlign.center,
-            ),
+            Text(_errorMessage!, textAlign: TextAlign.center),
             const SizedBox(height: 24),
             FilledButton.icon(
               onPressed: _loadGroups,
@@ -393,8 +387,6 @@ class _GroupsScreenState extends State<GroupsScreen> {
   // ==================================================
 
   void _showSearchMessage() {
-    _showMessage(
-      'جستجو را در مرحله بعد اضافه می‌کنیم.',
-    );
+    _showMessage('جستجو را در مرحله بعد اضافه می‌کنیم.');
   }
 }

@@ -56,9 +56,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       text: user.firstName ?? '',
     );
 
-    final lastNameController = TextEditingController(
-      text: user.lastName ?? '',
-    );
+    final lastNameController = TextEditingController(text: user.lastName ?? '');
 
     final result = await showDialog<bool>(
       context: context,
@@ -71,42 +69,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
               TextField(
                 controller: firstNameController,
                 textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
-                  labelText: 'نام',
-                ),
+                decoration: const InputDecoration(labelText: 'نام'),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: lastNameController,
                 textInputAction: TextInputAction.done,
-                decoration: const InputDecoration(
-                  labelText: 'نام خانوادگی',
-                ),
+                decoration: const InputDecoration(labelText: 'نام خانوادگی'),
               ),
             ],
           ),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-              },
-              child: const Text('انصراف'),
-            ),
-            FilledButton(
-              onPressed: () {
-                final firstName =
-                    firstNameController.text.trim();
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(dialogContext);
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: AppColors.red1,
+                    ),
+                    child: const Text('انصراف'),
+                  ),
+                ),
+                SizedBox(width: 5),
+                Expanded(
+                  flex: 1,
+                  child: FilledButton(
+                    onPressed: () {
+                      final firstName = firstNameController.text.trim();
 
-                final lastName =
-                    lastNameController.text.trim();
+                      final lastName = lastNameController.text.trim();
 
-                if (firstName.isEmpty || lastName.isEmpty) {
-                  return;
-                }
+                      if (firstName.isEmpty || lastName.isEmpty) {
+                        return;
+                      }
 
-                Navigator.pop(dialogContext, true);
-              },
-              child: const Text('ذخیره'),
+                      Navigator.pop(dialogContext, true);
+                    },
+                    child: const Text('ذخیره'),
+                  ),
+                ),
+              ],
             ),
           ],
         );
@@ -119,9 +127,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     firstNameController.dispose();
     lastNameController.dispose();
 
-    if (result != true ||
-        firstName.isEmpty ||
-        lastName.isEmpty) {
+    if (result != true || firstName.isEmpty || lastName.isEmpty) {
       return;
     }
 
@@ -130,16 +136,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
 
     try {
-      await AuthService.updateProfile(
-        firstName: firstName,
-        lastName: lastName,
-      );
+      await AuthService.updateProfile(firstName: firstName, lastName: lastName);
 
       await _loadUser();
 
-      _showMessage(
-        'اطلاعات حساب با موفقیت به‌روزرسانی شد.',
-      );
+      _showMessage('اطلاعات حساب با موفقیت به‌روزرسانی شد.');
     } catch (e) {
       _showMessage(_errorMessage(e));
     } finally {
@@ -174,18 +175,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
             'از حساب خود خارج شوید؟',
           ),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-              },
-              child: const Text('انصراف'),
-            ),
-            FilledButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-                _logout();
-              },
-              child: const Text('خروج'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(dialogContext);
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: AppColors.gray3,
+                    ),
+                    child: const Text('انصراف'),
+                  ),
+                ),
+                SizedBox(width: 5),
+                Expanded(
+                  flex: 1,
+                  child: FilledButton(
+                    onPressed: () {
+                      Navigator.pop(dialogContext);
+                      _logout();
+                    },
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.red1,
+                    ),
+                    child: const Text('خروج'),
+                  ),
+                ),
+              ],
             ),
           ],
         );
@@ -277,10 +297,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return 'خطا در ارتباط با سرور.';
     }
 
-    return message.replaceFirst(
-      'Exception: ',
-      '',
-    );
+    return message.replaceFirst('Exception: ', '');
   }
 
   void _showMessage(String message) {
@@ -288,20 +305,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-        ),
-      );
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('تنظیمات'),
-        ),
+        appBar: AppBar(title: const Text('تنظیمات')),
         body: _buildBody(),
       ),
     );
@@ -309,20 +320,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     final user = _user;
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(
-        16,
-        16,
-        16,
-        32,
-      ),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
       children: [
         _buildProfileCard(user),
 
@@ -340,9 +344,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                      ),
+                      child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : null,
             ),
@@ -359,10 +361,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: 'گروه‌های من',
               subtitle: 'مشاهده و مدیریت گروه‌ها',
               onTap: () {
-                Navigator.pushReplacementNamed(
-                  context,
-                  AppRoutes.groups,
-                );
+                Navigator.pushReplacementNamed(context, AppRoutes.groups);
               },
             ),
 
@@ -412,16 +411,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
         OutlinedButton.icon(
           onPressed: _showLogoutConfirmation,
-          icon: const Icon(
-            Icons.logout,
-            color: AppColors.red1,
-          ),
+          icon: const Icon(Icons.logout, color: AppColors.red1),
           label: const Text('خروج از حساب'),
           style: OutlinedButton.styleFrom(
             foregroundColor: AppColors.red1,
-            side: const BorderSide(
-              color: AppColors.red1,
-            ),
+            side: const BorderSide(color: AppColors.red1),
           ),
         ),
       ],
@@ -429,11 +423,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildProfileCard(User? user) {
-    final fullName =
-        user?.fullName ?? 'حساب کاربری';
+    final fullName = user?.fullName ?? 'حساب کاربری';
 
-    final phone =
-        user?.phone ?? 'اطلاعات حساب در دسترس نیست';
+    final phone = user?.phone ?? 'اطلاعات حساب در دسترس نیست';
 
     return Card(
       child: Padding(
@@ -445,13 +437,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               height: 64,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.green3.withValues(
-                  alpha: 0.25,
-                ),
-                border: Border.all(
-                  color: AppColors.green3,
-                  width: 2,
-                ),
+                color: AppColors.green3.withValues(alpha: 0.25),
+                border: Border.all(color: AppColors.green3, width: 2),
               ),
               child: const Icon(
                 Icons.person,
@@ -464,17 +451,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             Expanded(
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     fullName,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
 
                   const SizedBox(height: 5),
@@ -482,9 +465,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Text(
                     phone,
                     textDirection: TextDirection.ltr,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall,
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
               ),
@@ -492,12 +473,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             IconButton(
               tooltip: 'ویرایش',
-              onPressed: _isUpdatingProfile
-                  ? null
-                  : _editProfile,
-              icon: const Icon(
-                Icons.edit_outlined,
-              ),
+              onPressed: _isUpdatingProfile ? null : _editProfile,
+              icon: const Icon(Icons.edit_outlined),
             ),
           ],
         ),
@@ -510,32 +487,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required List<Widget> children,
   }) {
     return Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 4,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Text(
             title,
-            style: Theme.of(context)
-                .textTheme
-                .titleSmall
-                ?.copyWith(
-                  color: AppColors.gray1,
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: AppColors.gray1,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
 
         const SizedBox(height: 8),
 
-        Card(
-          child: Column(
-            children: children,
-          ),
-        ),
+        Card(child: Column(children: children)),
       ],
     );
   }
@@ -548,15 +515,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     Widget? trailing,
   }) {
     return ListTile(
-      leading: Icon(
-        icon,
-        color: AppColors.green1,
-      ),
+      leading: Icon(icon, color: AppColors.green1),
       title: Text(title),
       subtitle: Text(subtitle),
-      trailing:
-          trailing ??
-          const Icon(Icons.chevron_left),
+      trailing: trailing ?? const Icon(Icons.chevron_left),
       onTap: onTap,
     );
   }

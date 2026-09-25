@@ -1,4 +1,4 @@
-package com.example.begir
+package com.example.mage_nagoftam
 
 import io.flutter.embedding.android.FlutterActivity
 

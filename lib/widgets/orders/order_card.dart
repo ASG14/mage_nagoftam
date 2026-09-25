@@ -107,17 +107,39 @@ class _OrderCardState extends State<OrderCard> {
             'آیا از حذف این سفارش مطمئن هستید؟',
           ),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context, false);
-              },
-              child: const Text('انصراف'),
-            ),
-            FilledButton(
-              onPressed: () {
-                Navigator.pop(context, true);
-              },
-              child: const Text('حذف'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(context, false);
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: AppColors.gray2,
+                    ),
+                    child: const Text('انصراف'),
+                  ),
+                ),
+                SizedBox(width: 5),
+
+                Expanded(
+                  flex: 1,
+                  child: FilledButton(
+                    onPressed: () {
+                      Navigator.pop(context, true);
+                    },
+
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.red1,
+                    ),
+
+                    child: const Text('حذف'),
+                  ),
+                ),
+              ],
             ),
           ],
         );
