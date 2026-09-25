@@ -6,3 +6,5 @@ import 'package:http/http.dart' as http;
 http.Client createClient() {
   return createClientImpl();
 }
+
+bool get isWeb => isWebImpl;

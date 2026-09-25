@@ -1,26 +1,16 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:http/browser_client.dart' as browser;
 
 import 'auth_service.dart';
 import 'session_manager.dart';
+import 'client_factory.dart';
 
 class ApiClient {
   static const String baseUrl =
       'https://magenagoftam.ir/api';
 
-  static final http.Client _client = _createClient();
-
-  static http.Client _createClient() {
-    if (kIsWeb) {
-      return browser.BrowserClient()
-        ..withCredentials = true;
-    }
-
-    return http.Client();
-  }
+  static final http.Client _client = createClient();
 
   // --------------------------------------------------
   // GET
@@ -163,7 +153,7 @@ class ApiClient {
      * Therefore the token must NOT be read from
      * SharedPreferences and must NOT be sent manually.
      */
-    if (kIsWeb) {
+    if (isWeb) {
       return null;
     }
 
