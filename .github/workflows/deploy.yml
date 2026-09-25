@@ -40,5 +40,5 @@ jobs:
           protocol: ftp
           port: 21
           local-dir: ./build/web/
-          server-dir: /public_html/app/
+          server-dir: ./
           timeout: 120000
