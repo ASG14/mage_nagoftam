@@ -4,10 +4,6 @@ import 'package:mage_nagoftam/models/order.dart';
 import 'package:mage_nagoftam/services/api_client.dart';
 
 class OrderService {
-  // --------------------------------------------------
-  // Get Orders
-  // --------------------------------------------------
-
   static Future<List<Order>> getOrders({
     required int groupId,
   }) async {
@@ -45,10 +41,6 @@ class OrderService {
         )
         .toList();
   }
-
-  // --------------------------------------------------
-  // Create Order
-  // --------------------------------------------------
 
   static Future<Order> createOrder({
     required int groupId,
@@ -91,8 +83,7 @@ class OrderService {
     }
 
     return Order.fromJson(
-      result['data']['order']
-          as Map<String, dynamic>,
+      result['data']['order'] as Map<String, dynamic>,
     );
   }
 
@@ -135,6 +126,49 @@ class OrderService {
     if (result['success'] != true) {
       throw Exception(
         result['message'] ?? 'خطا در سپردن سفارش',
+      );
+    }
+  }
+
+  // --------------------------------------------------
+  // Unassign Order
+  // --------------------------------------------------
+
+  static Future<void> unassignOrder({
+    required int orderId,
+  }) async {
+    final response = await ApiClient.postForm(
+      'orders/unassign.php',
+      body: {
+        'order_id': orderId.toString(),
+      },
+    );
+
+    if (response.statusCode == 401) {
+      throw Exception('unauthorized');
+    }
+
+    if (response.statusCode == 403) {
+      throw Exception('forbidden');
+    }
+
+    if (response.statusCode == 404) {
+      throw Exception('not_found');
+    }
+
+    if (response.statusCode == 409) {
+      throw Exception('not_assigned');
+    }
+
+    if (response.statusCode != 200) {
+      throw Exception('server_error');
+    }
+
+    final result = jsonDecode(response.body);
+
+    if (result['success'] != true) {
+      throw Exception(
+        result['message'] ?? 'خطا در لغو مسئولیت',
       );
     }
   }
@@ -235,23 +269,29 @@ class OrderService {
   static String _formatDateTime(
     DateTime dateTime,
   ) {
-    final year =
-        dateTime.year.toString().padLeft(4, '0');
+    final year = dateTime.year
+        .toString()
+        .padLeft(4, '0');
 
-    final month =
-        dateTime.month.toString().padLeft(2, '0');
+    final month = dateTime.month
+        .toString()
+        .padLeft(2, '0');
 
-    final day =
-        dateTime.day.toString().padLeft(2, '0');
+    final day = dateTime.day
+        .toString()
+        .padLeft(2, '0');
 
-    final hour =
-        dateTime.hour.toString().padLeft(2, '0');
+    final hour = dateTime.hour
+        .toString()
+        .padLeft(2, '0');
 
-    final minute =
-        dateTime.minute.toString().padLeft(2, '0');
+    final minute = dateTime.minute
+        .toString()
+        .padLeft(2, '0');
 
-    final second =
-        dateTime.second.toString().padLeft(2, '0');
+    final second = dateTime.second
+        .toString()
+        .padLeft(2, '0');
 
     return '$year-$month-$day '
         '$hour:$minute:$second';

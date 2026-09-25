@@ -299,7 +299,6 @@ abstract final class AppTheme {
       titleTextStyle: AppTypography.h4.copyWith(color: AppColors.gray1),
 
       contentTextStyle: AppTypography.h8.copyWith(color: AppColors.gray2),
-      
     ),
 
     // ============================================================

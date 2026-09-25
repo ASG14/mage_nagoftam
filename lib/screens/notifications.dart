@@ -1,55 +1,75 @@
 import 'package:flutter/material.dart';
 
+import 'package:mage_nagoftam/models/group.dart';
 import 'package:mage_nagoftam/models/notification.dart';
+import 'package:mage_nagoftam/services/group_service.dart';
 import 'package:mage_nagoftam/services/notification_service.dart';
 import 'package:mage_nagoftam/widgets/bottom_navigation_bar.dart';
-import 'package:mage_nagoftam/widgets/drawer.dart';
-import 'package:mage_nagoftam/widgets/notification_card.dart';
+import 'package:mage_nagoftam/widgets/notifications/notification_feed.dart';
+import 'package:mage_nagoftam/widgets/notifications/notification_filter.dart';
 
 class NotificationsScreen extends StatefulWidget {
-  const NotificationsScreen({
-    super.key,
-  });
+  const NotificationsScreen({super.key});
 
   @override
-  State<NotificationsScreen> createState() =>
-      _NotificationsScreenState();
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
 }
 
-class _NotificationsScreenState
-    extends State<NotificationsScreen> {
+class _NotificationsScreenState extends State<NotificationsScreen> {
   List<AppNotification> _notifications = [];
+  List<Group> _groups = [];
+
+  int? _selectedGroupId;
 
   bool _isLoading = true;
   String? _errorMessage;
+
+  int _unreadCount = 0;
 
   @override
   void initState() {
     super.initState();
 
-    _loadNotifications();
+    _loadData();
   }
 
-  Future<void> _loadNotifications() async {
+  Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
 
     try {
-      final result =
-          await NotificationService.getNotifications();
+      final results = await Future.wait([
+        NotificationService.getNotifications(),
+        GroupService.getGroups(),
+      ]);
 
       if (!mounted) {
         return;
       }
 
+      final notificationResult = results[0] as NotificationResult;
+      final groups = results[1] as List<Group>;
+
       setState(() {
-        _notifications = result.notifications;
+        _notifications = notificationResult.notifications;
+        _unreadCount = notificationResult.unreadCount;
+        _groups = groups;
         _isLoading = false;
       });
 
-      await NotificationService.markAllAsRead();
+      if (_unreadCount > 0) {
+        await NotificationService.markAllAsRead();
+
+        if (!mounted) {
+          return;
+        }
+
+        setState(() {
+          _unreadCount = 0;
+        });
+      }
     } catch (e) {
       if (!mounted) {
         return;
@@ -62,20 +82,37 @@ class _NotificationsScreenState
     }
   }
 
-  Future<void> _refreshNotifications() async {
+  Future<void> _refresh() async {
     try {
-      final result =
-          await NotificationService.getNotifications();
+      final results = await Future.wait([
+        NotificationService.getNotifications(),
+        GroupService.getGroups(),
+      ]);
 
       if (!mounted) {
         return;
       }
 
+      final notificationResult = results[0] as NotificationResult;
+      final groups = results[1] as List<Group>;
+
       setState(() {
-        _notifications = result.notifications;
+        _notifications = notificationResult.notifications;
+        _unreadCount = notificationResult.unreadCount;
+        _groups = groups;
       });
 
-      await NotificationService.markAllAsRead();
+      if (_unreadCount > 0) {
+        await NotificationService.markAllAsRead();
+
+        if (!mounted) {
+          return;
+        }
+
+        setState(() {
+          _unreadCount = 0;
+        });
+      }
     } catch (e) {
       if (!mounted) {
         return;
@@ -109,61 +146,70 @@ class _NotificationsScreenState
     return 'خطا در دریافت اعلان‌ها.';
   }
 
+  List<AppNotification> get _filteredNotifications {
+    if (_selectedGroupId == null) {
+      return _notifications;
+    }
+
+    return _notifications
+        .where(
+          (notification) =>
+              notification.groupId == _selectedGroupId,
+        )
+        .toList();
+  }
+
   Widget _buildEmptyState() {
     return RefreshIndicator(
-      onRefresh: _refreshNotifications,
+      onRefresh: _refresh,
       child: ListView(
-        physics:
-            const AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
         children: [
           SizedBox(
-            height:
-                MediaQuery.of(context).size.height *
-                    0.65,
-            child: Center(
+            height: MediaQuery.of(context).size.height * 0.55,
+            child: const Center(
               child: Padding(
-                padding:
-                    const EdgeInsets.all(32),
+                padding: EdgeInsets.all(32),
                 child: Column(
-                  mainAxisSize:
-                      MainAxisSize.min,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.notifications_none,
-                      size: 80,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .primary,
-                    ),
-
-                    const SizedBox(
-                      height: 20,
-                    ),
-
-                    const Text(
+                    Text(
                       'اعلانی ندارید',
-                      textAlign:
-                          TextAlign.center,
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 20,
-                        fontWeight:
-                            FontWeight.bold,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-
-                    const SizedBox(
-                      height: 8,
-                    ),
-
-                    const Text(
+                    SizedBox(height: 8),
+                    Text(
                       'وقتی اتفاق مهمی در گروه‌های '
                       'شما رخ دهد، اعلان آن را '
-                      'در اینجا خواهید دید.',
-                      textAlign:
-                          TextAlign.center,
+                      'اینجا خواهید دید.',
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoFilterResult() {
+    return RefreshIndicator(
+      onRefresh: _refresh,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.45,
+            child: const Center(
+              child: Text(
+                'اعلانی برای این گروه وجود ندارد.',
+                textAlign: TextAlign.center,
               ),
             ),
           ),
@@ -179,54 +225,19 @@ class _NotificationsScreenState
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Theme.of(context)
-                  .colorScheme
-                  .error,
-            ),
-
-            const SizedBox(height: 16),
-
             Text(
               _errorMessage!,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 16,
-              ),
             ),
 
             const SizedBox(height: 16),
 
             FilledButton(
-              onPressed: _loadNotifications,
-              child: const Text(
-                'تلاش دوباره',
-              ),
+              onPressed: _loadData,
+              child: const Text('تلاش دوباره'),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildNotificationsList() {
-    return RefreshIndicator(
-      onRefresh: _refreshNotifications,
-      child: ListView.builder(
-        physics:
-            const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.only(
-          top: 8,
-          bottom: 24,
-        ),
-        itemCount: _notifications.length,
-        itemBuilder: (context, index) {
-          return NotificationCard(
-            notification: _notifications[index],
-          );
-        },
       ),
     );
   }
@@ -242,11 +253,20 @@ class _NotificationsScreenState
       return _buildErrorState();
     }
 
+    final notifications = _filteredNotifications;
+
     if (_notifications.isEmpty) {
       return _buildEmptyState();
     }
 
-    return _buildNotificationsList();
+    if (notifications.isEmpty) {
+      return _buildNoFilterResult();
+    }
+
+    return NotificationFeed(
+      notifications: notifications,
+      onRefresh: _refresh,
+    );
   }
 
   @override
@@ -254,17 +274,35 @@ class _NotificationsScreenState
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: const Text(
-            'اعلان‌ها',
-          ),
+          title: const Text('اعلان‌ها'),
         ),
 
-        drawer: const MyDrawer(),
+        body: Column(
+          children: [
+            if (_groups.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(
+                  top: 8,
+                  bottom: 4,
+                ),
+                child: NotificationFilter(
+                  groups: _groups,
+                  selectedGroupId: _selectedGroupId,
+                  onChanged: (groupId) {
+                    setState(() {
+                      _selectedGroupId = groupId;
+                    });
+                  },
+                ),
+              ),
 
-        body: _buildBody(),
+            Expanded(
+              child: _buildBody(),
+            ),
+          ],
+        ),
 
-        bottomNavigationBar:
-            const MyBottomNavigationBar(),
+        bottomNavigationBar: const MyBottomNavigationBar(),
       ),
     );
   }

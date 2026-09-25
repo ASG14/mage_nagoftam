@@ -20,11 +20,9 @@ class AddOrder extends StatefulWidget {
 }
 
 class _AddOrderState extends State<AddOrder> {
-  final TextEditingController _titleController =
-      TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
 
-  final TextEditingController _quantityController =
-      TextEditingController();
+  final TextEditingController _quantityController = TextEditingController();
 
   Priority _priority = Priority.medium;
 
@@ -71,9 +69,7 @@ class _AddOrderState extends State<AddOrder> {
     } catch (e) {
       if (!mounted) return;
 
-      _showMessage(
-        'ثبت سفارش انجام نشد',
-      );
+      _showMessage('ثبت سفارش انجام نشد');
     } finally {
       if (mounted) {
         setState(() {
@@ -84,11 +80,9 @@ class _AddOrderState extends State<AddOrder> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -96,9 +90,7 @@ class _AddOrderState extends State<AddOrder> {
     return AlertDialog(
       title: Text(
         'افزودن سفارش',
-        style: AppTypography.h5.copyWith(
-          color: AppColors.gray1,
-        ),
+        style: AppTypography.h5.copyWith(color: AppColors.gray1),
       ),
       content: SingleChildScrollView(
         child: Column(
@@ -131,22 +123,11 @@ class _AddOrderState extends State<AddOrder> {
 
             DropdownButtonFormField<Priority>(
               initialValue: _priority,
-              decoration: const InputDecoration(
-                labelText: 'اولویت',
-              ),
+              decoration: const InputDecoration(labelText: 'اولویت'),
               items: const [
-                DropdownMenuItem(
-                  value: Priority.low,
-                  child: Text('کم'),
-                ),
-                DropdownMenuItem(
-                  value: Priority.medium,
-                  child: Text('عادی'),
-                ),
-                DropdownMenuItem(
-                  value: Priority.high,
-                  child: Text('زیاد'),
-                ),
+                DropdownMenuItem(value: Priority.low, child: Text('کم')),
+                DropdownMenuItem(value: Priority.medium, child: Text('عادی')),
+                DropdownMenuItem(value: Priority.high, child: Text('زیاد')),
               ],
               onChanged: _isLoading
                   ? null
@@ -162,24 +143,34 @@ class _AddOrderState extends State<AddOrder> {
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: _isLoading
-              ? null
-              : () => Navigator.pop(context),
-          child: const Text('انصراف'),
-        ),
-
-        FilledButton(
-          onPressed: _isLoading ? null : _submit,
-          child: _isLoading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                  ),
-                )
-              : const Text('ثبت سفارش'),
+        Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              flex: 1,
+              child: TextButton(
+                onPressed: _isLoading ? null : () => Navigator.pop(context),
+                style: TextButton.styleFrom(backgroundColor: AppColors.red1),
+                child: const Text('انصراف'),
+              ),
+            ),
+                SizedBox(width: 5,),
+            Expanded(
+              flex: 1,
+              child: FilledButton(
+                onPressed: _isLoading ? null : _submit,
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('ثبت سفارش'),
+              ),
+            ),
+          ],
         ),
       ],
     );

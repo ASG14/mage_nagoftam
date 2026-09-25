@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="begir"
+        android:label="mage_nagoftam"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

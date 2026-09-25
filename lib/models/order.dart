@@ -1,3 +1,5 @@
+import 'assign.dart';
+
 enum Status {
   pending,
   reserved,
@@ -16,20 +18,19 @@ class Order {
   final int groupId;
   final int createdBy;
 
-  String title;
-  String? quantity;
+  final String title;
+  final String? quantity;
 
-  Priority priority;
-  Status status;
+  final Priority priority;
+  final Status status;
 
-  DateTime? deadline;
+  final DateTime? deadline;
   final DateTime createdAt;
-  DateTime? updatedAt;
+  final DateTime? updatedAt;
 
-  int? assignedUserId;
-  String? assignedUserName;
+  final Assign? assignment;
 
-  Order({
+  const Order({
     required this.id,
     required this.groupId,
     required this.createdBy,
@@ -40,106 +41,125 @@ class Order {
     this.deadline,
     required this.createdAt,
     this.updatedAt,
-    this.assignedUserId,
-    this.assignedUserName,
+    this.assignment,
   });
 
-  factory Order.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory Order.fromJson(Map<String, dynamic> json) {
+    final assignedUserId = _parseInt(
+      json['assigned_user_id'],
+    );
+
+    Assign? assignment;
+
+    if (assignedUserId != null) {
+      assignment = Assign(
+        orderId: _parseInt(json['id']) ?? 0,
+        userId: assignedUserId,
+      );
+    }
+
     return Order(
-      id: int.parse(
-        json['id'].toString(),
-      ),
-      groupId: int.parse(
-        json['group_id'].toString(),
-      ),
-      createdBy: int.parse(
-        json['created_by'].toString(),
-      ),
-      title: json['title'].toString(),
+      id: _parseInt(json['id']) ?? 0,
+      groupId: _parseInt(json['group_id']) ?? 0,
+      createdBy: _parseInt(json['created_by']) ?? 0,
+      title: json['title']?.toString() ?? '',
       quantity: json['quantity']?.toString(),
       priority: _priorityFromString(
-        json['priority'].toString(),
+        json['priority']?.toString(),
       ),
       status: _statusFromString(
-        json['status'].toString(),
+        json['status']?.toString(),
       ),
-      deadline: _parseDate(
-        json['deadline'],
-      ),
-      createdAt: DateTime.parse(
-        json['created_at'].toString(),
-      ),
-      updatedAt: _parseDate(
-        json['updated_at'],
-      ),
-      assignedUserId:
-          json['assigned_user_id'] != null
-              ? int.parse(
-                  json['assigned_user_id'].toString(),
-                )
-              : null,
-      assignedUserName:
-          json['assigned_user_name']?.toString(),
+      deadline: _parseDate(json['deadline']),
+      createdAt:
+          _parseDate(json['created_at']) ??
+          DateTime.fromMillisecondsSinceEpoch(0),
+      updatedAt: _parseDate(json['updated_at']),
+      assignment: assignment,
     );
   }
 
-  static DateTime? _parseDate(
-    dynamic value,
-  ) {
-    if (value == null ||
-        value.toString().isEmpty) {
-      return null;
-    }
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'group_id': groupId,
+      'created_by': createdBy,
+      'title': title,
+      'quantity': quantity,
+      'priority': priority.name,
+      'status': status.name,
+      'deadline': deadline?.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
+      'assigned_user_id': assignment?.userId,
+    };
+  }
 
-    return DateTime.parse(
-      value.toString(),
+  Order copyWith({
+    int? id,
+    int? groupId,
+    int? createdBy,
+    String? title,
+    String? quantity,
+    Priority? priority,
+    Status? status,
+    DateTime? deadline,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Assign? assignment,
+  }) {
+    return Order(
+      id: id ?? this.id,
+      groupId: groupId ?? this.groupId,
+      createdBy: createdBy ?? this.createdBy,
+      title: title ?? this.title,
+      quantity: quantity ?? this.quantity,
+      priority: priority ?? this.priority,
+      status: status ?? this.status,
+      deadline: deadline ?? this.deadline,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      assignment: assignment ?? this.assignment,
     );
   }
 
-  static Priority _priorityFromString(
-    String value,
-  ) {
-    switch (value) {
-      case 'low':
-        return Priority.low;
-
-      case 'high':
-        return Priority.high;
-
-      default:
-        return Priority.medium;
-    }
+  bool isPending() {
+    return status == Status.pending;
   }
 
-  static Status _statusFromString(
-    String value,
-  ) {
-    switch (value) {
-      case 'reserved':
-        return Status.reserved;
-
-      case 'completed':
-        return Status.completed;
-
-      case 'cancelled':
-        return Status.cancelled;
-
-      default:
-        return Status.pending;
-    }
+  bool isReserved() {
+    return status == Status.reserved;
   }
 
-  bool get isPending =>
-      status == Status.pending;
+  bool isCompleted() {
+    return status == Status.completed;
+  }
 
-  bool get isReserved =>
-      status == Status.reserved;
+  bool isCancelled() {
+    return status == Status.cancelled;
+  }
 
-  bool get isCompleted =>
-      status == Status.completed;
+  static int? _parseInt(dynamic value) {
+    if (value == null) return null;
+    return int.tryParse(value.toString());
+  }
 
-  bool get isCancelled =>
-      status == Status.cancelled;
+  static DateTime? _parseDate(dynamic value) {
+    if (value == null) return null;
+    return DateTime.tryParse(value.toString());
+  }
+
+  static Priority _priorityFromString(String? value) {
+    return Priority.values.firstWhere(
+      (priority) => priority.name == value,
+      orElse: () => Priority.medium,
+    );
+  }
+
+  static Status _statusFromString(String? value) {
+    return Status.values.firstWhere(
+      (status) => status.name == value,
+      orElse: () => Status.pending,
+    );
+  }
 }

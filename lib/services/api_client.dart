@@ -1,25 +1,45 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/browser_client.dart' as browser;
 
 import 'auth_service.dart';
+import 'session_manager.dart';
 
 class ApiClient {
   static const String baseUrl =
       'https://magenagoftam.ir/api';
+
+  static final http.Client _client = _createClient();
+
+  static http.Client _createClient() {
+    if (kIsWeb) {
+      return browser.BrowserClient()
+        ..withCredentials = true;
+    }
+
+    return http.Client();
+  }
 
   // --------------------------------------------------
   // GET
   // --------------------------------------------------
 
   static Future<http.Response> get(
-    String endpoint,
-  ) async {
-    final token = await AuthService.getToken();
+    String endpoint, {
+    bool handleUnauthorized = true,
+  }) async {
+    final token = await _getToken();
 
-    return http.get(
+    final response = await _client.get(
       Uri.parse('$baseUrl/$endpoint'),
       headers: _headers(token),
+    );
+
+    return _handleResponse(
+      response,
+      handleUnauthorized: handleUnauthorized,
     );
   }
 
@@ -30,13 +50,19 @@ class ApiClient {
   static Future<http.Response> post(
     String endpoint, {
     Map<String, dynamic>? body,
+    bool handleUnauthorized = true,
   }) async {
-    final token = await AuthService.getToken();
+    final token = await _getToken();
 
-    return http.post(
+    final response = await _client.post(
       Uri.parse('$baseUrl/$endpoint'),
       headers: _headers(token),
       body: body == null ? null : jsonEncode(body),
+    );
+
+    return _handleResponse(
+      response,
+      handleUnauthorized: handleUnauthorized,
     );
   }
 
@@ -47,13 +73,19 @@ class ApiClient {
   static Future<http.Response> postForm(
     String endpoint, {
     required Map<String, String> body,
+    bool handleUnauthorized = true,
   }) async {
-    final token = await AuthService.getToken();
+    final token = await _getToken();
 
-    return http.post(
+    final response = await _client.post(
       Uri.parse('$baseUrl/$endpoint'),
       headers: _formHeaders(token),
       body: body,
+    );
+
+    return _handleResponse(
+      response,
+      handleUnauthorized: handleUnauthorized,
     );
   }
 
@@ -64,13 +96,19 @@ class ApiClient {
   static Future<http.Response> put(
     String endpoint, {
     Map<String, dynamic>? body,
+    bool handleUnauthorized = true,
   }) async {
-    final token = await AuthService.getToken();
+    final token = await _getToken();
 
-    return http.put(
+    final response = await _client.put(
       Uri.parse('$baseUrl/$endpoint'),
       headers: _headers(token),
       body: body == null ? null : jsonEncode(body),
+    );
+
+    return _handleResponse(
+      response,
+      handleUnauthorized: handleUnauthorized,
     );
   }
 
@@ -81,14 +119,60 @@ class ApiClient {
   static Future<http.Response> delete(
     String endpoint, {
     Map<String, dynamic>? body,
+    bool handleUnauthorized = true,
   }) async {
-    final token = await AuthService.getToken();
+    final token = await _getToken();
 
-    return http.delete(
+    final response = await _client.delete(
       Uri.parse('$baseUrl/$endpoint'),
       headers: _headers(token),
       body: body == null ? null : jsonEncode(body),
     );
+
+    return _handleResponse(
+      response,
+      handleUnauthorized: handleUnauthorized,
+    );
+  }
+
+  // --------------------------------------------------
+  // Response handling
+  // --------------------------------------------------
+
+  static Future<http.Response> _handleResponse(
+    http.Response response, {
+    required bool handleUnauthorized,
+  }) async {
+    if (response.statusCode == 401 &&
+        handleUnauthorized) {
+      await SessionManager.handleUnauthorized();
+    }
+
+    return response;
+  }
+
+  // --------------------------------------------------
+  // Token
+  // --------------------------------------------------
+
+  static Future<String?> _getToken() async {
+    /*
+     * Flutter Web:
+     * Authentication is handled by the HttpOnly cookie.
+     *
+     * Therefore the token must NOT be read from
+     * SharedPreferences and must NOT be sent manually.
+     */
+    if (kIsWeb) {
+      return null;
+    }
+
+    /*
+     * Android / iOS:
+     * Continue using the Bearer token stored by
+     * AuthService.
+     */
+    return AuthService.getToken();
   }
 
   // --------------------------------------------------
