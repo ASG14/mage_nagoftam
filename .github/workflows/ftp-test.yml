@@ -9,14 +9,12 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Create test file
+      - name: Create test directory
         run: |
-          echo "FTP connection test - $(date -u)" > test-ftp.txt
+          mkdir ftp-test
+          echo "FTP connection test - $(date -u)" > ftp-test/test-ftp.txt
 
-      - name: Upload test file to cPanel
+      - name: Upload test file
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ${{ secrets.FTP_HOST }}
@@ -24,6 +22,5 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftp
           port: 21
-          local-dir: ./
+          local-dir: ./ftp-test/
           server-dir: ./
-          timeout: 120000
