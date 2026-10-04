@@ -1,3 +1,4 @@
+```yaml
 name: Deploy Flutter Web
 
 on:
@@ -32,13 +33,14 @@ jobs:
         run: flutter build web --release --base-href /app/
 
       - name: Deploy to cPanel
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
+          protocol: ftps
           port: 21
+          security: loose
           local-dir: ./build/web/
           server-dir: ./
-          timeout: 120000
+```
